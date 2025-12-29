@@ -1,0 +1,41 @@
+{
+  "name": "ESP8266 IR Reverse Engineering",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    }
+  },
+
+  "postCreateCommand": "pip install --upgrade platformio && pio platform install espressif8266",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "platformio.platformio-ide",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+
+  "workspaceFolder": "/workspace",
+
+  "remoteUser": "vscode",
+
+  "postAttachCommand": "echo '✅ Devcontainer ready! Build with: pio run'",
+
+  "forwardPorts": [],
+
+  "runArgs": []
+}

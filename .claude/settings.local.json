@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "WebSearch",
+      "Bash(podman ps:*)",
+      "Bash(podman exec:*)",
+      "Bash(./scripts/flash.sh:*)",
+      "Bash(python3:*)",
+      "Bash(./scripts/capture.sh:*)",
+      "Bash(pio test:*)",
+      "Bash(pio run:*)",
+      "Bash(pio device monitor:*)",
+      "Bash(npx create-react-router@latest app --template default)",
+      "Bash(npx create-react-router@latest:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm run dev:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm exec playwright:*)",
+      "Bash(curl:*)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(pnpm --dir /Users/nickdancer/Documents/claude-ir/app test:e2e)",
+      "Bash(pnpm --dir /Users/nickdancer/Documents/claude-ir/app test:e2e --grep \"should change temperature with slider\")",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9:*)",
+      "Skill(spec-writing)"
+    ]
+  }
+}

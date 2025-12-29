@@ -1,0 +1,55 @@
+# PlatformIO
+.pio/
+.vscode/
+.clang_complete
+.gcc-flags.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+*.o
+*.hex
+*.elf
+*.bin
+
+# Logs and captures (keep directory but not files)
+captures/*.txt
+!captures/.gitkeep
+
+# Analysis outputs
+analysis/*.json
+analysis/*.csv
+analysis/__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Node.js / React Router app
+app/node_modules/
+app/.react-router/
+app/build/
+app/test-results/
+app/playwright-report/
+*.lock
