@@ -1,4 +1,4 @@
-# ESP32 IR Remote Control Development Board - Hardware Specification v1.0
+# ESP32 IR Remote Control Development Board - Hardware Specification v1.1
 
 ## Overview
 
@@ -52,25 +52,54 @@ These provisions allow testing of battery-powered operation modes (particularly 
 
 ### Microcontroller Module
 
-**Specified Module**: ESP32-DevKitC-32E (Espressif official development board)
+**Specified Module**: ESP32-WROOM-32E-N4 (Espressif WiFi+BT module)
 
-The board MUST use the ESP32-DevKitC-32E module, selected for its official support, comprehensive documentation, and widespread availability. This 38-pin module uses the ESP32-WROOM-32E core with integrated USB-to-UART conversion (CP2102) and includes onboard 3.3V regulation for the ESP32 chip itself.
+The board MUST use the ESP32-WROOM-32E-N4 module directly, rather than a development board. This provides full control over the supporting circuitry while using a proven, FCC/CE certified RF module. The module integrates:
+
+- ESP32-D0WD-V3 dual-core Xtensa LX6 @ 240MHz
+- 4MB SPI flash (N4 variant)
+- 520KB internal SRAM
+- 40MHz crystal oscillator
+- PCB trace antenna
+- All required RF matching and filtering
+
+**Module Specifications**:
+
+- Dimensions: 18mm × 25.5mm × 3.1mm
+- Pins: 38 castellated pads at 1.27mm pitch
+- Operating voltage: 3.0-3.6V (3.3V nominal)
+- Operating temperature: -40°C to +85°C
+- Deep sleep current: <5µA
 
 The module exposes sufficient GPIO pins to support:
 
 - 4× IR LED driver signals
 - 1× IR receiver input
 - I2C interface (SDA/SCL) for temperature sensor
-- UART0 (USB programming)
+- UART0 (programming and debug)
 - User programmable GPIO for expansion
 
-**Power Architecture**: The board MUST provide independent 3.3V regulation rather than relying on the module's onboard regulator. Module regulators typically limit to 500-600mA which is marginal under the ~470mA peak load calculated for this design. Independent regulation provides:
+**Required Support Circuitry**: Unlike a development board, the bare module requires external circuitry for:
 
-- Adequate current headroom for reliable operation
-- Reduced thermal stress on the module
-- Flexibility for future expansion beyond module regulator capacity
+1. **Power regulation**: 3.3V supply (provided by LM2596 buck converter per this spec)
+2. **USB-to-UART bridge**: For programming and serial communication (see USB-to-UART Bridge section)
+3. **Auto-reset circuit**: Transistor network for automatic bootloader entry (see Auto-Reset Circuit section)
+4. **EN pin conditioning**: RC delay circuit for reliable power-on reset
+5. **Strapping pin management**: Pull-ups/pull-downs on boot mode pins
 
-The module connects to the board's 3.3V rail via its 3V3 pin, and to the USB programming connection via its existing USB port.
+**Power Architecture**: The board provides 3.3V regulation via the LM2596 buck converter specified in the Voltage Regulation section. The module draws:
+
+- Typical: 80-120mA (WiFi idle)
+- Peak: 240mA (WiFi TX burst)
+- Deep sleep: <5µA
+
+The 1A-rated buck converter provides adequate headroom for the module plus all peripherals.
+
+**Mounting**: The module's castellated pads can be hand-soldered to the PCB. For easier assembly, the PCB layout SHOULD include:
+
+- Extended pads beyond the module footprint for solder iron access
+- Solder mask relief around pads
+- Clear silkscreen indicating pin 1 orientation
 
 ### Infrared Emitters
 
@@ -143,7 +172,69 @@ The IR receiver enables verification of transmitted waveforms and debugging of p
 
 This connector is specified due to its through-hole construction enabling reliable hand assembly and its availability from major distributors. Alternative through-hole USB-C receptacles with equivalent pinout are acceptable.
 
-**Power Delivery Configuration**: CC1 and CC2 pins MUST connect to ground through 5.1kΩ ±5% resistors to signal 5V/3A power capability to USB-PD sources. This resistor configuration enables the board to draw sufficient current from modern USB-C chargers without implementing complex PD negotiation. D+/D- pins remain unconnected (USB data handled by ESP32 module's onboard USB interface).
+**Power Delivery Configuration**: CC1 and CC2 pins MUST connect to ground through 5.1kΩ ±5% resistors to signal 5V/3A power capability to USB-PD sources. This resistor configuration enables the board to draw sufficient current from modern USB-C chargers without implementing complex PD negotiation.
+
+**USB Data Lines**: D+ and D- pins connect to the USB-to-UART bridge IC for programming and serial communication (see USB-to-UART Bridge section).
+
+### USB-to-UART Bridge
+
+The board MUST include a USB-to-UART bridge IC to enable programming and serial communication with the ESP32 module. This replaces the functionality provided by the CP2102 on the ESP32-DevKitC.
+
+**Bridge IC Requirements**:
+
+- USB 2.0 Full Speed (12 Mbps) support
+- 3.3V I/O compatible (no level shifting required)
+- Baud rates up to 921600 (required for fast firmware upload)
+- DTR and RTS flow control signals (required for auto-reset circuit)
+- Package: Hand-solderable (SOIC, SSOP, or QFN with exposed pad)
+- Built-in oscillator preferred (reduces external component count)
+- Windows/macOS/Linux driver support
+
+**Recommended ICs** (in order of preference):
+
+1. **CP2102N** (Silicon Labs) - QFN-28 or QFN-24
+   - Direct replacement for DevKitC's CP2102
+   - Excellent driver support across all platforms
+   - Built-in oscillator, minimal external components
+   - Configurable GPIO pins (optional features)
+   - Note: QFN package requires careful hand-soldering or reflow
+
+2. **CH340C** (WCH) - SOP-16
+   - Lower cost alternative
+   - Built-in oscillator (no external crystal needed)
+   - Wider pin pitch (easier hand soldering than QFN)
+   - Good driver support (built into modern OS versions)
+   - Requires 100nF decoupling capacitor
+
+3. **CH340G** (WCH) - SOP-16
+   - Similar to CH340C but requires external 12MHz crystal
+   - Slightly lower cost, slightly more complex BOM
+
+**Recommended Implementation**: CH340C in SOP-16 package
+
+The CH340C offers the best balance of hand-solderability, cost, and simplicity for this development board. Its SOP-16 package (1.27mm pitch) is manageable with a fine-tip soldering iron, and the built-in oscillator eliminates the need for an external crystal.
+
+**CH340C Circuit Requirements**:
+
+```
+USB D+ ──────────────────── CH340C Pin 5 (UD+)
+USB D- ──────────────────── CH340C Pin 6 (UD-)
+3.3V ────┬─────────────── CH340C Pin 16 (VCC)
+          └──[100nF]──┬──── CH340C Pin 4 (V3)
+                      └──── GND
+GND ─────────────────────── CH340C Pin 1 (GND)
+CH340C Pin 2 (TXD) ──────── ESP32 GPIO3 (U0RXD)
+CH340C Pin 3 (RXD) ──────── ESP32 GPIO1 (U0TXD)
+CH340C Pin 7 (DTR#) ─────── Auto-reset circuit (see below)
+CH340C Pin 8 (RTS#) ─────── Auto-reset circuit (see below)
+```
+
+**Notes**:
+- TX/RX are crossed: CH340C TXD connects to ESP32 RXD, and vice versa
+- V3 pin is the internal 3.3V regulator output; connect 100nF capacitor to GND
+- DTR# and RTS# are active-low outputs used by the auto-reset circuit
+
+**ESD Protection**: A USB ESD protection device (e.g., USBLC6-2SC6) SHOULD be placed on D+/D- lines near the USB connector to protect the bridge IC from electrostatic discharge.
 
 ### Voltage Regulation
 
@@ -266,14 +357,14 @@ The board MUST include two momentary push buttons for ESP32 control:
 
 - Function: Initiates complete ESP32 system reset (equivalent to power cycle)
 - Connection: Connects ESP32 EN (enable) pin to ground when pressed
-- Pull-up: 10kΩ resistor to 3.3V on EN pin (enables ESP32 to run when button released)
+- Pull-up: Shared with auto-reset circuit (see Auto-Reset Circuit section)
 
 **BOOT Button**:
 
 - Function: Enters bootloader/programming mode when held during reset
 - Connection: Connects GPIO0 to ground when pressed
-- Pull-up: 10kΩ resistor to 3.3V on GPIO0 (normal operation mode when released)
-- Usage: Hold BOOT, press RESET, release both to enter programming mode
+- Pull-up: Shared with auto-reset circuit (see Auto-Reset Circuit section)
+- Usage: Hold BOOT, press RESET, release both to enter programming mode (manual override of auto-reset)
 
 **Switch Requirements**:
 
@@ -283,7 +374,12 @@ The board MUST include two momentary push buttons for ESP32 control:
 - Actuation force: 100-300gf (comfortable for frequent development use)
 - Positioning: Accessible while USB cable is connected
 
-Both buttons enable standard ESP32 programming and debugging workflows and are essential for development.
+**Note**: With the auto-reset circuit in place, manual button presses are typically only needed for:
+- Recovery from crashed firmware
+- Debugging boot mode issues
+- Testing without USB connection
+
+Normal firmware upload uses the auto-reset circuit automatically.
 
 ### Development Headers
 
@@ -420,7 +516,95 @@ The USB-C connector's VBUS pin connects to the protection circuit as follows:
 USB VBUS ----[PTC Fuse]----[Reverse Protection]----[TVS to GND]----[Voltage Regulator]
 ```
 
-CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins connect to PCB ground plane. D+/D- pins remain unconnected as USB data communication is handled by the ESP32 module's integrated USB-UART chip.
+CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins connect to PCB ground plane. D+/D- pins connect to the USB-to-UART bridge IC (CH340C) for programming and serial communication.
+
+### Auto-Reset Circuit
+
+The auto-reset circuit enables automatic bootloader entry when programming tools (esptool, cargo-espflash) assert DTR and RTS signals. This eliminates the need to manually press BOOT and RESET buttons during firmware upload.
+
+**Circuit Function**:
+
+The ESP32 enters bootloader mode when:
+- EN (enable) pin is pulsed LOW (reset)
+- GPIO0 is held LOW during reset release
+
+The auto-reset circuit uses two NPN transistors to translate the USB-UART bridge's DTR# and RTS# signals into the correct EN/GPIO0 sequence.
+
+**Circuit Schematic**:
+
+```
+                    ┌─────────────────────────────────────┐
+                    │                                     │
+DTR# ───┬───[10kΩ]──┴──┤Base                              │
+        │              │      Q5 (NPN)                    │
+        │         ┌────┤Collector                         │
+        │         │    │                                  │
+        │         │    └Emitter──── GND                   │
+        │         │                                       │
+        │         └────────────────────── GPIO0 ◄──[10kΩ]─┴── 3.3V
+        │
+        └──────────────────┐
+                           │
+RTS# ───┬───[10kΩ]─────────┴──┤Base
+        │                     │      Q6 (NPN)
+        │              ┌──────┤Collector
+        │              │      │
+        │              │      └Emitter──── GND
+        │              │
+        │              └──────────────────── EN ◄──[10kΩ]─┬── 3.3V
+        │                                                 │
+        └─────────────────────────────────────────────────┘
+                                                          │
+                                                     [1µF cap]
+                                                          │
+                                                         GND
+```
+
+**Component Requirements**:
+
+| Ref | Value | Purpose |
+|-----|-------|---------|
+| Q5, Q6 | NPN (2N2222A, BC337) | Signal translation |
+| R (×2) | 10kΩ | Base current limiting |
+| R (×2) | 10kΩ | Pull-ups for EN and GPIO0 |
+| C1 | 1µF ceramic | EN pin RC delay (power-on reset) |
+
+**Signal Timing**:
+
+The programming sequence works as follows:
+
+1. Tool asserts RTS# LOW, DTR# HIGH → Q6 on, Q5 off → EN LOW (reset), GPIO0 released HIGH
+2. Tool asserts DTR# LOW, RTS# HIGH → Q5 on, Q6 off → GPIO0 LOW (boot mode), EN released HIGH
+3. ESP32 exits reset with GPIO0 LOW → enters bootloader
+4. Tool releases both → normal operation resumes
+
+**Alternative: Dedicated Auto-Reset IC**
+
+For simplified design, the CH9329 or similar USB-serial chips include built-in auto-reset logic. However, the discrete transistor approach is well-documented and allows use of any USB-UART bridge.
+
+**Manual Override**:
+
+The BOOT and RESET buttons (see Control Switches section) remain functional and can override the auto-reset circuit for manual bootloader entry when needed.
+
+### EN Pin Conditioning
+
+The EN (enable/chip_pu) pin requires an RC delay circuit to ensure reliable power-on reset:
+
+```
+3.3V ──[10kΩ]──┬── EN (ESP32 pin 3)
+               │
+              [1µF]
+               │
+              GND
+```
+
+This circuit:
+- Holds EN LOW during power supply ramp-up
+- Allows EN to rise to HIGH after supply stabilizes (~10ms time constant)
+- Prevents spurious resets from supply noise
+- Allows RESET button and auto-reset circuit to pull EN LOW
+
+The 10kΩ/1µF values are per Espressif's hardware design guidelines.
 
 ## Power Budget Analysis
 
@@ -430,10 +614,11 @@ CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins conne
 
 - ESP32 module: 80-120mA (WiFi idle)
 - WiFi transmission peaks: 240mA for <1s bursts
+- CH340C USB-UART bridge: ~15mA (active)
 - IR receiver: 0.5mA
 - BME280: 1.8µA (negligible)
 - Status LEDs (6× @ 3mA): 18mA
-- **3.3V rail total: ~330mA average, ~470mA peak**
+- **3.3V rail total: ~345mA average, ~485mA peak**
 
 **5V Rail Loads** (IR transmission):
 
@@ -442,15 +627,15 @@ CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins conne
 
 **Buck Converter Power Analysis**:
 
-- Input power (from USB): ~330mA × 3.3V / 0.85 efficiency = ~1.28W → 256mA @ 5V
-- Peak input power: ~470mA × 3.3V / 0.85 = ~1.82W → 364mA @ 5V
-- Buck converter power dissipation: ~0.15W at average load (vs 0.6W for LDO)
+- Input power (from USB): ~345mA × 3.3V / 0.85 efficiency = ~1.34W → 268mA @ 5V
+- Peak input power: ~485mA × 3.3V / 0.85 = ~1.88W → 376mA @ 5V
+- Buck converter power dissipation: ~0.16W at average load (vs 0.6W for LDO)
 - Thermal performance: Minimal heat generation, TO-220 package provides adequate cooling
 
 **Total USB Current Draw**:
 
-- Average: 256mA (3.3V loads) + 120mA (IR LEDs) = ~376mA
-- Peak: 364mA (3.3V loads) + 400mA (IR LEDs 100% duty) = ~764mA
+- Average: 268mA (3.3V loads) + 120mA (IR LEDs) = ~388mA
+- Peak: 376mA (3.3V loads) + 400mA (IR LEDs 100% duty) = ~776mA
 - Well within USB-C 3A capability
 
 **Battery Capacity Estimate** (future):
@@ -618,13 +803,15 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 
 | Qty | Reference | Part/Requirement            | Description                              | Package/Notes             |
 | --- | --------- | --------------------------- | ---------------------------------------- | ------------------------- |
-| 1   | U1        | **ESP32-DevKitC-32E**       | ESP32 Development Module (specified)     | 38-pin DIP                |
+| 1   | U1        | **ESP32-WROOM-32E-N4**      | ESP32 WiFi+BT Module (4MB flash)         | 38-pin castellated, 1.27mm pitch |
+| 1   | U2        | **CH340C**                  | USB-to-UART Bridge IC                    | SOP-16 (1.27mm pitch)     |
 | 4   | LED1-LED4 | 940nm IR LED, ≥100mA        | Suggested: TSAL6200 (Vishay)             | 5mm through-hole          |
-| 4   | Q1-Q4     | NPN, ≥100mA, hFE≥100        | Suggested: 2N2222A, PN2222A, BC337       | TO-92 or equivalent       |
-| 1   | U2        | 38kHz IR Receiver           | Suggested: TSOP1838, TSOP4838 (Vishay)   | 3-pin through-hole module |
-| 1   | U3        | BME280 Breakout             | Recommended: Adafruit #2652, SparkFun    | Breakout with headers     |
+| 4   | Q1-Q4     | NPN, ≥100mA, hFE≥100        | IR LED drivers. Suggested: 2N2222A, BC337| TO-92 or equivalent       |
+| 2   | Q5-Q6     | NPN, general purpose        | Auto-reset circuit. Suggested: 2N2222A   | TO-92 or equivalent       |
+| 1   | U3        | 38kHz IR Receiver           | Suggested: TSOP1838, TSOP4838 (Vishay)   | 3-pin through-hole module |
+| 1   | U4        | BME280 Breakout             | Recommended: Adafruit #2652, SparkFun    | Breakout with headers     |
 | 1   | J1        | **USB4085-GF-A (GCT)**      | USB-C Receptacle (specified footprint)   | Through-hole              |
-| 1   | U4        | Buck Converter IC           | Recommended: LM2596-3.3 (fixed 3.3V)     | TO-220-5 through-hole     |
+| 1   | U5        | Buck Converter IC           | Recommended: LM2596-3.3 (fixed 3.3V)     | TO-220-5 through-hole     |
 
 ### Protection and Power
 
@@ -633,7 +820,15 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 1   | F1        | PTC Fuse, 1.1A/2A           | Suggested: Bourns MF-R110             | Through-hole radial |
 | 1   | D1        | TVS Diode, 5.5-6.5V clamp   | Suggested: SMBJ5.0A                   | DO-214AA or larger |
 | 1   | D2        | Schottky or P-MOSFET        | Reverse protection (see spec notes)   | See spec section   |
+| 1   | D4        | USB ESD Protection          | Suggested: USBLC6-2SC6                | SOT-23-6           |
 | 2   | R1-R2     | 5.1kΩ ±5% 1/4W              | USB-C CC resistors                    | Axial or 1206 SMD  |
+
+### USB-to-UART Bridge Circuit
+
+| Qty | Reference | Part/Requirement            | Description                           | Package/Notes      |
+| --- | --------- | --------------------------- | ------------------------------------- | ------------------ |
+| 1   | C9        | 100nF ceramic               | CH340C V3 pin decoupling              | 0805 or 1206 SMD   |
+| 2   | R23-R24   | 10kΩ 1/4W                   | Auto-reset base resistors             | Axial or 1206 SMD  |
 
 ### Buck Converter Support Components
 
@@ -669,6 +864,7 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | --- | --------- | ---------------------- | ---------------------------- | --------------------------- |
 | 2   | SW1-SW2   | Tactile Switch, NO     | RESET and BOOT buttons       | Through-hole, 6×6mm typical |
 | 2   | R17-R18   | 10kΩ 1/4W              | Pull-up resistors (EN, GPIO0) | Axial or 1206 SMD           |
+| 1   | C10       | 1µF ceramic            | EN pin RC delay capacitor    | 0805 or 1206 SMD            |
 | 1   | J2        | 4-pin Header           | UART debug header            | 2.54mm preferred            |
 | 2   | J3-J4     | 4-pin Header           | I2C and temp sensor headers  | 2.54mm preferred            |
 | 1   | J5        | 8-10 pin Header        | GPIO expansion header        | 2.54mm preferred            |
@@ -687,23 +883,25 @@ These components have PCB footprints but are not populated in initial builds:
 
 | Qty | Reference | Part/Requirement       | Description                      | Purpose/Notes                    |
 | --- | --------- | ---------------------- | -------------------------------- | -------------------------------- |
-| 1   | U5        | TP4056 or equivalent   | Li-ion charging IC               | Future battery charging circuit  |
+| 1   | U6        | TP4056 or equivalent   | Li-ion charging IC               | Future battery charging circuit  |
 | 2   | R21-R22   | 4.7kΩ 1/4W             | I2C pull-up resistors (optional) | If not present on sensor breakout |
 | 1   | J7        | U.FL connector         | External antenna connector       | Future WiFi range extension      |
 
 ---
 
-**Document Version**: 1.0
-**Date**: 2025-12-29
+**Document Version**: 1.1
+**Date**: 2025-12-30
 **Author**: Development Team
 **Status**: Ready for Implementation
 
 **Design Decisions Made**:
-- ESP32 Module: ESP32-DevKitC-32E selected for official support and availability
+- ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module
+- USB-to-UART Bridge: CH340C selected for hand-solderability (SOP-16), built-in oscillator, and low cost
+- Auto-Reset Circuit: Discrete transistor approach for compatibility with any USB-UART bridge
 - Voltage Regulation: Buck converter (LM2596-3.3 recommended) for ~85% efficiency and minimal heat generation (~0.15W vs 0.6W for LDO)
 - Hand Assembly: Through-hole and large SMD components permitted; 2.54mm headers preferred but not required; BGA excluded
 
 **Remaining Implementation Tasks**:
-- GPIO pin assignment mapping (requires ESP32-DevKitC-32E pinout verification to avoid conflicts)
+- GPIO pin assignment mapping (requires ESP32-WROOM-32E pinout verification to avoid conflicts)
 - PCB layout design following constraints in this specification
 - BOM finalization with specific vendor part numbers
