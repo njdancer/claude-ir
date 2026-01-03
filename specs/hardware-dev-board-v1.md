@@ -36,17 +36,13 @@ Unlike the current breadboard implementation which requires precise aiming, the 
 
 The board MUST operate from USB-C power (5V nominal) and maintain stable 3.3V regulation under varying load conditions. Peak current draw during WiFi transmission with simultaneous IR emission (approximately 350-400mA) must not cause voltage droop exceeding 100mV at the ESP32's power pins.
 
-The power subsystem MUST implement overcurrent protection (trip at 2A), overvoltage protection (clamp below 6V), and reverse polarity protection. These protections guard against common development mistakes such as incorrect power supply connections.
+The power subsystem MUST implement overcurrent protection (trip at 2A) and overvoltage protection (clamp below 6V). Reverse polarity protection is omitted for the USB-C input as the connector enforces correct orientation; reverse protection MAY be added on the battery input path when that feature is implemented.
 
-### Battery Provisions
+### Battery Support
 
-While this development board does not implement battery charging circuitry, it MUST provide connection points and monitoring capability for future battery integration. Specifically:
+Battery operation is **deferred to v2**. This development board is USB-powered only.
 
-- Solder pads or headers for connecting a TP4056 charging module
-- Battery input connection via JST-PH 2-pin connector
-- Voltage divider network enabling battery voltage monitoring through ESP32 ADC
-
-These provisions allow testing of battery-powered operation modes (particularly deep sleep power consumption) without requiring a complete charging circuit implementation. The board does not constrain physical mounting of battery holders, which may be connected externally during testing.
+The GPIO expansion header exposes 3.3V and 5V rails, enabling experimentation with external battery and power management circuits on a separate prototyping board. A jumper (JP1) on the buck converter's EN pin allows disabling the internal regulator when testing external power solutions (see Voltage Regulation section).
 
 ## Component Specifications
 
@@ -81,19 +77,19 @@ The module exposes sufficient GPIO pins to support:
 
 **Required Support Circuitry**: Unlike a development board, the bare module requires external circuitry for:
 
-1. **Power regulation**: 3.3V supply (provided by LM2596 buck converter per this spec)
+1. **Power regulation**: 3.3V supply (provided by AP63203 synchronous buck converter per this spec)
 2. **USB-to-UART bridge**: For programming and serial communication (see USB-to-UART Bridge section)
 3. **Auto-reset circuit**: Transistor network for automatic bootloader entry (see Auto-Reset Circuit section)
 4. **EN pin conditioning**: RC delay circuit for reliable power-on reset
 5. **Strapping pin management**: Pull-ups/pull-downs on boot mode pins
 
-**Power Architecture**: The board provides 3.3V regulation via the LM2596 buck converter specified in the Voltage Regulation section. The module draws:
+**Power Architecture**: The board provides 3.3V regulation via the AP63203 synchronous buck converter specified in the Voltage Regulation section. The module draws:
 
 - Typical: 80-120mA (WiFi idle)
 - Peak: 240mA (WiFi TX burst)
 - Deep sleep: <5µA
 
-The 1A-rated buck converter provides adequate headroom for the module plus all peripherals.
+The 2A-rated buck converter provides adequate headroom for the module plus all peripherals.
 
 **Mounting**: The module's castellated pads can be hand-soldered to the PCB. For easier assembly, the PCB layout SHOULD include:
 
@@ -141,23 +137,21 @@ The IR receiver enables verification of transmitted waveforms and debugging of p
 
 ### Temperature Sensor
 
-**Interface**: I2C
-**Mounting**: Breakout board with pin headers (female headers on main board)
+**Interface**: Single-wire (proprietary protocol)
+**Mounting**: Through-hole module with pin headers
 
 **Sensor Requirements**:
 
-- Temperature accuracy: ±1.0°C across 18-28°C range (typical indoor AC environment)
+- Temperature accuracy: ±0.5°C across 18-28°C range (typical indoor AC environment)
 - Supply voltage: 3.3V compatible
-- Interface: I2C (configurable address to avoid conflicts)
 - Sleep current: <10µA (for battery operation testing)
-- Response time: <1 second for room temperature changes
+- Response time: <2 seconds for room temperature changes
 
-**Additional Capabilities** (optional but useful):
+**Additional Capabilities**:
 
 - Humidity sensing (enables comfort index calculations)
-- Pressure sensing (enables weather-aware operation modes)
 
-**Recommended Part**: Bosch BME280 on breakout board meets all requirements and adds humidity/pressure sensing. Pre-assembled breakout boards (Adafruit #2652, SparkFun SEN-13676, or generic) avoid hand-soldering the small LGA package while providing necessary pull-ups and level shifting.
+**Specified Part**: DHT22 (AM2302) temperature and humidity sensor module. The module includes the required pull-up resistor on the data line. Connect to any available GPIO pin.
 
 ### USB-C Power Connector
 
@@ -217,70 +211,88 @@ The CH340C offers the best balance of hand-solderability, cost, and simplicity f
 **CH340C Circuit Requirements**:
 
 ```
-USB D+ ──────────────────── CH340C Pin 5 (UD+)
-USB D- ──────────────────── CH340C Pin 6 (UD-)
-3.3V ────┬─────────────── CH340C Pin 16 (VCC)
-          └──[100nF]──┬──── CH340C Pin 4 (V3)
+USB D+ ──────────────────── CH340C UD+
+USB D- ──────────────────── CH340C UD-
+3.3V ────┬─────────────── CH340C VCC
+          └──[100nF]──┬──── CH340C V3
                       └──── GND
-GND ─────────────────────── CH340C Pin 1 (GND)
-CH340C Pin 2 (TXD) ──────── ESP32 GPIO3 (U0RXD)
-CH340C Pin 3 (RXD) ──────── ESP32 GPIO1 (U0TXD)
-CH340C Pin 7 (DTR#) ─────── Auto-reset circuit (see below)
-CH340C Pin 8 (RTS#) ─────── Auto-reset circuit (see below)
+GND ─────────────────────── CH340C GND
+CH340C TXD ─────────────── ESP32 U0RXD (GPIO3)
+CH340C RXD ─────────────── ESP32 U0TXD (GPIO1)
+CH340C DTR# ────[JP2]───── Auto-reset circuit Q1 base
+CH340C RTS# ────[JP3]───── Auto-reset circuit Q2 base
 ```
 
 **Notes**:
 - TX/RX are crossed: CH340C TXD connects to ESP32 RXD, and vice versa
 - V3 pin is the internal 3.3V regulator output; connect 100nF capacitor to GND
 - DTR# and RTS# are active-low outputs used by the auto-reset circuit
+- Refer to CH340C datasheet for physical pin assignments during PCB layout
 
 **ESD Protection**: A USB ESD protection device (e.g., USBLC6-2SC6) SHOULD be placed on D+/D- lines near the USB connector to protect the bridge IC from electrostatic discharge.
 
 ### Voltage Regulation
 
-The board MUST regulate the USB 5V input to stable 3.3V for powering the ESP32 module, IR receiver, temperature sensor, and status LEDs. A buck (step-down) switching regulator is REQUIRED for efficiency and thermal performance.
+The board MUST regulate the USB 5V input to stable 3.3V for powering the ESP32 module, IR receiver, temperature sensor, and status LEDs. A synchronous buck (step-down) switching regulator is REQUIRED for efficiency and thermal performance.
 
 **Regulator Requirements**:
 
-- Type: Buck (step-down) switching regulator
-- Input voltage: 4.5-5.5V (USB voltage range)
-- Output voltage: 3.3V ±3% (3.2-3.4V)
-- Output current: ≥1A continuous (supports 470mA peak + margin)
-- Switching frequency: 50-500kHz (balances efficiency and component size)
-- Efficiency: ≥80% at 300mA load
-- Package: Hand-solderable (TO-220, SOIC-8, or equivalent through-hole/large SMD)
-- Protection: Thermal shutdown, current limiting, short circuit protection
+- Type: Synchronous buck (step-down) switching regulator
+- Input voltage: 3.8-32V (wide input range)
+- Output voltage: 3.3V ±1%
+- Output current: ≥2A continuous
+- Switching frequency: ≥500kHz (enables smaller external components)
+- Efficiency: ≥90% at typical loads
+- Package: Hand-solderable (TSOT26 or larger)
+- Protection: Thermal shutdown, overcurrent protection, overvoltage protection
 
-**Recommended Implementation**: LM2596-3.3 (fixed 3.3V output) in TO-220-5 package
+**Specified Implementation**: AP63203 (Diodes Incorporated) - Fixed 3.3V synchronous buck converter
 
-- Through-hole package (easiest hand assembly)
-- Fixed 3.3V output version simplifies design (no feedback resistors needed)
-- 3A output capability (ample headroom)
-- ~85% efficiency (vs ~60% for LDO)
-- Power dissipation: ~0.15W at 330mA average (vs 0.6W for LDO)
-- Excellent documentation and reference designs available
-- Wide availability and low cost
+- **Datasheet**: https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf
+- Synchronous topology (no external catch diode needed)
+- Fixed 3.3V output (±1% accuracy, no feedback resistors needed)
+- 2A output capability (ample headroom)
+- 1.1MHz switching frequency (small external components)
+- ~92-93% efficiency at typical loads
+- TSOT26 package (0.95mm pitch, hand-solderable with fine-tip iron)
+- Built-in soft-start (4ms), OVP, OCP, thermal shutdown
+- Frequency spread spectrum for EMI reduction
 
 **Required Support Components**:
 
-1. **Input capacitor**: 100µF electrolytic, 16V (placed close to VIN pin)
-2. **Output capacitor**: 220µF electrolytic or 47µF low-ESR ceramic, 10V (placed close to output)
-3. **Inductor**: 68-100µH, ≥1.5A saturation current, low DCR (<0.2Ω)
-   - Package: Radial through-hole or large SMD (hand-solderable)
-   - Suggested: Bourns 1140 series or similar power inductor
-4. **Catch diode**: 1N5822 Schottky diode (3A, 40V) in DO-201AD through-hole package
-   - Note: Some LM2596 modules have integrated diode; check datasheet
-5. **Bypass capacitors**: 100nF ceramic at input and output
+1. **Input capacitor (C1)**: 10µF ceramic, 10V or higher (placed close to VIN pin)
+2. **Output capacitors (C2, C3)**: 2× 22µF ceramic, 10V or higher (placed close to output)
+3. **Bootstrap capacitor (C4)**: 100nF ceramic (between BST and SW pins)
+4. **Inductor (L1)**: 3.9µH, ≥2.7A saturation current, low DCR
+   - Package: SMD power inductor (hand-solderable)
+   - Size: 4x4mm or 5x5mm typical
+
+**No catch diode required** - the AP63203's synchronous topology uses an integrated low-side MOSFET instead.
 
 **PCB Layout Considerations**:
 
-- Keep switching node (connection between inductor, diode, and SW pin) traces short and thick
+- Keep switching node (SW pin to inductor) trace short and away from sensitive signals
 - Input capacitor must be placed immediately adjacent to VIN and GND pins
-- Output capacitor placed close to output and load
-- Ground plane provides good thermal dissipation for TO-220 package
-- Consider adding copper pour area under TO-220 for heat spreading
+- Output capacitors placed close to FB pin and load
+- Use multiple vias for ground connections to bottom plane
+- Bootstrap capacitor placed close to BST and SW pins
 
-**Alternative**: Pre-assembled buck converter modules (e.g., MP1584EN module) can be used if board space permits, trading flexibility for assembly simplicity.
+**Buck Converter Disable Jumper (JP1)**:
+
+A 2-pin header (JP1) connects the AP63203 EN pin to GND, allowing the internal regulator to be disabled for external power experimentation:
+
+```
+AP63203 EN pin ────┬──── (internal pullup to VIN)
+                   │
+                  JP1 (2-pin header)
+                   │
+                  GND
+```
+
+- **JP1 open (default)**: EN floats high via internal pullup → buck converter enabled, normal USB operation
+- **JP1 shorted**: EN pulled to GND → buck converter disabled, output goes high-impedance
+
+**Use case**: When prototyping external battery/buck-boost circuits on a separate board, install the JP1 jumper to disable the internal regulator, then feed external 3.3V via the GPIO expansion header's 3V3 pin.
 
 ### Protection Components
 
@@ -291,7 +303,7 @@ The power input path MUST include:
 - Type: Resettable PTC fuse (polyfuse) or equivalent resettable overcurrent device
 - Hold current: 1.0-1.2A (allows normal operation)
 - Trip current: 1.8-2.2A (protects against shorts)
-- Package: Through-hole radial preferred
+- Package: Through-hole radial or SMD
 - **Suggested Part**: Bourns MF-R110 or equivalent
 
 **Overvoltage Protection**:
@@ -300,17 +312,10 @@ The power input path MUST include:
 - Clamp voltage: 5.5-6.5V (protects 5V circuit, below regulator absolute maximum)
 - Transient power rating: ≥400W
 - Package: Hand-solderable (DO-214AA/SMB, DO-214AB/SMC, or through-hole)
-- Placement: Immediately after USB connector, before other circuitry
+- Placement: After fuse, before voltage regulator
 - **Suggested Part**: SMBJ5.0A or equivalent
 
-**Reverse Polarity Protection**:
-
-The circuit MUST prevent damage if incorrect polarity is applied (non-compliant charger or reversed battery connection).
-
-- **Option A - Schottky Diode**: Series diode (e.g., 1N5817: 1A, 0.4V drop, simple)
-- **Option B - P-MOSFET**: P-channel MOSFET with gate-source resistor (e.g., AO3401: efficient, ~0V drop, more complex)
-
-Either approach is acceptable. Series diode is simpler but dissipates ~0.2W; P-MOSFET is more efficient but requires careful gate biasing.
+**Reverse Polarity Protection**: Omitted for USB-C input. The USB-C connector physically enforces correct orientation, and the CC resistor configuration ensures proper power negotiation. Reverse protection SHOULD be added on the battery input path when that feature is implemented (P-MOSFET recommended for efficiency).
 
 ### Status Indicators
 
@@ -383,78 +388,70 @@ Normal firmware upload uses the auto-reset circuit automatically.
 
 ### Development Headers
 
-The board MUST expose the following connections via pin headers for development and expansion:
+**ESP32 Breakout Header** (2×19 pins):
 
-**UART Debug Header** (4-pin):
+The board includes a debug breakout header matching the ESP32-DevKitC V4 pinout. This 38-pin header (2 rows of 19) exposes all ESP32 GPIO pins plus power rails, enabling:
 
-- Pinout: GND, 3.3V, TX (GPIO1), RX (GPIO3)
-- Purpose: External serial console, connection to USB-UART adapters
-- Labeling: Clearly marked on silkscreen with pin functions
+- External serial console via UART0 (GPIO1/TXD, GPIO3/RXD)
+- I2C peripherals via GPIO21 (SDA) and GPIO22 (SCL)
+- Additional GPIO access for prototyping and expansion
+- Power rails: 3.3V (pin 1), 5V (pin 19), GND (pins 14, 20, 26)
 
-**I2C Expansion Header** (4-pin):
-
-- Pinout: GND, 3.3V, SDA (GPIO21), SCL (GPIO22)
-- Purpose: Additional I2C peripherals beyond the temperature sensor
-- Note: Shares I2C bus with BME280; address conflicts must be avoided
-
-**GPIO Expansion Header** (8-10 pins):
-
-- Pinout: Multiple GPIO pins not otherwise allocated, plus GND and 3.3V
-- Purpose: Breakout board connection, peripheral testing, firmware expansion
-- GPIO priority: Pins supporting ADC, PWM, and touch sensing
-- Labeling: Each pin labeled with GPIO number on silkscreen
-
-**Battery Connection** (2-3 pin):
-
-- Pinout: Battery positive (B+), Battery negative (GND), optional battery voltage sense
-- Purpose: External battery connection during power consumption testing
-- Connector type: JST-PH 2-pin connector or pin header
+**Pin Numbering**: Column-first ordering matches DevKitC - left column pins 1-19, right column pins 20-38.
 
 **Header Specifications**:
 
-- Pitch: 2.54mm (0.1") PREFERRED for compatibility with standard jumper wires and modules
-- Pitch alternatives: Other pitches acceptable if hand-solderable and clearly documented
-- Gender: Female headers RECOMMENDED on board (accepts male pins from modules/jumpers)
-- Orientation: Right-angle or vertical based on board layout optimization
-
-The key requirement is development flexibility - enabling connection of external modules, test equipment, and expansion boards during firmware development.
+- Pitch: 2.54mm (0.1") for compatibility with standard jumper wires and breadboards
+- Gender: Female headers RECOMMENDED (accepts male pins from modules/jumpers)
+- Row spacing: 22.86mm (0.9") to match DevKitC module width
 
 ## Circuit Design Requirements
 
 ### IR Transmitter Driver Circuit
 
-Each IR LED MUST drive through an independent NPN transistor configured as a common-emitter switch.
+All four IR LEDs are driven through a single N-channel MOSFET configured as a low-side switch. This design was chosen over individual NPN transistors for:
 
-**Transistor Requirements**:
+- **Power efficiency**: MOSFETs have no base current draw and lower on-state losses
+- **Simpler drive**: Single GPIO controls all LEDs simultaneously
+- **3.3V compatibility**: Logic-level MOSFET fully enhances at 3.3V gate drive
 
-- Type: NPN bipolar junction transistor
-- Collector current: ≥100mA continuous, ≥200mA peak
-- Current gain (hFE): ≥100 (ensures saturation with 3mA base current)
-- Package: Through-hole (TO-92, TO-220, or equivalent hand-solderable)
-- **Suggested Parts**: 2N2222A, PN2222A, BC337, or equivalent general-purpose NPN
+**MOSFET Requirements**:
 
-**Base Drive Circuit**:
+- Type: N-channel enhancement mode MOSFET
+- Drain current: ≥500mA continuous (handles 4 × 100mA LEDs)
+- Gate threshold: <2V (must be fully enhanced at Vgs = 3.3V)
+- Rds(on): <50mΩ at Vgs = 2.5V (minimizes power loss)
+- Package: SOT-23 (hand-solderable with fine-tip iron)
+- **Specified Part**: IRLML6344 (Infineon) - Vgs_th = 0.5-1.1V, Rds_on = 27mΩ @ Vgs = 2.5V
 
-- ESP32 GPIO → Base resistor → Transistor base
-- Base resistor value: 1kΩ typical (limits base current to ~3mA at 3.3V GPIO high)
-- This ensures transistor saturation (VCE < 0.3V) when driving 100mA collector current
+**LED Power Supply**:
 
-**Collector Load Circuit**:
+LEDs are powered from the 3.3V regulated rail (not 5V) for improved efficiency:
 
-- Supply voltage (5V) → Current-limiting resistor → IR LED → Transistor collector
+- 3.3V supply reduces voltage drop across current-limiting resistors
+- Power dissipated in resistors: 0.18W per LED (vs 0.35W from 5V)
+- Total system efficiency improved ~28% during IR transmission
+- Buck converter has adequate headroom (675mA peak vs 2A rating)
+
+**Current Limiting Circuit**:
+
+- Supply voltage (3.3V) → Current-limiting resistor → IR LED anode
+- IR LED cathode → MOSFET drain (all 4 cathodes joined)
 - Current-limiting resistor calculation for 100mA target current:
   ```
-  R_limit = (V_supply - V_LED_forward - V_CE_sat) / I_target
-  R_limit = (5V - 1.5V - 0.3V) / 0.1A = 32Ω
+  R_limit = (V_supply - V_LED_forward - V_DS_on) / I_target
+  R_limit = (3.3V - 1.5V - 0.01V) / 0.1A = 17.9Ω
   ```
-- Use nearest standard value (33Ω recommended)
-- Resistor power rating: ≥0.5W (dissipates ~0.3W during transmission)
+- Use nearest standard value (18Ω, E24 series)
+- Resistor power rating: ≥0.25W (dissipates ~0.18W during transmission)
 
-**GPIO Control Architecture**:
+**Gate Drive Circuit**:
 
-- All four IR LED driver transistors MAY share a common ESP32 GPIO pin (simultaneous activation)
-- OR use independent GPIO pins for each LED (selective activation during testing)
-- The specification permits either approach; firmware can test which provides better performance
+- ESP32 GPIO18 (IR_TX) → 10kΩ resistor → MOSFET gate
+- 100kΩ pull-down resistor from gate to GND
+- MOSFET source → GND
+- Gate series resistor limits inrush current and provides ESD protection
+- Gate pull-down ensures MOSFET is OFF during boot/reset when GPIO is high-impedance
 
 ### IR Receiver Interface
 
@@ -472,51 +469,37 @@ The IR receiver module connects directly to the 3.3V rail, ground, and an ESP32 
 - Output type: Active-low demodulated pulses (receiver outputs LOW when 38kHz modulated IR detected)
 - Timing: Preserves pulse timing from original IR transmission after demodulation
 - Pull-up: May require weak pull-up if receiver output is open-drain (check receiver datasheet)
+- **GPIO Assignment**: GPIO19 (IR_RX) - interrupt-capable, not a strapping pin
 
 The GPIO pin MUST support external interrupts to capture timing-accurate signal edges for protocol decoding.
 
 ### Temperature Sensor Interface
 
-The temperature sensor breakout board connects via I2C using ESP32's default I2C pins (GPIO21 = SDA, GPIO22 = SCL).
+The DHT22 temperature/humidity sensor connects via a single-wire proprietary protocol to any available GPIO pin.
 
-**I2C Connection Requirements**:
+**Connection Requirements**:
 
-- Pull-up resistors: 4.7kΩ on both SDA and SCL lines
-- Pull-up provisioning: If breakout board includes pull-ups, main board pull-ups are optional
-- Pull-up location: Main board SHOULD provide footprints for optional I2C pull-up resistors
+- Data pin: GPIO4 (TEMP_DATA) - not a strapping pin
+- Pull-up resistor: 10kΩ on data line (typically included on DHT22 module)
 - Supply voltage: 3.3V and GND from regulated supply
 
 **Mounting**:
 
 - Connection method: Pin headers (female headers on main board recommended)
-- Rationale: Allows breakout board removal for testing or replacement without desoldering
+- Rationale: Allows sensor removal for testing or replacement without desoldering
 - Alternative: Direct soldering acceptable if header mounting is impractical
-
-The I2C bus is shared with any additional sensors connected to the I2C expansion header. All devices must use unique I2C addresses.
-
-### Battery Voltage Monitoring
-
-To enable battery voltage measurement, the board MUST implement a 50% voltage divider from the battery positive terminal to an ESP32 ADC-capable GPIO pin:
-
-```
-Battery+ ----[100kΩ]----+----[100kΩ]---- GND
-                        |
-                   [100nF cap]
-                        |
-                  ESP32 ADC Pin (GPIO34, GPIO35, GPIO36, or GPIO39)
-```
-
-This divider scales the 3.0-4.2V battery range to 1.5-2.1V suitable for the ESP32's ADC. The 100nF capacitor provides low-pass filtering to reduce ADC noise.
 
 ### USB-C Power Entry
 
 The USB-C connector's VBUS pin connects to the protection circuit as follows:
 
 ```
-USB VBUS ----[PTC Fuse]----[Reverse Protection]----[TVS to GND]----[Voltage Regulator]
+USB VBUS ----[PTC Fuse]----+----[TVS to GND]----[Voltage Regulator]
+                           |
+                          GND (TVS clamps overvoltage)
 ```
 
-CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins connect to PCB ground plane. D+/D- pins connect to the USB-to-UART bridge IC (CH340C) for programming and serial communication.
+CC1 and CC2 pins each connect through 5.1kΩ resistors to GND. Shield pins connect to PCB ground plane. D+/D- pins connect to the USB-to-UART bridge IC for programming and serial communication.
 
 ### Auto-Reset Circuit
 
@@ -528,83 +511,84 @@ The ESP32 enters bootloader mode when:
 - EN (enable) pin is pulsed LOW (reset)
 - GPIO0 is held LOW during reset release
 
-The auto-reset circuit uses two NPN transistors to translate the USB-UART bridge's DTR# and RTS# signals into the correct EN/GPIO0 sequence.
+The auto-reset circuit uses two cross-coupled NPN transistors that form an XOR-like gate. This prevents the chip from being held in reset when both DTR and RTS are asserted together (which happens when opening a serial port).
 
-**Circuit Schematic**:
+**Truth Table**:
+
+| DTR | RTS | EN | GPIO0 |
+|-----|-----|----|-------|
+| 0 | 0 | HIGH | HIGH | (normal operation) |
+| 0 | 1 | HIGH | LOW | (boot mode select) |
+| 1 | 0 | LOW | HIGH | (reset) |
+| 1 | 1 | HIGH | HIGH | (normal operation) |
+
+**Circuit Schematic** (per ESP32-S2-SAOLA-1 reference design):
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │                                     │
-DTR# ───┬───[10kΩ]──┴──┤Base                              │
-        │              │      Q5 (NPN)                    │
-        │         ┌────┤Collector                         │
-        │         │    │                                  │
-        │         │    └Emitter──── GND                   │
-        │         │                                       │
-        │         └────────────────────── GPIO0 ◄──[10kΩ]─┴── 3.3V
-        │
-        └──────────────────┐
-                           │
-RTS# ───┬───[10kΩ]─────────┴──┤Base
-        │                     │      Q6 (NPN)
-        │              ┌──────┤Collector
-        │              │      │
-        │              │      └Emitter──── GND
-        │              │
-        │              └──────────────────── EN ◄──[10kΩ]─┬── 3.3V
-        │                                                 │
-        └─────────────────────────────────────────────────┘
-                                                          │
-                                                     [1µF cap]
-                                                          │
-                                                         GND
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+DTR ───┬───[10kΩ]───┴──┤Base                                 │
+       │               │     Q1 (NPN)                        │
+       │          ┌────┤Collector ────┬──[10kΩ]── 3.3V       │
+       │          │    │              │                      │
+       │          │    └Emitter───────│────┐                 │
+       │          │                   │    │                 │
+       │          │                   EN   │                 │
+       │          │                   │    │                 │
+       │          │              [1µF cap] │                 │
+       │          │                   │    │                 │
+       │          │                  GND   │                 │
+       │          │                        │                 │
+       └──────────│────────────────────────│─────────────────┘
+                  │                        │
+RTS ───┬──────────│────────────────────────┘
+       │          │
+       └──[10kΩ]──┴──┤Base
+                     │     Q2 (NPN)
+                ┌────┤Collector ────┬──[10kΩ]── 3.3V
+                │    │              │
+                │    └Emitter───────│──── DTR (cross-coupled)
+                │                   │
+                │                 GPIO0
+                │
+                └──── RTS (to Q1 emitter, cross-coupled)
 ```
+
+**Key insight**: The emitters are NOT grounded - each transistor's emitter connects to the opposite input signal (DTR to Q2 emitter, RTS to Q1 emitter). This cross-coupling creates the XOR behavior.
 
 **Component Requirements**:
 
 | Ref | Value | Purpose |
 |-----|-------|---------|
-| Q5, Q6 | NPN (2N2222A, BC337) | Signal translation |
+| Q1, Q2 | NPN (S8050, 2N2222A, BC337) | Cross-coupled signal translation |
 | R (×2) | 10kΩ | Base current limiting |
 | R (×2) | 10kΩ | Pull-ups for EN and GPIO0 |
-| C1 | 1µF ceramic | EN pin RC delay (power-on reset) |
+| C | 1µF ceramic | EN pin RC delay (power-on reset) |
 
-**Signal Timing**:
-
-The programming sequence works as follows:
-
-1. Tool asserts RTS# LOW, DTR# HIGH → Q6 on, Q5 off → EN LOW (reset), GPIO0 released HIGH
-2. Tool asserts DTR# LOW, RTS# HIGH → Q5 on, Q6 off → GPIO0 LOW (boot mode), EN released HIGH
-3. ESP32 exits reset with GPIO0 LOW → enters bootloader
-4. Tool releases both → normal operation resumes
-
-**Alternative: Dedicated Auto-Reset IC**
-
-For simplified design, the CH9329 or similar USB-serial chips include built-in auto-reset logic. However, the discrete transistor approach is well-documented and allows use of any USB-UART bridge.
+**Reference**: This circuit matches the ESP32-S2-SAOLA-1 schematic from Espressif. See also: [Espressif's Automatic Reset](https://qsantos.fr/2025/05/09/espressifs-automatic-reset/) for detailed explanation.
 
 **Manual Override**:
 
 The BOOT and RESET buttons (see Control Switches section) remain functional and can override the auto-reset circuit for manual bootloader entry when needed.
 
-### EN Pin Conditioning
+**Auto-Reset Bypass Jumpers (JP2, JP3)**:
 
-The EN (enable/chip_pu) pin requires an RC delay circuit to ensure reliable power-on reset:
+Two inline shunt jumpers allow disabling the auto-reset circuit for debugging:
 
 ```
-3.3V ──[10kΩ]──┬── EN (ESP32 pin 3)
-               │
-              [1µF]
-               │
-              GND
+CH340C DTR# ────[JP2]──── Auto-reset circuit (Q1 base)
+CH340C RTS# ────[JP3]──── Auto-reset circuit (Q2 base)
 ```
 
-This circuit:
-- Holds EN LOW during power supply ramp-up
-- Allows EN to rise to HIGH after supply stabilizes (~10ms time constant)
-- Prevents spurious resets from supply noise
-- Allows RESET button and auto-reset circuit to pull EN LOW
+| Jumper | Installed (default) | Removed |
+|--------|---------------------|---------|
+| JP2 | DTR connected, auto-reset enabled | DTR disconnected |
+| JP3 | RTS connected, auto-reset enabled | RTS disconnected |
 
-The 10kΩ/1µF values are per Espressif's hardware design guidelines.
+- **Default configuration**: Both jumpers installed. Auto-reset works normally for programming.
+- **Debug configuration**: Remove one or both jumpers to use serial communication without triggering resets.
+
+The board ships with JP2 and JP3 installed.
 
 ## Power Budget Analysis
 
@@ -627,23 +611,16 @@ The 10kΩ/1µF values are per Espressif's hardware design guidelines.
 
 **Buck Converter Power Analysis**:
 
-- Input power (from USB): ~345mA × 3.3V / 0.85 efficiency = ~1.34W → 268mA @ 5V
-- Peak input power: ~485mA × 3.3V / 0.85 = ~1.88W → 376mA @ 5V
-- Buck converter power dissipation: ~0.16W at average load (vs 0.6W for LDO)
-- Thermal performance: Minimal heat generation, TO-220 package provides adequate cooling
+- Input power (from USB): ~345mA × 3.3V / 0.92 efficiency = ~1.24W → 248mA @ 5V
+- Peak input power: ~485mA × 3.3V / 0.92 = ~1.74W → 348mA @ 5V
+- Buck converter power dissipation: ~0.09W at average load (vs 0.6W for LDO)
+- Thermal performance: Minimal heat generation, TSOT26 package adequate without heatsinking
 
 **Total USB Current Draw**:
 
 - Average: 268mA (3.3V loads) + 120mA (IR LEDs) = ~388mA
 - Peak: 376mA (3.3V loads) + 400mA (IR LEDs 100% duty) = ~776mA
 - Well within USB-C 3A capability
-
-**Battery Capacity Estimate** (future):
-
-- With 3000mAh cell @ 3.7V: 11.1Wh capacity
-- Average power consumption: ~1.3W → 8.5 hours continuous active use
-- With deep sleep (10s active per 10 minutes): weeks of operation
-- Buck converter efficiency improves battery life vs LDO (15-20% longer runtime)
 
 ### Voltage Rail Requirements
 
@@ -662,7 +639,7 @@ The board requires two voltage rails:
 - Powers IR receiver module
 - Powers temperature sensor breakout board
 - Powers status LEDs
-- Maximum load: 1A continuous (buck converter rated for 3A)
+- Maximum load: 2A continuous (AP63203 rated capacity)
 
 ## PCB Design Constraints
 
@@ -759,11 +736,9 @@ Prefer components available from LCSC (JLCPCB's component supplier) to enable po
 
 The following capabilities are NOT implemented in this revision but MUST have physical provisions enabling future addition:
 
-**Battery Charging Circuit**:
+**Battery Charging Circuit** (deferred to v2):
 
-- Solder pads for TP4056 charging IC (SOP-8 footprint)
-- Pads for charging indicator LEDs and current programming resistor
-- Connection path from USB 5V to charging circuit input
+Battery operation requires power path management beyond simple charging. The GPIO expansion header exposes 3.3V and 5V rails, and JP1 allows disabling the internal buck converter, enabling external battery circuit prototyping before integrating into v2.
 
 **External Antenna**:
 
@@ -799,6 +774,12 @@ This development board intentionally over-provisions debugging and expansion fea
 
 This BOM specifies exact parts only where necessary for compatibility (e.g., ESP32 module pinout, USB-C connector footprint). For other components, requirements are listed with suggested parts.
 
+**BOM Status**: Work in progress. The following items require confirmation after selecting specific vendor parts:
+
+- **TVS diode (D1)**: Confirm polarity orientation (unidirectional vs bidirectional) based on selected part
+- **Status LED resistors (R11-R16)**: Calculate values based on selected LED forward voltage to achieve 2-5mA target current
+- **IR LED resistors (R3-R6)**: Verify 18Ω value against selected LED forward voltage for 100mA target
+
 ### Core Components
 
 | Qty | Reference | Part/Requirement            | Description                              | Package/Notes             |
@@ -806,22 +787,20 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 1   | U1        | **ESP32-WROOM-32E-N4**      | ESP32 WiFi+BT Module (4MB flash)         | 38-pin castellated, 1.27mm pitch |
 | 1   | U2        | **CH340C**                  | USB-to-UART Bridge IC                    | SOP-16 (1.27mm pitch)     |
 | 4   | LED1-LED4 | 940nm IR LED, ≥100mA        | Suggested: TSAL6200 (Vishay)             | 5mm through-hole          |
-| 4   | Q1-Q4     | NPN, ≥100mA, hFE≥100        | IR LED drivers. Suggested: 2N2222A, BC337| TO-92 or equivalent       |
+| 1   | Q1        | **IRLML6344**               | IR LED driver MOSFET (logic-level N-ch)  | SOT-23                    |
 | 2   | Q5-Q6     | NPN, general purpose        | Auto-reset circuit. Suggested: 2N2222A   | TO-92 or equivalent       |
 | 1   | U3        | 38kHz IR Receiver           | Suggested: TSOP1838, TSOP4838 (Vishay)   | 3-pin through-hole module |
-| 1   | U4        | BME280 Breakout             | Recommended: Adafruit #2652, SparkFun    | Breakout with headers     |
-| 1   | J1        | **USB4085-GF-A (GCT)**      | USB-C Receptacle (specified footprint)   | Through-hole              |
-| 1   | U5        | Buck Converter IC           | Recommended: LM2596-3.3 (fixed 3.3V)     | TO-220-5 through-hole     |
+| 1   | U4        | DHT22 (AM2302)              | Temperature/humidity sensor module       | 3-pin through-hole module |
+| 1   | J1        | USB-C Receptacle            | Through-hole preferred for hand assembly | Through-hole              |
+| 1   | U5        | **AP63203**                 | Synchronous buck converter (fixed 3.3V)  | TSOT26                    |
 
 ### Protection and Power
 
 | Qty | Reference | Part/Requirement            | Description                           | Package/Notes      |
 | --- | --------- | --------------------------- | ------------------------------------- | ------------------ |
-| 1   | F1        | PTC Fuse, 1.1A/2A           | Suggested: Bourns MF-R110             | Through-hole radial |
-| 1   | D1        | TVS Diode, 5.5-6.5V clamp   | Suggested: SMBJ5.0A                   | DO-214AA or larger |
-| 1   | D2        | Schottky or P-MOSFET        | Reverse protection (see spec notes)   | See spec section   |
-| 1   | D4        | USB ESD Protection          | Suggested: USBLC6-2SC6                | SOT-23-6           |
-| 2   | R1-R2     | 5.1kΩ ±5% 1/4W              | USB-C CC resistors                    | Axial or 1206 SMD  |
+| 1   | F1        | PTC Fuse, 1.1A/2A           | Overcurrent protection                | Through-hole or SMD |
+| 1   | D1        | TVS Diode, 5.5-6.5V clamp   | Overvoltage protection                | DO-214AA or larger |
+| 2   | R1-R2     | 5.1kΩ ±5%                   | USB-C CC resistors                    | 0805 or 1206 SMD   |
 
 ### USB-to-UART Bridge Circuit
 
@@ -834,19 +813,18 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 
 | Qty | Reference | Part/Requirement            | Description                           | Package/Notes        |
 | --- | --------- | --------------------------- | ------------------------------------- | -------------------- |
-| 1   | L1        | 68-100µH, ≥1.5A, low DCR    | Power inductor (Bourns 1140 series)   | Radial or large SMD  |
-| 1   | D3        | Schottky 3A, 40V            | Catch diode (e.g., 1N5822)            | DO-201AD through-hole |
-| 1   | C1        | 100µF 16V electrolytic      | Buck input capacitor                  | Radial through-hole  |
-| 1   | C2        | 220µF 10V electrolytic      | Buck output capacitor                 | Radial through-hole  |
-| 2   | C3-C4     | 100nF ceramic               | Bypass capacitors (input/output)      | 1206 SMD or radial   |
-| 2+  | C5-C7     | 100nF ceramic               | Additional bypass capacitors          | 1206 SMD or radial   |
+| 1   | L1        | 3.9µH, ≥2.7A, low DCR       | Power inductor for AP63203            | SMD 4x4mm or 5x5mm   |
+| 1   | C1        | 10µF ceramic, ≥10V          | Buck input capacitor                  | 0805 or 1206 SMD     |
+| 2   | C2-C3     | 22µF ceramic, ≥10V          | Buck output capacitors                | 0805 or 1206 SMD     |
+| 1   | C4        | 100nF ceramic               | Bootstrap capacitor (BST to SW)       | 0603 or 0805 SMD     |
 
 ### IR Transmitter Circuit
 
 | Qty | Reference | Part/Requirement      | Description                        | Package/Notes      |
 | --- | --------- | --------------------- | ---------------------------------- | ------------------ |
-| 4   | R3-R6     | 33Ω ≥0.5W             | LED current limiting (~100mA)      | Axial, 1W preferred |
-| 4   | R7-R10    | 1kΩ 1/4W              | Transistor base resistors          | Axial or 1206 SMD  |
+| 4   | R3-R6     | 18Ω ≥0.25W            | LED current limiting (~100mA)      | Axial or 1206 SMD  |
+| 1   | R7        | 10kΩ 1/4W             | MOSFET gate series resistor        | Axial or 1206 SMD  |
+| 1   | R8        | 100kΩ 1/4W            | MOSFET gate pull-down              | Axial or 1206 SMD  |
 
 ### Status LEDs
 
@@ -865,17 +843,9 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 2   | SW1-SW2   | Tactile Switch, NO     | RESET and BOOT buttons       | Through-hole, 6×6mm typical |
 | 2   | R17-R18   | 10kΩ 1/4W              | Pull-up resistors (EN, GPIO0) | Axial or 1206 SMD           |
 | 1   | C10       | 1µF ceramic            | EN pin RC delay capacitor    | 0805 or 1206 SMD            |
-| 1   | J2        | 4-pin Header           | UART debug header            | 2.54mm preferred            |
-| 2   | J3-J4     | 4-pin Header           | I2C and temp sensor headers  | 2.54mm preferred            |
-| 1   | J5        | 8-10 pin Header        | GPIO expansion header        | 2.54mm preferred            |
-| 1   | J6        | 2-pin Connector        | Battery connection           | JST-PH or header            |
-
-### Battery Monitoring
-
-| Qty | Reference | Part/Requirement | Description                  | Package/Notes     |
-| --- | --------- | ---------------- | ---------------------------- | ----------------- |
-| 2   | R19-R20   | 100kΩ ±1%        | Voltage divider resistors    | Axial or 1206 SMD |
-| 1   | C8        | 100nF ceramic    | ADC filtering capacitor      | 1206 SMD or radial |
+| 1   | J2        | 2×19 Female Header     | ESP32 breakout header        | 2.54mm, 22.86mm row spacing |
+| 1   | JP1       | 2-pin Header           | Buck converter disable jumper| 2.54mm, no jumper installed |
+| 2   | JP2-JP3   | 2-pin Header + Shunt   | Auto-reset bypass jumpers    | 2.54mm, jumpers installed   |
 
 ### Optional Components (Unpopulated)
 
@@ -883,25 +853,32 @@ These components have PCB footprints but are not populated in initial builds:
 
 | Qty | Reference | Part/Requirement       | Description                      | Purpose/Notes                    |
 | --- | --------- | ---------------------- | -------------------------------- | -------------------------------- |
-| 1   | U6        | TP4056 or equivalent   | Li-ion charging IC               | Future battery charging circuit  |
 | 2   | R21-R22   | 4.7kΩ 1/4W             | I2C pull-up resistors (optional) | If not present on sensor breakout |
 | 1   | J7        | U.FL connector         | External antenna connector       | Future WiFi range extension      |
 
 ---
 
-**Document Version**: 1.1
-**Date**: 2025-12-30
+**Document Version**: 1.6
+**Date**: 2026-01-03
 **Author**: Development Team
-**Status**: Ready for Implementation
+**Status**: In Implementation - Schematic Review Complete
 
 **Design Decisions Made**:
 - ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module
 - USB-to-UART Bridge: CH340C selected for hand-solderability (SOP-16), built-in oscillator, and low cost
-- Auto-Reset Circuit: Discrete transistor approach for compatibility with any USB-UART bridge
-- Voltage Regulation: Buck converter (LM2596-3.3 recommended) for ~85% efficiency and minimal heat generation (~0.15W vs 0.6W for LDO)
-- Hand Assembly: Through-hole and large SMD components permitted; 2.54mm headers preferred but not required; BGA excluded
+- Auto-Reset Circuit: Discrete NPN transistor approach (cross-coupled) with bypass jumpers (JP2, JP3) for debugging
+- Voltage Regulation: AP63203 synchronous buck converter with disable jumper (JP1) for external power experimentation
+- Protection: PTC fuse + TVS diode; USB D+/D- ESD protection omitted (adequate for dev board use)
+- IR LED Driver: Single IRLML6344 logic-level MOSFET (SOT-23) with gate pull-down; LEDs powered from 3.3V rail
+- IR GPIO Assignment: GPIO18 (IR_TX), GPIO19 (IR_RX) - adjacent pins, avoids strapping pins
+- Temperature Sensor GPIO: GPIO4 (TEMP_DATA)
+- User LEDs: GPIO16 (USER_LED1), GPIO17 (USER_LED2)
+- Temperature Sensor: DHT22 (AM2302) single-wire module replacing BME280
+- Breakout Header: DevKitC V4-compatible 2×19 header exposes all GPIO, power rails, UART, and I2C
+- Jumper Configuration: JP1 ships open (buck enabled), JP2/JP3 ship with shunts installed (auto-reset enabled)
+- Hand Assembly: Through-hole and large SMD components; TSOT26, SOP-16, SOT-23, 0805/1206 passives; BGA excluded
 
 **Remaining Implementation Tasks**:
-- GPIO pin assignment mapping (requires ESP32-WROOM-32E pinout verification to avoid conflicts)
+- Footprint assignment for all schematic components
 - PCB layout design following constraints in this specification
-- BOM finalization with specific vendor part numbers
+- BOM finalization with specific vendor part numbers (see BOM Status section for pending confirmations)
