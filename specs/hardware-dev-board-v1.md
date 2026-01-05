@@ -214,9 +214,10 @@ The CH340C offers the best balance of hand-solderability, cost, and simplicity f
 USB D+ ──────────────────── CH340C UD+
 USB D- ──────────────────── CH340C UD-
 3.3V ────┬─────────────── CH340C VCC
-          └──[100nF]──┬──── CH340C V3
-                      └──── GND
+         │
+         └─────────────── CH340C V3 ───[100nF]─── GND
 GND ─────────────────────── CH340C GND
+GND ─────────────────────── CH340C R232 (pin 15)
 CH340C TXD ─────────────── ESP32 U0RXD (GPIO3)
 CH340C RXD ─────────────── ESP32 U0TXD (GPIO1)
 CH340C DTR# ────[JP2]───── Auto-reset circuit Q1 base
@@ -225,7 +226,8 @@ CH340C RTS# ────[JP3]───── Auto-reset circuit Q2 base
 
 **Notes**:
 - TX/RX are crossed: CH340C TXD connects to ESP32 RXD, and vice versa
-- V3 pin is the internal 3.3V regulator output; connect 100nF capacitor to GND
+- **3.3V Operation**: V3 must be tied to VCC (both connected to 3.3V). This bypasses the internal regulator. Add 100nF decoupling capacitor from V3 to GND.
+- **R232 Pin**: Must be tied to GND for TTL-level output compatible with ESP32. If tied high, outputs RS232 levels (wrong).
 - DTR# and RTS# are active-low outputs used by the auto-reset circuit
 - Refer to CH340C datasheet for physical pin assignments during PCB layout
 
@@ -319,40 +321,80 @@ The power input path MUST include:
 
 ### Status Indicators
 
-The board MUST include visible LED indicators for debugging and status monitoring:
+The board MUST include visible LED indicators for debugging and status monitoring. All status LEDs use 3mm through-hole package for compact layout while maintaining hand-solderability.
 
-**Power LED** (suggested color: Green):
+**Power Rail LEDs** (direct-driven from power rails):
 
-- Function: Illuminated whenever regulated 3.3V is present
-- Connection: 3.3V rail through current-limiting resistor
-- Target current: 2-5mA (balance visibility and power consumption)
+These LEDs connect directly to their respective power rails through current-limiting resistors, providing immediate visual confirmation of power presence without GPIO involvement.
 
-**Serial TX/RX LEDs** (suggested color: Yellow/Amber):
+*5V Rail Indicator* (Red):
+- Function: Illuminated whenever USB 5V input is present (before buck converter)
+- Connection: 5V rail → resistor → LED → GND
+- Resistor value: 680Ω for ~5mA with Vf=1.9V red LED
+- Purpose: Distinguishes input power issues from buck converter failures
 
+*3.3V Rail Indicator* (Green):
+- Function: Illuminated whenever regulated 3.3V is present (after buck converter)
+- Connection: 3.3V rail → resistor → LED → GND
+- Resistor value: 470Ω for ~3mA with Vf=2.0V green LED
+- Purpose: Confirms buck converter operation
+
+**GPIO-Controlled LEDs** (MOSFET-driven from 5V rail):
+
+All GPIO-controlled status LEDs are driven through individual N-channel MOSFETs configured as low-side switches. This design provides:
+- Consistent brightness across all LED colors (including blue with Vf ~3.2V)
+- Minimal GPIO current draw (~nA gate current vs mA LED current)
+- GPIO protection from LED faults
+- Ability to use any LED color regardless of forward voltage
+
+*Circuit per LED*:
+```
+5V ─── R_limit ─── LED(+) ─── LED(-) ─── MOSFET drain
+                                         MOSFET source ─── GND
+                              GPIO ─── MOSFET gate
+                              100kΩ ─── GND (gate pulldown)
+```
+
+*MOSFET Requirements*:
+- Type: N-channel enhancement mode, logic-level
+- Gate threshold: <2V (fully enhanced at Vgs=3.3V)
+- Drain current: ≥50mA (adequate for indicator LEDs)
+- Package: SOT-23
+- **Suggested Part**: 2N7002 or equivalent small-signal MOSFET
+
+*Serial TX/RX LEDs* (Amber, qty 2):
 - Function: Visual confirmation of serial communication during programming
-- Connection: UART0 TX/RX lines with series resistors (may require additional current-limiting)
-- Target current: 2-5mA per LED
+- Connection: GPIO-controlled via MOSFET
+- Resistor value: 150Ω for ~10mA with Vf=2.0V amber LED (brighter for brief pulses)
 
-**IR Transmit LED** (suggested color: Red):
-
+*IR Transmit Indicator* (Red):
 - Function: Indicates IR transmission activity
-- Connection: Paralleled with IR LED driver circuit or GPIO-controlled
-- Target current: 5-10mA (must be visible during brief transmission pulses)
+- Connection: GPIO-controlled via MOSFET
+- Resistor value: 330Ω for ~10mA with Vf=1.9V red LED
 
-**User Programmable LEDs** (suggested quantity: 2, suggested color: Blue):
-
+*User Programmable LEDs* (Blue, qty 2):
 - Function: Software-controlled for debugging and status indication
-- Connection: Available GPIO pins through current-limiting resistors
-- Target current: 2-5mA per LED
+- Connection: GPIO-controlled via MOSFET
+- Resistor value: 330Ω for ~5mA with Vf=3.2V blue LED
 - PCB silkscreen MUST label GPIO numbers for firmware reference
 
-**LED Requirements**:
+**LED Package Requirements**:
 
-- Package: Through-hole (3mm or 5mm diameter) or equivalent hand-solderable package
-- Mounting: Positioned for visibility when board is horizontal (vertical mounting or edge-mount)
-- Current-limiting resistors: Calculated based on LED forward voltage and target current
+- All status indicator LEDs: 3mm (T-1) through-hole package
+- IR emitter LEDs remain 5mm (T-1 3/4) for maximum optical output
+- Mounting: Positioned for visibility when board is horizontal
 
-All status LED current-limiting resistors SHOULD target 2-5mA for adequate brightness while minimizing power consumption during battery operation testing.
+**LED Summary Table**:
+
+| Function | Color | Qty | Drive Method | Supply | R_limit |
+|----------|-------|-----|--------------|--------|---------|
+| 5V Power | Red | 1 | Direct | 5V | 680Ω |
+| 3.3V Power | Green | 1 | Direct | 3.3V | 470Ω |
+| Serial TX | Amber | 1 | MOSFET | 5V | 150Ω |
+| Serial RX | Amber | 1 | MOSFET | 5V | 150Ω |
+| IR TX | Red | 1 | MOSFET | 5V | 330Ω |
+| User LED 1 | Blue | 1 | MOSFET | 5V | 330Ω |
+| User LED 2 | Blue | 1 | MOSFET | 5V | 330Ω |
 
 ### Control Switches
 
