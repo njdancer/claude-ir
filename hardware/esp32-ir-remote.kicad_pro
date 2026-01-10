@@ -242,7 +242,80 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      [
+        "lib_symbol_mismatch|355600|660400|95115408-2e27-4c67-a6bf-c3f87ec48e3c|00000000-0000-0000-0000-000000000000|||",
+        "We customised the symbol to add Flash pins to expose via header for debugging"
+      ],
+      [
+        "multiple_net_names|1384300|1244600|f2e15713-cb03-40d0-882a-3e09e065ee2c|a773e2fd-4adf-451b-b6c6-3119d655b67e|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|1600200|292100|b4bdff29-ec15-4003-b0d0-76de9f5021a6|ac5426d2-e87c-48bc-9ebe-1d1cdd5038aa|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|1600200|342900|00419c89-47c3-44a6-9c8b-c1c098726547|2f19627a-27a1-4cae-b475-9d582205cb69|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|1600200|368300|2e47659a-1191-43f4-9ee9-2e5a98c805bc|aef8975d-b2e0-46f6-8257-57c6b9315bb3|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|1930400|749300|5eff820a-447a-4095-9ec3-efbc6a6ac478|7db28497-5b7f-4a85-8f51-97f8b64b7bcb|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|1930400|977900|49da4e1a-1562-40b1-8f9a-3f649c9d3c06|24c28d7e-1b6a-4115-959d-9b242beed17b|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|1930400|977900|c8b3d37e-3116-4c53-80d6-230787674838|24c28d7e-1b6a-4115-959d-9b242beed17b|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|2159000|520700|1fed0df7-815c-485f-b2ba-1d05740fb86b|5d0e8a31-00a0-40eb-96f8-cb8d63491b5f|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|2159000|635000|6a796baa-3860-4a00-8a35-fa025d660d03|91c080ca-0130-4513-89d7-83aa5fb9c632|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|2552700|1117600|046c61dd-1418-43bd-a40a-6ed4cbe33e02|d3ae491d-1b8a-4815-9afc-c729a06cfa33|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|558800|279400|3115c90c-7556-4a05-8190-65f78e86ab81|86000741-0208-4cf4-b2f4-3d450c53e258|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|558800|279400|e6422075-fb1b-4eca-bd32-59402e74308f|86000741-0208-4cf4-b2f4-3d450c53e258|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|876300|838200|b4bdff29-ec15-4003-b0d0-76de9f5021a6|ac5426d2-e87c-48bc-9ebe-1d1cdd5038aa|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|876300|863600|01d2730b-5d2c-4a0f-87a3-305288822376|55a15ed9-d762-44c3-b90f-fdf76e6b642e|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ],
+      [
+        "multiple_net_names|876300|889000|00419c89-47c3-44a6-9c8b-c1c098726547|2f19627a-27a1-4cae-b475-9d582205cb69|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|876300|914400|2e47659a-1191-43f4-9ee9-2e5a98c805bc|aef8975d-b2e0-46f6-8257-57c6b9315bb3|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        "GPIO Mapping"
+      ],
+      [
+        "multiple_net_names|876300|965200|1fed0df7-815c-485f-b2ba-1d05740fb86b|27651bcf-8c95-4556-a991-e00868d99546|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd|/09f96520-8fed-4ae0-9534-bf9e422c04cd",
+        ""
+      ]
+    ],
     "meta": {
       "version": 0
     },
