@@ -168,7 +168,12 @@ Features are tracked in `viewer/features.yaml`. Each feature has:
 - **dependencies**: List of feature IDs that must be completed first
 - **priority**: critical | high | medium | low
 
-Update feature status as work progresses. This provides visibility into project progress and helps identify blockers.
+**Important**: Update feature status as you work:
+1. Mark features as `in_progress` when you start working on them
+2. Mark features as `completed` immediately when done
+3. Reference feature IDs in commit messages (e.g., "Implements PARSE-001")
+
+This provides visibility into project progress and helps identify blockers.
 
 ## Commit Message Format
 
