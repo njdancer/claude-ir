@@ -142,7 +142,7 @@ The viewer MUST include schematic symbols for common component types:
 | switch | Open contact symbol |
 | fuse | Rectangle with current rating |
 
-**[NEEDS CLARIFICATION: Should we use IEEE (US) or IEC (European) symbol standards? Or provide a toggle?]**
+The viewer MUST provide a user preference toggle to switch between IEEE (US) and IEC (European) symbol standards. The default SHOULD be IEEE style, with the preference persisted in localStorage.
 
 Unknown component types MUST render as generic IC blocks with pin labels derived from connection syntax.
 
