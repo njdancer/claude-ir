@@ -1,0 +1,50 @@
+# Sample parts.yaml
+#
+# Maps component types to KiCad symbols and footprints.
+# Create a parts.yaml in your project directory with your specific parts.
+
+# Common passives (defaults if not specified)
+resistor:
+  symbol: Device:R
+  footprint: Resistor_SMD:R_0402_1005Metric
+
+capacitor:
+  symbol: Device:C
+  footprint: Capacitor_SMD:C_0402_1005Metric
+
+inductor:
+  symbol: Device:L
+  footprint: Inductor_SMD:L_0603_1608Metric
+
+# LEDs
+led:
+  symbol: Device:LED
+  footprint: LED_SMD:LED_0603_1608Metric
+
+ir_led:
+  symbol: Device:LED_IR
+  footprint: LED_THT:LED_D5.0mm_IRGrey
+
+# Transistors
+2n2222:
+  symbol: Transistor_BJT:2N2222
+  footprint: Package_TO_SOT_THT:TO-92_Inline
+
+# Regulators
+ams1117:
+  symbol: Regulator_Linear:AMS1117-3.3
+  footprint: Package_TO_SOT_SMD:SOT-223-3_TabPin2
+
+lm1117:
+  symbol: Regulator_Linear:LM1117-3.3
+  footprint: Package_TO_SOT_SMD:SOT-223-3_TabPin2
+
+# Microcontrollers
+esp32_wroom_32:
+  symbol: RF_Module:ESP32-WROOM-32
+  footprint: RF_Module:ESP32-WROOM-32
+
+# Connectors
+usb_c_power_only:
+  symbol: Connector:USB_C_Receptacle_USB2.0
+  footprint: Connector_USB:USB_C_Receptacle_GCT_USB4085

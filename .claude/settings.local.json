@@ -23,7 +23,18 @@
       "Bash(pnpm --dir /Users/nickdancer/Documents/claude-ir/app test:e2e --grep \"should change temperature with slider\")",
       "Bash(lsof:*)",
       "Bash(xargs kill -9:*)",
-      "Skill(spec-writing)"
+      "Skill(spec-writing)",
+      "mcp__kicad__list_projects",
+      "mcp__kicad__analyze_bom",
+      "mcp__kicad__get_project_structure",
+      "mcp__kicad__extract_project_netlist",
+      "mcp__kicad__find_component_connections",
+      "mcp__kicad__analyze_schematic_connections",
+      "mcp__kicad__analyze_project_circuit_patterns"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "kicad"
+  ]
 }

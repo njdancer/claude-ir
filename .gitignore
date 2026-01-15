@@ -46,6 +46,9 @@ Thumbs.db
 *.bak
 *.log
 
+# KiCad autosave files
+_autosave-*
+
 # Node.js / React Router app
 app/node_modules/
 app/.react-router/
@@ -53,3 +56,4 @@ app/build/
 app/test-results/
 app/playwright-report/
 *.lock
+tools/kicad-mcp/

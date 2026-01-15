@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "kicad": {
+      "type": "stdio",
+      "command": "/Users/nickdancer/Documents/claude-ir/tools/kicad-mcp/.venv/bin/python",
+      "args": ["/Users/nickdancer/Documents/claude-ir/tools/kicad-mcp/main.py"],
+      "env": {
+        "KICAD_SEARCH_PATHS": "/Users/nickdancer/Documents/claude-ir/hardware",
+        "KICAD_USER_DIR": "/Users/nickdancer/Documents/KiCad",
+        "KICAD_APP_PATH": "/Applications/KiCad/KiCad.app"
+      }
+    }
+  }
+}
