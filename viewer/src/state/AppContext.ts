@@ -1,5 +1,9 @@
 import { createContext } from 'react'
 import type { AppState, AppAction, FilterConfig, ViewportTransform } from './types'
+import type { CircuitAST } from '@/parser'
+import type { CircuitGraph } from '@/graph'
+import type { ValidationResult } from '@/validation'
+import type { LayoutResult } from '@/layout'
 import type { SymbolStandard } from '@/symbols'
 
 /**
@@ -13,6 +17,11 @@ export interface AppContextValue {
     // Project actions
     loadProject: (filename: string, content: string) => void
     clearProject: () => void
+    setAST: (ast: CircuitAST) => void
+    setGraph: (graph: CircuitGraph) => void
+    setValidation: (validation: ValidationResult) => void
+    setLayout: (layout: LayoutResult) => void
+    setError: (error: string) => void
     // View actions
     setFilter: (filter: Partial<FilterConfig>) => void
     resetFilter: () => void

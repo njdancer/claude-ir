@@ -1,4 +1,4 @@
-import type { CircuitAST, ConnectionNode, InlinePassiveNode, Endpoint } from '@/parser'
+import type { CircuitAST, ConnectionNode, InlinePassiveNode, Endpoint, SourceLocation } from '@/parser'
 import type { CircuitGraph } from '@/graph'
 import type { ValidationIssue, ValidationResult, IssueSeverity, IssueCategory } from './types'
 

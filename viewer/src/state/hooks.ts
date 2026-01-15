@@ -75,6 +75,8 @@ export function useSelection() {
   const { state, actions } = useAppState()
   return {
     selection: state.view.selection,
+    selectedNodes: state.view.selection.selectedNodes,
+    hoveredNode: state.view.selection.hoveredNode,
     selectNodes: actions.selectNodes,
     toggleNodeSelection: actions.toggleNodeSelection,
     clearSelection: actions.clearSelection,

@@ -1,5 +1,9 @@
 import { useReducer, useMemo, type ReactNode } from 'react'
 import type { FilterConfig, ViewportTransform } from './types'
+import type { CircuitAST } from '@/parser'
+import type { CircuitGraph } from '@/graph'
+import type { ValidationResult } from '@/validation'
+import type { LayoutResult } from '@/layout'
 import type { SymbolStandard } from '@/symbols'
 import { AppContext } from './AppContext'
 import { appReducer, initialAppState } from './reducers'
@@ -17,6 +21,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       loadProject: (filename: string, content: string) =>
         dispatch({ type: 'project/load', payload: { filename, content } }),
       clearProject: () => dispatch({ type: 'project/clear' }),
+      setAST: (ast: CircuitAST) => dispatch({ type: 'project/setAST', payload: ast }),
+      setGraph: (graph: CircuitGraph) => dispatch({ type: 'project/setGraph', payload: graph }),
+      setValidation: (validation: ValidationResult) =>
+        dispatch({ type: 'project/setValidation', payload: validation }),
+      setLayout: (layout: LayoutResult) => dispatch({ type: 'project/setLayout', payload: layout }),
+      setError: (error: string) => dispatch({ type: 'project/setError', payload: error }),
 
       // View actions
       setFilter: (filter: Partial<FilterConfig>) => dispatch({ type: 'view/setFilter', payload: filter }),

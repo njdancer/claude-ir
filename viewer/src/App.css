@@ -1,42 +1,29 @@
+/* Circuit Schematic Viewer App Styles */
+
+/* Full-screen app */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  height: 100vh;
+  width: 100vw;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* CSS Variables for theming */
+:root {
+  --color-wire: #64748b;
+  --color-selected: #3b82f6;
+  --color-highlight: #22c55e;
+  --color-grid: #e2e8f0;
+  --color-bg: #ffffff;
+  --color-border: #cbd5e1;
+  --color-text: #334155;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+/* Dark mode */
+.dark {
+  --color-wire: #94a3b8;
+  --color-selected: #60a5fa;
+  --color-highlight: #4ade80;
+  --color-grid: #334155;
+  --color-bg: #1e293b;
+  --color-border: #475569;
+  --color-text: #e2e8f0;
 }
