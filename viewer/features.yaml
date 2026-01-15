@@ -14,7 +14,6 @@ meta:
 # =============================================================================
 
 features:
-
   # ---------------------------------------------------------------------------
   # Project Setup (INFRA-001 to INFRA-015)
   # ---------------------------------------------------------------------------
@@ -162,7 +161,7 @@ features:
   - id: PARSE-003
     category: parser
     name: Implement net declaration tokenizer
-    description: Tokenize [NET_NAME]: net syntax
+    description: 'Tokenize [NET_NAME]: net syntax'
     status: planned
     priority: critical
     dependencies: [PARSE-001]
@@ -170,7 +169,7 @@ features:
   - id: PARSE-004
     category: parser
     name: Implement component declaration tokenizer
-    description: Tokenize [REF]: type(params) syntax
+    description: 'Tokenize [REF]: type(params) syntax'
     status: planned
     priority: critical
     dependencies: [PARSE-001]
@@ -178,7 +177,7 @@ features:
   - id: PARSE-005
     category: parser
     name: Implement sub-circuit reference tokenizer
-    description: Tokenize [REF]: @./path.circuit.md syntax
+    description: 'Tokenize [REF]: @./path.circuit.md syntax'
     status: planned
     priority: critical
     dependencies: [PARSE-001]
@@ -186,7 +185,7 @@ features:
   - id: PARSE-006
     category: parser
     name: Implement connection tokenizer
-    description: Tokenize [A --- B] connection syntax
+    description: 'Tokenize [A --- B] connection syntax'
     status: planned
     priority: critical
     dependencies: [PARSE-001]
@@ -194,7 +193,7 @@ features:
   - id: PARSE-007
     category: parser
     name: Implement inline passive tokenizer
-    description: Tokenize [A --- value --- B] inline passives
+    description: 'Tokenize [A --- value --- B] inline passives'
     status: planned
     priority: critical
     dependencies: [PARSE-001]
@@ -202,7 +201,7 @@ features:
   - id: PARSE-008
     category: parser
     name: Implement property tokenizer
-    description: Tokenize [key ==> value] property syntax
+    description: 'Tokenize [key ==> value] property syntax'
     status: planned
     priority: medium
     dependencies: [PARSE-001]
@@ -1069,7 +1068,20 @@ features:
     description: Collect all validation issues with locations
     status: planned
     priority: high
-    dependencies: [VALID-002, VALID-003, VALID-004, VALID-005, VALID-006, VALID-007, VALID-008, VALID-009, VALID-010, VALID-011, VALID-012]
+    dependencies:
+      [
+        VALID-002,
+        VALID-003,
+        VALID-004,
+        VALID-005,
+        VALID-006,
+        VALID-007,
+        VALID-008,
+        VALID-009,
+        VALID-010,
+        VALID-011,
+        VALID-012,
+      ]
 
   - id: VALID-014
     category: validation
