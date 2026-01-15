@@ -9,7 +9,6 @@ import type {
   ConnectionToken,
   InlinePassiveToken,
   PropertyToken,
-  TextToken,
   FrontmatterToken,
 } from './types'
 
@@ -28,13 +27,13 @@ const PATTERNS = {
 
   // [A --- value --- B] (inline passive)
   INLINE_PASSIVE:
-    /^\[([^\[\]]+?)\s+---\s+(\d+(?:\.\d+)?[kKmMµunp]?[ΩRFHAfAhΩ]?)\s+---\s+([^\[\]]+?)\]/,
+    /^\[([^[\]]+?)\s+---\s+(\d+(?:\.\d+)?[kKmMµunp]?[ΩRFHAfAhΩ]?)\s+---\s+([^[\]]+?)\]/,
 
   // [A --- B] (connection)
-  CONNECTION: /^\[([^\[\]]+?)\s+---\s+([^\[\]]+?)\]/,
+  CONNECTION: /^\[([^[\]]+?)\s+---\s+([^[\]]+?)\]/,
 
   // [key ==> value]
-  PROPERTY: /^\[([^\[\]=]+?)\s*==>\s*([^\[\]]+?)\]/,
+  PROPERTY: /^\[([^[\]=]+?)\s*==>\s*([^[\]]+?)\]/,
 
   // YAML frontmatter
   FRONTMATTER: /^---\n([\s\S]*?)\n---/,
@@ -87,17 +86,6 @@ export function tokenize(input: string, filename: string): LexerResult {
 
   // Helper to get current column
   const getColumn = () => pos - lineStart + 1
-
-  // Helper to advance past newlines
-  const advanceNewlines = () => {
-    while (pos < input.length && (input[pos] === '\n' || input[pos] === '\r')) {
-      if (input[pos] === '\n') {
-        line++
-        lineStart = pos + 1
-      }
-      pos++
-    }
-  }
 
   // Check for YAML frontmatter at start
   if (input.startsWith('---\n')) {

@@ -1,5 +1,5 @@
 import { tokenize } from './lexer'
-import type { CircuitToken, ParseError, LexerResult } from './types'
+import type { ParseError, LexerResult } from './types'
 import {
   type CircuitAST,
   type NetNode,
@@ -39,7 +39,7 @@ function parseFrontmatter(content: string): Frontmatter {
     // Check for multiline indicator
     if (inMultiline) {
       if (line.startsWith('  ') || line.trim() === '') {
-        multilineValue += (multilineValue ? '\n' : '') + line.replace(/^  /, '')
+        multilineValue += (multilineValue ? '\n' : '') + line.replace(/^ {2}/, '')
         continue
       } else {
         // End of multiline

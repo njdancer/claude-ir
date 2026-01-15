@@ -1,7 +1,6 @@
 import type { CircuitAST, Endpoint } from '@/parser'
 import type {
   CircuitGraph,
-  CircuitGraphNode,
   ComponentGraphNode,
   SubcircuitGraphNode,
   NetGraphNode,
