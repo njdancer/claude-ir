@@ -1186,7 +1186,7 @@ features:
   category: ui
   name: Install shadcn Select component
   description: Add Select/Combobox from shadcn/ui
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - INFRA-006
@@ -1194,7 +1194,7 @@ features:
   category: ui
   name: Install shadcn Slider component
   description: Add Slider from shadcn/ui
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - INFRA-006
@@ -1202,7 +1202,7 @@ features:
   category: ui
   name: Install shadcn Tabs component
   description: Add Tabs from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1210,7 +1210,7 @@ features:
   category: ui
   name: Install shadcn ScrollArea component
   description: Add ScrollArea from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1218,7 +1218,7 @@ features:
   category: ui
   name: Install shadcn Badge component
   description: Add Badge from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1226,7 +1226,7 @@ features:
   category: ui
   name: Install shadcn Tooltip component
   description: Add Tooltip from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1234,7 +1234,7 @@ features:
   category: ui
   name: Install shadcn Dialog component
   description: Add Dialog from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1242,7 +1242,7 @@ features:
   category: ui
   name: Install shadcn Command component
   description: Add Command palette from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1250,7 +1250,7 @@ features:
   category: ui
   name: Install shadcn Separator component
   description: Add Separator from shadcn/ui
-  status: implemented
+  status: completed
   priority: low
   dependencies:
   - INFRA-006
@@ -1258,7 +1258,7 @@ features:
   category: ui
   name: Install shadcn Card component
   description: Add Card from shadcn/ui
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - INFRA-006
@@ -1266,7 +1266,7 @@ features:
   category: ui
   name: Create loading spinner component
   description: Loading indicator for async operations
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - UI-001
@@ -1355,7 +1355,7 @@ features:
   category: ui
   name: Create clear filters button
   description: Reset all filters to default
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-021
@@ -1430,7 +1430,7 @@ features:
   category: ui
   name: Create SchematicCanvas component
   description: Main canvas for schematic rendering
-  status: implemented
+  status: completed
   priority: critical
   dependencies:
   - UI-003
@@ -1438,7 +1438,7 @@ features:
   category: ui
   name: Implement canvas pan controls
   description: Click-drag to pan the canvas
-  status: implemented
+  status: completed
   priority: critical
   dependencies:
   - UI-036
@@ -1446,7 +1446,7 @@ features:
   category: ui
   name: Implement canvas zoom controls
   description: Scroll wheel and buttons for zoom
-  status: implemented
+  status: completed
   priority: critical
   dependencies:
   - UI-036
@@ -1454,7 +1454,7 @@ features:
   category: ui
   name: Implement zoom to fit
   description: Fit entire schematic in viewport
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-038
@@ -1523,7 +1523,7 @@ features:
   category: ui
   name: Implement multi-select
   description: Shift+click for multi-selection
-  status: implemented
+  status: completed
   priority: medium
   dependencies:
   - UI-045
@@ -1531,7 +1531,7 @@ features:
   category: ui
   name: Implement hover highlighting
   description: Highlight elements on mouse hover
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-041
@@ -1540,7 +1540,7 @@ features:
   category: ui
   name: Implement selection highlighting
   description: Visual feedback for selected elements
-  status: implemented
+  status: completed
   priority: critical
   dependencies:
   - UI-045
@@ -1600,7 +1600,7 @@ features:
   category: ui
   name: Create PropertiesPanel component
   description: Panel showing selected element details
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-003
@@ -1608,7 +1608,7 @@ features:
   category: ui
   name: Display component properties
   description: Show ref, type, params for selected component
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-056
@@ -1616,7 +1616,7 @@ features:
   category: ui
   name: Display component connections
   description: List connections for selected component
-  status: implemented
+  status: completed
   priority: high
   dependencies:
   - UI-056
@@ -2015,7 +2015,7 @@ features:
   category: testing
   name: Write E2E test for file loading
   description: Test loading circuit files end-to-end
-  status: in_progress
+  status: completed
   priority: critical
   dependencies:
   - INFRA-010
@@ -2024,7 +2024,7 @@ features:
   category: testing
   name: Write E2E test for net filtering
   description: Test filtering schematic by net
-  status: in_progress
+  status: completed
   priority: critical
   dependencies:
   - INFRA-010
@@ -2033,7 +2033,7 @@ features:
   category: testing
   name: Write E2E test for component filtering
   description: Test filtering schematic by component
-  status: in_progress
+  status: completed
   priority: critical
   dependencies:
   - INFRA-010
@@ -2042,7 +2042,7 @@ features:
   category: testing
   name: Write E2E test for neighborhood view
   description: Test depth-limited component view
-  status: in_progress
+  status: completed
   priority: critical
   dependencies:
   - INFRA-010
@@ -2051,7 +2051,7 @@ features:
   category: testing
   name: Write E2E test for canvas interaction
   description: Test pan, zoom, selection
-  status: in_progress
+  status: completed
   priority: high
   dependencies:
   - INFRA-010
@@ -2060,7 +2060,7 @@ features:
   category: testing
   name: Write E2E test for issues panel
   description: Test validation issue display
-  status: in_progress
+  status: completed
   priority: high
   dependencies:
   - INFRA-010
