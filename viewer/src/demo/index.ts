@@ -83,3 +83,68 @@ export async function loadAllDemoCircuits(): Promise<Map<string, string>> {
 
   return circuits
 }
+
+/**
+ * Create a FileLoader for demo circuits
+ * This loader fetches files from /demo-circuits/ and caches them
+ */
+export function createDemoFileLoader(): {
+  load: (path: string, relativeTo: string) => Promise<string | null>
+  resolve: (path: string, relativeTo: string) => string
+} {
+  const cache = new Map<string, string>()
+
+  return {
+    async load(path: string, relativeTo: string): Promise<string | null> {
+      const resolved = this.resolve(path, relativeTo)
+
+      // Check cache first
+      if (cache.has(resolved)) {
+        return cache.get(resolved)!
+      }
+
+      // Fetch from demo-circuits
+      try {
+        const response = await fetch(`/demo-circuits/${resolved}`)
+        if (!response.ok) {
+          return null
+        }
+        const content = await response.text()
+        cache.set(resolved, content)
+        return content
+      } catch {
+        return null
+      }
+    },
+
+    resolve(path: string, relativeTo: string): string {
+      if (path.startsWith('./')) {
+        // Get directory of relativeTo
+        const dir = relativeTo.split('/').slice(0, -1).join('/')
+        const resolved = dir ? `${dir}/${path.slice(2)}` : path.slice(2)
+        // Normalize path
+        return normalizePath(resolved)
+      }
+      return path
+    },
+  }
+}
+
+/**
+ * Normalize a file path (resolve . and ..)
+ */
+function normalizePath(path: string): string {
+  const parts = path.split('/')
+  const result: string[] = []
+
+  for (const part of parts) {
+    if (part === '.' || part === '') continue
+    if (part === '..') {
+      result.pop()
+    } else {
+      result.push(part)
+    }
+  }
+
+  return result.join('/')
+}

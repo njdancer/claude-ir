@@ -24,7 +24,8 @@ import { FileDropzone } from '@/components/file/FileDropzone'
 import { SettingsDialog } from '@/components/settings/SettingsDialog'
 import { Button } from '@/components/ui/button'
 import { PanelLeft, Play, ChevronDown } from 'lucide-react'
-import { DEMO_CIRCUITS, loadDemoCircuit } from '@/demo'
+import { DEMO_CIRCUITS, loadDemoCircuit, createDemoFileLoader } from '@/demo'
+import { resolve as resolveCircuit } from '@/parser/resolver'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,12 +133,37 @@ function AppContent() {
   // Demo loading state
   const [demoLoading, setDemoLoading] = useState(false)
 
-  // Demo load handler
+  // Demo load handler with sub-circuit resolution
   const handleLoadDemo = useCallback(
     async (filename: string) => {
       setDemoLoading(true)
       try {
         const { content } = await loadDemoCircuit(filename)
+
+        // Create a file loader for demo circuits and resolve sub-circuits
+        const loader = createDemoFileLoader()
+        const { ast, errors } = await resolveCircuit(content, filename, loader)
+
+        // Report any resolution errors but continue
+        if (errors.length > 0) {
+          console.warn('Resolution errors:', errors)
+        }
+
+        actions.setAST(ast)
+
+        // Build graph from resolved AST
+        const graph = buildGraph(ast)
+        actions.setGraph(graph)
+
+        // Validate
+        const validationResult = validate(ast, graph)
+        actions.setValidation(validationResult)
+
+        // Layout
+        const layoutResult = await layoutGraphElk(graph)
+        actions.setLayout(layoutResult)
+
+        // Mark project as loaded
         actions.loadProject(filename, content)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load demo circuit'
