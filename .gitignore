@@ -57,6 +57,3 @@ app/test-results/
 app/playwright-report/
 *.lock
 tools/kicad-mcp/
-
-# GitHub Actions (cannot be pushed without workflow permissions)
-.github/workflows/
