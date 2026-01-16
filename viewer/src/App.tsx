@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AppStateProvider,
   useAppState,
@@ -16,14 +16,21 @@ import {
 import { parse } from '@/parser'
 import { buildGraph } from '@/graph'
 import { validate } from '@/validation'
-import { layoutGraph } from '@/layout'
+import { layoutGraphElk } from '@/layout'
 import { SchematicCanvas } from '@/components/canvas/SchematicCanvas'
 import { Toolbar } from '@/components/toolbar/Toolbar'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { FileDropzone } from '@/components/file/FileDropzone'
 import { SettingsDialog } from '@/components/settings/SettingsDialog'
 import { Button } from '@/components/ui/button'
-import { PanelLeft } from 'lucide-react'
+import { PanelLeft, Play, ChevronDown } from 'lucide-react'
+import { DEMO_CIRCUITS, loadDemoCircuit } from '@/demo'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import './App.css'
 
 /**
@@ -49,26 +56,34 @@ function AppContent() {
     if (!project.sourceContent || !project.filename) return
     if (project.loading === false && project.ast) return // Already processed
 
-    try {
-      // Parse
-      const ast = parse(project.sourceContent, project.filename)
-      actions.setAST(ast)
+    // Capture values for async function
+    const sourceContent = project.sourceContent
+    const filename = project.filename
 
-      // Build graph
-      const graph = buildGraph(ast)
-      actions.setGraph(graph)
+    const processCircuit = async () => {
+      try {
+        // Parse
+        const ast = parse(sourceContent, filename)
+        actions.setAST(ast)
 
-      // Validate
-      const validationResult = validate(ast, graph)
-      actions.setValidation(validationResult)
+        // Build graph
+        const graph = buildGraph(ast)
+        actions.setGraph(graph)
 
-      // Layout
-      const layoutResult = layoutGraph(graph)
-      actions.setLayout(layoutResult)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to process circuit'
-      actions.setError(message)
+        // Validate
+        const validationResult = validate(ast, graph)
+        actions.setValidation(validationResult)
+
+        // Layout using ELK (async)
+        const layoutResult = await layoutGraphElk(graph)
+        actions.setLayout(layoutResult)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to process circuit'
+        actions.setError(message)
+      }
     }
+
+    processCircuit()
   }, [project.sourceContent, project.filename, project.loading, project.ast, actions])
 
   // File load handler
@@ -114,8 +129,28 @@ function AppContent() {
     setViewport({ panX: 0, panY: 0, zoom: 1 })
   }, [setViewport])
 
+  // Demo loading state
+  const [demoLoading, setDemoLoading] = useState(false)
+
+  // Demo load handler
+  const handleLoadDemo = useCallback(
+    async (filename: string) => {
+      setDemoLoading(true)
+      try {
+        const { content } = await loadDemoCircuit(filename)
+        actions.loadProject(filename, content)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load demo circuit'
+        actions.setError(message)
+      } finally {
+        setDemoLoading(false)
+      }
+    },
+    [actions]
+  )
+
   // Show welcome screen if no project loaded
-  const showWelcome = !project.filename && !project.loading
+  const showWelcome = !project.filename && !project.loading && !demoLoading
 
   return (
     <div className="flex h-screen flex-col bg-slate-50">
@@ -172,6 +207,32 @@ function AppContent() {
                   Drop a .circuit.md file to visualize and explore your circuit schematic.
                 </p>
                 <FileDropzone onFileLoad={handleFileLoad} className="h-48" />
+
+                <div className="flex items-center gap-4 justify-center pt-2">
+                  <span className="text-sm text-slate-500">or</span>
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Play className="h-4 w-4" />
+                      Load Demo Circuit
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="w-64">
+                    {DEMO_CIRCUITS.map((demo) => (
+                      <DropdownMenuItem
+                        key={demo.filename}
+                        onClick={() => handleLoadDemo(demo.filename)}
+                        className="flex flex-col items-start gap-1"
+                      >
+                        <span className="font-medium">{demo.name}</span>
+                        <span className="text-xs text-slate-500">{demo.description}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ) : project.error ? (
