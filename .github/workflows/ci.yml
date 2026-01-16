@@ -112,16 +112,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: e2e
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push'
 
     permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
 
     steps:
       - name: Checkout
@@ -141,20 +135,47 @@ jobs:
         working-directory: viewer
         run: pnpm install
 
+      - name: Set deployment path
+        id: deploy-path
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "path=" >> $GITHUB_OUTPUT
+            echo "base=/claude-ir/" >> $GITHUB_OUTPUT
+            echo "keep_files=false" >> $GITHUB_OUTPUT
+          else
+            # Extract branch name and sanitize for URL
+            BRANCH="${{ github.ref_name }}"
+            echo "path=previews/${BRANCH}" >> $GITHUB_OUTPUT
+            echo "base=/claude-ir/previews/${BRANCH}/" >> $GITHUB_OUTPUT
+            echo "keep_files=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build for GitHub Pages
         working-directory: viewer
         env:
-          GITHUB_PAGES: true
+          VITE_BASE_PATH: ${{ steps.deploy-path.outputs.base }}
         run: pnpm build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to GitHub Pages (main)
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: viewer/dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./viewer/dist
+          keep_files: false
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages (preview)
+        if: github.ref != 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./viewer/dist
+          destination_dir: ${{ steps.deploy-path.outputs.path }}
+          keep_files: true
+
+      - name: Output preview URL
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "## 🚀 Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Preview URL: https://${{ github.repository_owner }}.github.io${{ steps.deploy-path.outputs.base }}" >> $GITHUB_STEP_SUMMARY
