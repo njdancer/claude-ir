@@ -1,2181 +1,2171 @@
-# Circuit Schematic Viewer - Feature Registry
-# This document tracks all features for the viewer application.
-# Status: planned | in_progress | implemented | completed | blocked | deferred
-# Priority: critical | high | medium | low
-
 meta:
   project: circuit-schematic-viewer
   version: 1.0.0
   created: 2026-01-15
   spec: ../specs/circuit-schematic-viewer.md
-
 features:
-
-  # =============================================================================
-# PROJECT INFRASTRUCTURE
-# =============================================================================
-
-  - id: INFRA-001
-    category: infrastructure
-    name: Initialize pnpm project
-    description: Create package.json with pnpm, set up basic project structure
-    status: implemented
-    priority: critical
-    dependencies: []
-
-  - id: INFRA-002
-    category: infrastructure
-    name: Configure mise for Node.js version
-    description: Create .mise.toml with Node.js LTS version pinned
-    status: implemented
-    priority: critical
-    dependencies: []
-
-  - id: INFRA-003
-    category: infrastructure
-    name: Set up Vite with React
-    description: Initialize Vite project with React and TypeScript template
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-001, INFRA-002]
-
-  - id: INFRA-004
-    category: infrastructure
-    name: Configure TypeScript
-    description: Set up tsconfig.json with strict mode and path aliases
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-003]
-
-  - id: INFRA-005
-    category: infrastructure
-    name: Install and configure Tailwind CSS
-    description: Set up Tailwind with PostCSS, create base styles
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-003]
-
-  - id: INFRA-006
-    category: infrastructure
-    name: Initialize shadcn/ui
-    description: Run shadcn init, configure components.json
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-005]
-
-  - id: INFRA-007
-    category: infrastructure
-    name: Configure ESLint
-    description: Set up ESLint with TypeScript, React, and accessibility rules
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-004]
-
-  - id: INFRA-008
-    category: infrastructure
-    name: Configure Prettier
-    description: Set up Prettier with consistent formatting rules
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-001]
-
-  - id: INFRA-009
-    category: infrastructure
-    name: Set up Vitest
-    description: Configure Vitest for unit testing with coverage reporting
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-003]
-
-  - id: INFRA-010
-    category: infrastructure
-    name: Set up Playwright
-    description: Configure Playwright for E2E testing with browser configs
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-003]
-
-  - id: INFRA-011
-    category: infrastructure
-    name: Create GitHub Actions CI workflow
-    description: Set up lint, test, build pipeline on push/PR
-    status: implemented
-    priority: critical
-    dependencies:
-      [
-        INFRA-007,
-        INFRA-008,
-        INFRA-009,
-        INFRA-010,
-      ]
-
-  - id: INFRA-012
-    category: infrastructure
-    name: Create project directory structure
-    description: Set up src/, tests/, public/ with module folders
-    status: implemented
-    priority: high
-    dependencies: [INFRA-003]
-
-  - id: INFRA-013
-    category: infrastructure
-    name: Configure path aliases
-    description: Set up @/ imports for clean module references
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-004]
-
-  - id: INFRA-014
-    category: infrastructure
-    name: Add sample circuit.md files
-    description: Copy ESP32 IR Remote circuits to public/ for demo
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-012]
-
-  - id: INFRA-015
-    category: infrastructure
-    name: Create development scripts
-    description: Add npm scripts for dev, build, test, lint, format
-    status: implemented
-    priority: high
-    dependencies:
-      [
-        INFRA-003,
-        INFRA-007,
-        INFRA-008,
-        INFRA-009,
-      ]
-
-
-  # ---------------------------------------------------------------------------
-# Parser (PARSE-001 to PARSE-030)
-# ---------------------------------------------------------------------------
-
-  - id: PARSE-001
-    category: parser
-    name: Define token types
-    description: Create TypeScript types for all circuit.md tokens
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-004]
-
-  - id: PARSE-002
-    category: parser
-    name: Implement YAML frontmatter extraction
-    description: Parse optional YAML frontmatter for metadata
-    status: implemented
-    priority: high
-    dependencies: [PARSE-001]
-
-  - id: PARSE-003
-    category: parser
-    name: Implement net declaration tokenizer
-    description: "Tokenize [NET_NAME]: net syntax"
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-004
-    category: parser
-    name: Implement component declaration tokenizer
-    description: "Tokenize [REF]: type(params) syntax"
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-005
-    category: parser
-    name: Implement sub-circuit reference tokenizer
-    description: "Tokenize [REF]: @./path.circuit.md syntax"
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-006
-    category: parser
-    name: Implement connection tokenizer
-    description: Tokenize [A --- B] connection syntax
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-007
-    category: parser
-    name: Implement inline passive tokenizer
-    description: Tokenize [A --- value --- B] inline passives
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-008
-    category: parser
-    name: Implement property tokenizer
-    description: Tokenize [key ==> value] property syntax
-    status: implemented
-    priority: medium
-    dependencies: [PARSE-001]
-
-  - id: PARSE-009
-    category: parser
-    name: Implement value parsing utilities
-    description: Parse component values (10k, 4.7µF, 100nF, 4k7, 2R2)
-    status: implemented
-    priority: high
-    dependencies: [PARSE-001]
-
-  - id: PARSE-010
-    category: parser
-    name: Implement pin reference parser
-    description: Parse pin syntax (U1.VCC, U1#1, net names)
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-011
-    category: parser
-    name: Define AST node types
-    description: Create TypeScript interfaces for AST nodes
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-001]
-
-  - id: PARSE-012
-    category: parser
-    name: Implement AST builder for nets
-    description: Build Net AST nodes from tokens
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-003, PARSE-011]
-
-  - id: PARSE-013
-    category: parser
-    name: Implement AST builder for components
-    description: Build Component AST nodes from tokens
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-004, PARSE-011]
-
-  - id: PARSE-014
-    category: parser
-    name: Implement AST builder for sub-circuits
-    description: Build SubCircuit AST nodes from tokens
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-005, PARSE-011]
-
-  - id: PARSE-015
-    category: parser
-    name: Implement AST builder for connections
-    description: Build Connection AST nodes from tokens
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-006, PARSE-011]
-
-  - id: PARSE-016
-    category: parser
-    name: Implement AST builder for inline passives
-    description: Build InlinePassive AST nodes, generate anonymous refs
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-007, PARSE-011]
-
-  - id: PARSE-017
-    category: parser
-    name: Implement AST builder for properties
-    description: Build Property AST nodes from tokens
-    status: implemented
-    priority: medium
-    dependencies: [PARSE-008, PARSE-011]
-
-  - id: PARSE-018
-    category: parser
-    name: Implement Circuit AST root builder
-    description: Combine all AST nodes into Circuit root structure
-    status: implemented
-    priority: critical
-    dependencies:
-      [
-        PARSE-012,
-        PARSE-013,
-        PARSE-014,
-        PARSE-015,
-        PARSE-016,
-        PARSE-017,
-      ]
-
-  - id: PARSE-019
-    category: parser
-    name: Track source locations in AST
-    description: Store file, line, column for all AST nodes
-    status: implemented
-    priority: high
-    dependencies: [PARSE-011]
-
-  - id: PARSE-020
-    category: parser
-    name: Implement parse error collection
-    description: Collect parse errors with location info, continue parsing
-    status: implemented
-    priority: high
-    dependencies: [PARSE-011]
-
-  - id: PARSE-021
-    category: parser
-    name: Implement file loader interface
-    description: Abstract file loading for browser/node compatibility
-    status: implemented
-    priority: high
-    dependencies: [PARSE-018]
-
-  - id: PARSE-022
-    category: parser
-    name: Implement sub-circuit path resolution
-    description: Resolve relative paths in @./ references
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-021]
-
-  - id: PARSE-023
-    category: parser
-    name: Implement recursive sub-circuit loading
-    description: Load and parse sub-circuits recursively
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-022]
-
-  - id: PARSE-024
-    category: parser
-    name: Detect circular sub-circuit references
-    description: Detect and report circular dependencies
-    status: implemented
-    priority: high
-    dependencies: [PARSE-023]
-
-  - id: PARSE-025
-    category: parser
-    name: Merge sub-circuit ASTs
-    description: Integrate sub-circuit ASTs into parent with namespacing
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-023]
-
-  - id: PARSE-026
-    category: parser
-    name: Resolve sub-circuit pin references
-    description: Map SUB.PIN syntax to internal sub-circuit nets
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-025]
-
-  - id: PARSE-027
-    category: parser
-    name: Build resolved circuit tree
-    description: Create fully resolved circuit with all sub-circuits expanded
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-026]
-
-  - id: PARSE-028
-    category: parser
-    name: Implement lazy sub-circuit resolution
-    description: Option to resolve sub-circuits on demand
-    status: implemented
-    priority: medium
-    dependencies: [PARSE-027]
-
-  - id: PARSE-029
-    category: parser
-    name: Cache parsed circuits
-    description: Cache parsed files to avoid re-parsing unchanged files
-    status: implemented
-    priority: medium
-    dependencies: [PARSE-027]
-
-  - id: PARSE-030
-    category: parser
-    name: Export parser public API
-    description: Create clean public interface for parser module
-    status: implemented
-    priority: high
-    dependencies: [PARSE-027]
-
-
-  # ---------------------------------------------------------------------------
-# Graph Model (GRAPH-001 to GRAPH-020)
-# ---------------------------------------------------------------------------
-
-  - id: GRAPH-001
-    category: graph
-    name: Define graph node types
-    description: TypeScript types for ComponentNode, NetNode, PinNode
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-030]
-
-  - id: GRAPH-002
-    category: graph
-    name: Define graph edge types
-    description: TypeScript types for Connection edges
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-001]
-
-  - id: GRAPH-003
-    category: graph
-    name: Implement CircuitGraph class
-    description: Core graph data structure with nodes and edges
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-001, GRAPH-002]
-
-  - id: GRAPH-004
-    category: graph
-    name: Implement graph builder from AST
-    description: Convert resolved AST to CircuitGraph
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-003, PARSE-027]
-
-  - id: GRAPH-005
-    category: graph
-    name: Implement node lookup by reference
-    description: Fast lookup of nodes by reference designator
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-006
-    category: graph
-    name: Implement net lookup by name
-    description: Fast lookup of nets by name
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-007
-    category: graph
-    name: Implement adjacency queries
-    description: Get all nodes connected to a given node
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-008
-    category: graph
-    name: Implement component type queries
-    description: Get all components of a given type
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-009
-    category: graph
-    name: Implement net membership queries
-    description: Get all components connected to a given net
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-010
-    category: graph
-    name: Implement BFS traversal
-    description: Breadth-first traversal from a starting node
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-011
-    category: graph
-    name: Implement depth-limited BFS
-    description: BFS with configurable depth limit for neighborhood view
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-010]
-
-  - id: GRAPH-012
-    category: graph
-    name: Implement subgraph extraction
-    description: Extract subgraph containing only specified nodes
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-013
-    category: graph
-    name: Implement net-filtered subgraph
-    description: Extract subgraph for components on selected nets
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-012, GRAPH-009]
-
-  - id: GRAPH-014
-    category: graph
-    name: Implement component-filtered subgraph
-    description: Extract subgraph for selected component and connections
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-012, GRAPH-007]
-
-  - id: GRAPH-015
-    category: graph
-    name: Implement neighborhood subgraph
-    description: Extract N-depth neighborhood around a component
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-012, GRAPH-011]
-
-  - id: GRAPH-016
-    category: graph
-    name: Implement combined filter queries
-    description: Support multiple filter criteria (AND/OR)
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-013, GRAPH-014, GRAPH-015]
-
-  - id: GRAPH-017
-    category: graph
-    name: Implement hierarchical graph support
-    description: Support collapsed/expanded sub-circuit nodes
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-018
-    category: graph
-    name: Implement graph statistics
-    description: Count nodes, edges, nets, components by type
-    status: implemented
-    priority: medium
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-019
-    category: graph
-    name: Implement graph serialization
-    description: Serialize graph to JSON for debugging/persistence
-    status: implemented
-    priority: low
-    dependencies: [GRAPH-003]
-
-  - id: GRAPH-020
-    category: graph
-    name: Export graph public API
-    description: Create clean public interface for graph module
-    status: implemented
-    priority: high
-    dependencies: [GRAPH-016, GRAPH-017]
-
-
-  # ---------------------------------------------------------------------------
-# Layout Engine (LAYOUT-001 to LAYOUT-020)
-# ---------------------------------------------------------------------------
-
-  - id: LAYOUT-001
-    category: layout
-    name: Define layout types
-    description: TypeScript types for positioned nodes and routed edges
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-020]
-
-  - id: LAYOUT-002
-    category: layout
-    name: Implement force-directed layout base
-    description: Basic force-directed graph layout algorithm
-    status: implemented
-    priority: critical
-    dependencies: [LAYOUT-001]
-
-  - id: LAYOUT-003
-    category: layout
-    name: Implement repulsion forces
-    description: Node-to-node repulsion to prevent overlap
-    status: implemented
-    priority: critical
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-004
-    category: layout
-    name: Implement attraction forces
-    description: Edge-based attraction for connected nodes
-    status: implemented
-    priority: critical
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-005
-    category: layout
-    name: Implement centering force
-    description: Force to keep graph centered in viewport
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-006
-    category: layout
-    name: Implement layout iteration
-    description: Iterative simulation with cooling for convergence
-    status: implemented
-    priority: critical
-    dependencies: [LAYOUT-003, LAYOUT-004, LAYOUT-005]
-
-  - id: LAYOUT-007
-    category: layout
-    name: Implement component size awareness
-    description: Account for component symbol sizes in layout
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-008
-    category: layout
-    name: Implement net grouping heuristics
-    description: Group components on same net closer together
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-009
-    category: layout
-    name: Implement hierarchical layout hints
-    description: Position power nets at top, ground at bottom
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-002]
-
-  - id: LAYOUT-010
-    category: layout
-    name: Implement connection routing base
-    description: Basic Manhattan (orthogonal) wire routing
-    status: implemented
-    priority: critical
-    dependencies: [LAYOUT-006]
-
-  - id: LAYOUT-011
-    category: layout
-    name: Implement routing obstacle avoidance
-    description: Route wires around component symbols
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-010]
-
-  - id: LAYOUT-012
-    category: layout
-    name: Implement wire crossing minimization
-    description: Heuristics to reduce wire crossings
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-010]
-
-  - id: LAYOUT-013
-    category: layout
-    name: Implement junction detection
-    description: Detect and mark wire junction points
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-010]
-
-  - id: LAYOUT-014
-    category: layout
-    name: Implement net label placement
-    description: Position net labels avoiding overlaps
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-010]
-
-  - id: LAYOUT-015
-    category: layout
-    name: Implement incremental layout updates
-    description: Update layout efficiently when filters change
-    status: implemented
-    priority: medium
-    dependencies: [LAYOUT-006]
-
-  - id: LAYOUT-016
-    category: layout
-    name: Implement layout bounds calculation
-    description: Calculate bounding box for viewport fitting
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-006]
-
-  - id: LAYOUT-017
-    category: layout
-    name: Implement sub-circuit block layout
-    description: Layout collapsed sub-circuits as rectangular blocks
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-006]
-
-  - id: LAYOUT-018
-    category: layout
-    name: Implement pin arrangement on blocks
-    description: Position pins on sub-circuit block edges
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-017]
-
-  - id: LAYOUT-019
-    category: layout
-    name: Implement layout caching
-    description: Cache layout results for unchanged subgraphs
-    status: implemented
-    priority: low
-    dependencies: [LAYOUT-006]
-
-  - id: LAYOUT-020
-    category: layout
-    name: Export layout public API
-    description: Create clean public interface for layout module
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-016, LAYOUT-018]
-
-
-  # ---------------------------------------------------------------------------
-# Symbol Library (SYMBOL-001 to SYMBOL-030)
-# ---------------------------------------------------------------------------
-
-  - id: SYMBOL-001
-    category: symbols
-    name: Define symbol interface
-    description: TypeScript interface for schematic symbols
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-004]
-
-  - id: SYMBOL-002
-    category: symbols
-    name: Implement symbol registry
-    description: Registry mapping component types to symbols
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-003
-    category: symbols
-    name: Implement resistor symbol (IEEE)
-    description: Zigzag resistor symbol with pin positions
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-004
-    category: symbols
-    name: Implement resistor symbol (IEC)
-    description: Rectangle resistor symbol with pin positions
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-005
-    category: symbols
-    name: Implement capacitor symbol
-    description: Non-polarized capacitor symbol
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-006
-    category: symbols
-    name: Implement polarized capacitor symbol
-    description: Electrolytic capacitor symbol with + marker
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-007
-    category: symbols
-    name: Implement inductor symbol
-    description: Coil/hump inductor symbol
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-008
-    category: symbols
-    name: Implement diode symbol
-    description: Standard diode symbol
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-009
-    category: symbols
-    name: Implement LED symbol
-    description: Diode with emission arrows
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-008]
-
-  - id: SYMBOL-010
-    category: symbols
-    name: Implement Zener diode symbol
-    description: Zener diode with bent bar
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-008]
-
-  - id: SYMBOL-011
-    category: symbols
-    name: Implement TVS diode symbol
-    description: TVS/suppressor diode symbol
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-008]
-
-  - id: SYMBOL-012
-    category: symbols
-    name: Implement NPN transistor symbol
-    description: NPN BJT with emitter arrow
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-013
-    category: symbols
-    name: Implement PNP transistor symbol
-    description: PNP BJT with emitter arrow
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-012]
-
-  - id: SYMBOL-014
-    category: symbols
-    name: Implement N-MOSFET symbol
-    description: N-channel MOSFET symbol
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-015
-    category: symbols
-    name: Implement P-MOSFET symbol
-    description: P-channel MOSFET symbol
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-014]
-
-  - id: SYMBOL-016
-    category: symbols
-    name: Implement generic IC symbol
-    description: Rectangular IC with configurable pins
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-017
-    category: symbols
-    name: Implement connector symbol
-    description: Multi-pin connector symbol
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-018
-    category: symbols
-    name: Implement switch symbol
-    description: SPST switch symbol
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-019
-    category: symbols
-    name: Implement fuse symbol
-    description: Fuse/PTC symbol
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-020
-    category: symbols
-    name: Implement crystal symbol
-    description: Crystal oscillator symbol
-    status: implemented
-    priority: low
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-021
-    category: symbols
-    name: Implement ground symbol
-    description: Ground reference symbol
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-022
-    category: symbols
-    name: Implement power symbol
-    description: VCC/power rail symbol
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-023
-    category: symbols
-    name: Implement net junction symbol
-    description: Wire junction dot
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-024
-    category: symbols
-    name: Implement sub-circuit block symbol
-    description: Expandable sub-circuit block with pins
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-016]
-
-  - id: SYMBOL-025
-    category: symbols
-    name: Implement symbol style toggle
-    description: Switch between IEEE and IEC symbols
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-002, SYMBOL-003, SYMBOL-004]
-
-  - id: SYMBOL-026
-    category: symbols
-    name: Implement symbol scaling
-    description: Scale symbols based on zoom level
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-027
-    category: symbols
-    name: Implement symbol hover states
-    description: Visual feedback on symbol hover
-    status: implemented
-    priority: medium
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-028
-    category: symbols
-    name: Implement symbol selection states
-    description: Visual feedback for selected symbols
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-029
-    category: symbols
-    name: Implement reference designator labels
-    description: Render component reference labels
-    status: implemented
-    priority: critical
-    dependencies: [SYMBOL-001]
-
-  - id: SYMBOL-030
-    category: symbols
-    name: Export symbol public API
-    description: Create clean public interface for symbols module
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-025]
-
-
-  # ---------------------------------------------------------------------------
-# Validation (VALID-001 to VALID-020)
-# ---------------------------------------------------------------------------
-
-  - id: VALID-001
-    category: validation
-    name: Define validation issue types
-    description: TypeScript types for errors, warnings, info
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-004]
-
-  - id: VALID-002
-    category: validation
-    name: Implement syntax error detection
-    description: Detect malformed bracket syntax
-    status: implemented
-    priority: critical
-    dependencies: [VALID-001, PARSE-020]
-
-  - id: VALID-003
-    category: validation
-    name: Implement unclosed bracket detection
-    description: Detect unclosed bracket pairs
-    status: implemented
-    priority: critical
-    dependencies: [VALID-001]
-
-  - id: VALID-004
-    category: validation
-    name: Implement invalid connection format detection
-    description: Detect malformed connection syntax
-    status: implemented
-    priority: critical
-    dependencies: [VALID-001]
-
-  - id: VALID-005
-    category: validation
-    name: Implement undeclared net detection
-    description: Warn when nets used before declaration
-    status: implemented
-    priority: high
-    dependencies: [VALID-001, PARSE-018]
-
-  - id: VALID-006
-    category: validation
-    name: Implement undeclared component detection
-    description: Warn when components used before declaration
-    status: implemented
-    priority: high
-    dependencies: [VALID-001, PARSE-018]
-
-  - id: VALID-007
-    category: validation
-    name: Implement missing sub-circuit detection
-    description: Error when referenced sub-circuit file not found
-    status: implemented
-    priority: critical
-    dependencies: [VALID-001, PARSE-022]
-
-  - id: VALID-008
-    category: validation
-    name: Implement duplicate reference detection
-    description: Warn on duplicate reference designators
-    status: implemented
-    priority: high
-    dependencies: [VALID-001, PARSE-018]
-
-  - id: VALID-009
-    category: validation
-    name: Implement floating pin detection
-    description: Warn when component pins are unconnected
-    status: implemented
-    priority: medium
-    dependencies: [VALID-001, GRAPH-003]
-
-  - id: VALID-010
-    category: validation
-    name: Implement single-connection net detection
-    description: Warn when net has only one connection
-    status: implemented
-    priority: high
-    dependencies: [VALID-001, GRAPH-003]
-
-  - id: VALID-011
-    category: validation
-    name: Implement unused net detection
-    description: Warn when declared net has no connections
-    status: implemented
-    priority: medium
-    dependencies: [VALID-001, GRAPH-003]
-
-  - id: VALID-012
-    category: validation
-    name: Implement circular reference detection
-    description: Error on circular sub-circuit references
-    status: implemented
-    priority: critical
-    dependencies: [VALID-001, PARSE-024]
-
-  - id: VALID-013
-    category: validation
-    name: Implement validation result aggregation
-    description: Collect all validation issues with locations
-    status: implemented
-    priority: high
-    dependencies:
-      [
-        VALID-002,
-        VALID-003,
-        VALID-004,
-        VALID-005,
-        VALID-006,
-        VALID-007,
-        VALID-008,
-        VALID-009,
-        VALID-010,
-        VALID-011,
-        VALID-012,
-      ]
-
-  - id: VALID-014
-    category: validation
-    name: Implement validation severity levels
-    description: Categorize issues as error, warning, info
-    status: implemented
-    priority: high
-    dependencies: [VALID-013]
-
-  - id: VALID-015
-    category: validation
-    name: Implement file-grouped validation results
-    description: Group validation issues by source file
-    status: implemented
-    priority: medium
-    dependencies: [VALID-013]
-
-  - id: VALID-016
-    category: validation
-    name: Implement validation caching
-    description: Cache validation results for unchanged files
-    status: implemented
-    priority: low
-    dependencies: [VALID-013]
-
-  - id: VALID-017
-    category: validation
-    name: Design ERC pin direction metadata
-    description: Design circuit.md extension for pin directions
-    status: implemented
-    priority: low
-    dependencies: [VALID-001]
-    notes: Deferred feature - design only, no implementation
-
-  - id: VALID-018
-    category: validation
-    name: Implement validation on load
-    description: Run validation automatically when circuit loads
-    status: implemented
-    priority: high
-    dependencies: [VALID-013]
-
-  - id: VALID-019
-    category: validation
-    name: Implement validation refresh
-    description: Re-validate on file changes or manual trigger
-    status: implemented
-    priority: medium
-    dependencies: [VALID-018]
-
-  - id: VALID-020
-    category: validation
-    name: Export validation public API
-    description: Create clean public interface for validation module
-    status: implemented
-    priority: high
-    dependencies: [VALID-014, VALID-015]
-
-
-  # ---------------------------------------------------------------------------
-# UI Components (UI-001 to UI-080)
-# ---------------------------------------------------------------------------
-
-  - id: UI-001
-    category: ui
-    name: Create App shell component
-    description: Main application layout with header, panels, canvas
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-006]
-
-  - id: UI-002
-    category: ui
-    name: Create header component
-    description: App header with project name and controls
-    status: implemented
-    priority: high
-    dependencies: [UI-001]
-
-  - id: UI-003
-    category: ui
-    name: Create resizable panel layout
-    description: Split panels for filters, canvas, properties
-    status: implemented
-    priority: high
-    dependencies: [UI-001]
-
-  - id: UI-004
-    category: ui
-    name: Install shadcn Button component
-    description: Add Button from shadcn/ui
-    status: implemented
-    priority: high
-    dependencies: [INFRA-006]
-
-  - id: UI-005
-    category: ui
-    name: Install shadcn Input component
-    description: Add Input from shadcn/ui
-    status: implemented
-    priority: high
-    dependencies: [INFRA-006]
-
-  - id: UI-006
-    category: ui
-    name: Install shadcn Checkbox component
-    description: Add Checkbox from shadcn/ui
-    status: implemented
-    priority: high
-    dependencies: [INFRA-006]
-
-  - id: UI-007
-    category: ui
-    name: Install shadcn Select component
-    description: Add Select/Combobox from shadcn/ui
-    status: implemented
-    priority: high
-    dependencies: [INFRA-006]
-
-  - id: UI-008
-    category: ui
-    name: Install shadcn Slider component
-    description: Add Slider from shadcn/ui
-    status: implemented
-    priority: high
-    dependencies: [INFRA-006]
-
-  - id: UI-009
-    category: ui
-    name: Install shadcn Tabs component
-    description: Add Tabs from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-010
-    category: ui
-    name: Install shadcn ScrollArea component
-    description: Add ScrollArea from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-011
-    category: ui
-    name: Install shadcn Badge component
-    description: Add Badge from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-012
-    category: ui
-    name: Install shadcn Tooltip component
-    description: Add Tooltip from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-013
-    category: ui
-    name: Install shadcn Dialog component
-    description: Add Dialog from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-014
-    category: ui
-    name: Install shadcn Command component
-    description: Add Command palette from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-015
-    category: ui
-    name: Install shadcn Separator component
-    description: Add Separator from shadcn/ui
-    status: implemented
-    priority: low
-    dependencies: [INFRA-006]
-
-  - id: UI-016
-    category: ui
-    name: Install shadcn Card component
-    description: Add Card from shadcn/ui
-    status: implemented
-    priority: medium
-    dependencies: [INFRA-006]
-
-  - id: UI-017
-    category: ui
-    name: Create loading spinner component
-    description: Loading indicator for async operations
-    status: implemented
-    priority: medium
-    dependencies: [UI-001]
-
-  - id: UI-018
-    category: ui
-    name: Create error boundary component
-    description: Graceful error handling in UI
-    status: implemented
-    priority: high
-    dependencies: [UI-001]
-
-  - id: UI-019
-    category: ui
-    name: Create keyboard shortcuts handler
-    description: Global keyboard shortcut handling
-    status: implemented
-    priority: medium
-    dependencies: [UI-001]
-
-  - id: UI-020
-    category: ui
-    name: Implement dark mode support
-    description: Toggle between light and dark themes
-    status: implemented
-    priority: low
-    dependencies: [UI-001, INFRA-005]
-
-  - id: UI-021
-    category: ui
-    name: Create FilterPanel component
-    description: Container for all filter controls
-    status: implemented
-    priority: critical
-    dependencies: [UI-003]
-
-  - id: UI-022
-    category: ui
-    name: Create search input with autocomplete
-    description: Text search for components and nets
-    status: implemented
-    priority: critical
-    dependencies: [UI-021, UI-005, UI-014]
-
-  - id: UI-023
-    category: ui
-    name: Create net filter list
-    description: Checkbox list of nets for filtering
-    status: implemented
-    priority: critical
-    dependencies: [UI-021, UI-006, UI-010]
-
-  - id: UI-024
-    category: ui
-    name: Create component filter list
-    description: Checkbox list of components for filtering
-    status: implemented
-    priority: critical
-    dependencies: [UI-021, UI-006, UI-010]
-
-  - id: UI-025
-    category: ui
-    name: Create component type filter
-    description: Filter by component type (resistor, cap, etc.)
-    status: implemented
-    priority: high
-    dependencies: [UI-021, UI-007]
-
-  - id: UI-026
-    category: ui
-    name: Create depth slider control
-    description: Slider for neighborhood depth selection
-    status: implemented
-    priority: critical
-    dependencies: [UI-021, UI-008]
-
-  - id: UI-027
-    category: ui
-    name: Create clear filters button
-    description: Reset all filters to default
-    status: implemented
-    priority: high
-    dependencies: [UI-021, UI-004]
-
-  - id: UI-028
-    category: ui
-    name: Create view mode selector
-    description: Toggle between view modes
-    status: implemented
-    priority: high
-    dependencies: [UI-021, UI-009]
-
-  - id: UI-029
-    category: ui
-    name: Implement filter state persistence
-    description: Persist filter state in URL or localStorage
-    status: implemented
-    priority: medium
-    dependencies: [UI-021]
-
-  - id: UI-030
-    category: ui
-    name: Implement filter debouncing
-    description: Debounce filter updates for performance
-    status: implemented
-    priority: medium
-    dependencies: [UI-021]
-
-  - id: UI-031
-    category: ui
-    name: Create filter summary badge
-    description: Show count of active filters
-    status: implemented
-    priority: low
-    dependencies: [UI-021, UI-011]
-
-  - id: UI-032
-    category: ui
-    name: Implement net highlight on hover
-    description: Highlight net in filter list on canvas hover
-    status: implemented
-    priority: medium
-    dependencies: [UI-023]
-
-  - id: UI-033
-    category: ui
-    name: Implement component highlight on hover
-    description: Highlight component in filter list on canvas hover
-    status: implemented
-    priority: medium
-    dependencies: [UI-024]
-
-  - id: UI-034
-    category: ui
-    name: Create collapsible filter sections
-    description: Expand/collapse filter categories
-    status: implemented
-    priority: low
-    dependencies: [UI-021]
-
-  - id: UI-035
-    category: ui
-    name: Create filter presets
-    description: Save and load filter configurations
-    status: implemented
-    priority: low
-    dependencies: [UI-021]
-
-  - id: UI-036
-    category: ui
-    name: Create SchematicCanvas component
-    description: Main canvas for schematic rendering
-    status: implemented
-    priority: critical
-    dependencies: [UI-003]
-
-  - id: UI-037
-    category: ui
-    name: Implement canvas pan controls
-    description: Click-drag to pan the canvas
-    status: implemented
-    priority: critical
-    dependencies: [UI-036]
-
-  - id: UI-038
-    category: ui
-    name: Implement canvas zoom controls
-    description: Scroll wheel and buttons for zoom
-    status: implemented
-    priority: critical
-    dependencies: [UI-036]
-
-  - id: UI-039
-    category: ui
-    name: Implement zoom to fit
-    description: Fit entire schematic in viewport
-    status: implemented
-    priority: high
-    dependencies: [UI-038, LAYOUT-016]
-
-  - id: UI-040
-    category: ui
-    name: Implement zoom to selection
-    description: Zoom to selected component/net
-    status: implemented
-    priority: medium
-    dependencies: [UI-038]
-
-  - id: UI-041
-    category: ui
-    name: Create SVG renderer for symbols
-    description: Render schematic symbols as SVG
-    status: implemented
-    priority: critical
-    dependencies: [UI-036, SYMBOL-030]
-
-  - id: UI-042
-    category: ui
-    name: Create wire renderer
-    description: Render connections as SVG paths
-    status: implemented
-    priority: critical
-    dependencies: [UI-036, LAYOUT-010]
-
-  - id: UI-043
-    category: ui
-    name: Create junction dot renderer
-    description: Render wire junctions
-    status: implemented
-    priority: high
-    dependencies: [UI-042, SYMBOL-023]
-
-  - id: UI-044
-    category: ui
-    name: Create net label renderer
-    description: Render net name labels on wires
-    status: implemented
-    priority: high
-    dependencies: [UI-042, LAYOUT-014]
-
-  - id: UI-045
-    category: ui
-    name: Implement component click selection
-    description: Click to select components
-    status: implemented
-    priority: critical
-    dependencies: [UI-041]
-
-  - id: UI-046
-    category: ui
-    name: Implement net click selection
-    description: Click wires to select nets
-    status: implemented
-    priority: high
-    dependencies: [UI-042]
-
-  - id: UI-047
-    category: ui
-    name: Implement multi-select
-    description: Shift+click for multi-selection
-    status: implemented
-    priority: medium
-    dependencies: [UI-045]
-
-  - id: UI-048
-    category: ui
-    name: Implement hover highlighting
-    description: Highlight elements on mouse hover
-    status: implemented
-    priority: high
-    dependencies: [UI-041, SYMBOL-027]
-
-  - id: UI-049
-    category: ui
-    name: Implement selection highlighting
-    description: Visual feedback for selected elements
-    status: implemented
-    priority: critical
-    dependencies: [UI-045, SYMBOL-028]
-
-  - id: UI-050
-    category: ui
-    name: Implement canvas minimap
-    description: Overview minimap for large schematics
-    status: implemented
-    priority: low
-    dependencies: [UI-036]
-
-  - id: UI-051
-    category: ui
-    name: Create zoom level indicator
-    description: Display current zoom percentage
-    status: implemented
-    priority: low
-    dependencies: [UI-038]
-
-  - id: UI-052
-    category: ui
-    name: Create canvas toolbar
-    description: Zoom controls, fit, reset buttons
-    status: implemented
-    priority: high
-    dependencies: [UI-036, UI-004]
-
-  - id: UI-053
-    category: ui
-    name: Implement canvas context menu
-    description: Right-click context menu on elements
-    status: implemented
-    priority: low
-    dependencies: [UI-036]
-
-  - id: UI-054
-    category: ui
-    name: Implement canvas keyboard navigation
-    description: Arrow keys to pan, +/- to zoom
-    status: implemented
-    priority: medium
-    dependencies: [UI-036, UI-019]
-
-  - id: UI-055
-    category: ui
-    name: Implement canvas touch support
-    description: Touch gestures for pan and pinch zoom
-    status: implemented
-    priority: low
-    dependencies: [UI-037, UI-038]
-
-  - id: UI-056
-    category: ui
-    name: Create PropertiesPanel component
-    description: Panel showing selected element details
-    status: implemented
-    priority: high
-    dependencies: [UI-003]
-
-  - id: UI-057
-    category: ui
-    name: Display component properties
-    description: Show ref, type, params for selected component
-    status: implemented
-    priority: high
-    dependencies: [UI-056]
-
-  - id: UI-058
-    category: ui
-    name: Display component connections
-    description: List connections for selected component
-    status: implemented
-    priority: high
-    dependencies: [UI-056]
-
-  - id: UI-059
-    category: ui
-    name: Display net properties
-    description: Show net name, connection count
-    status: implemented
-    priority: high
-    dependencies: [UI-056]
-
-  - id: UI-060
-    category: ui
-    name: Display net members
-    description: List components connected to selected net
-    status: implemented
-    priority: high
-    dependencies: [UI-056]
-
-  - id: UI-061
-    category: ui
-    name: Display sub-circuit summary
-    description: Show sub-circuit name, exposed pins
-    status: implemented
-    priority: high
-    dependencies: [UI-056]
-
-  - id: UI-062
-    category: ui
-    name: Create expand sub-circuit button
-    description: Button to expand/navigate into sub-circuit
-    status: implemented
-    priority: high
-    dependencies: [UI-061, UI-004]
-
-  - id: UI-063
-    category: ui
-    name: Create IssuesPanel component
-    description: Panel listing validation issues
-    status: implemented
-    priority: critical
-    dependencies: [UI-003, VALID-020]
-
-  - id: UI-064
-    category: ui
-    name: Display issue count badge
-    description: Show error/warning counts in panel header
-    status: implemented
-    priority: high
-    dependencies: [UI-063, UI-011]
-
-  - id: UI-065
-    category: ui
-    name: Display issues grouped by file
-    description: Group issues by source file
-    status: implemented
-    priority: high
-    dependencies: [UI-063]
-
-  - id: UI-066
-    category: ui
-    name: Display issue severity icons
-    description: Error, warning, info icons for issues
-    status: implemented
-    priority: high
-    dependencies: [UI-063]
-
-  - id: UI-067
-    category: ui
-    name: Implement click-to-navigate for issues
-    description: Click issue to highlight affected element
-    status: implemented
-    priority: high
-    dependencies: [UI-063]
-
-  - id: UI-068
-    category: ui
-    name: Implement issue filtering by severity
-    description: Filter to show only errors, warnings, etc.
-    status: implemented
-    priority: medium
-    dependencies: [UI-063]
-
-  - id: UI-069
-    category: ui
-    name: Create collapsible issue details
-    description: Expand issue for full description
-    status: implemented
-    priority: low
-    dependencies: [UI-063]
-
-  - id: UI-070
-    category: ui
-    name: Display source location for issues
-    description: "Show file:line for each issue"
-    status: implemented
-    priority: high
-    dependencies: [UI-063]
-
-  - id: UI-071
-    category: ui
-    name: Create file loader service
-    description: Service to load circuit.md files
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-030]
-
-  - id: UI-072
-    category: ui
-    name: Implement dev server file loading
-    description: Load files from public/ in dev mode
-    status: implemented
-    priority: critical
-    dependencies: [UI-071]
-
-  - id: UI-073
-    category: ui
-    name: Create file drop zone
-    description: Drag-and-drop zone for file upload
-    status: implemented
-    priority: high
-    dependencies: [UI-001]
-
-  - id: UI-074
-    category: ui
-    name: Implement multi-file drop support
-    description: Handle multiple files dropped together
-    status: implemented
-    priority: high
-    dependencies: [UI-073]
-
-  - id: UI-075
-    category: ui
-    name: Create file browser dialog
-    description: Dialog to browse and select files
-    status: implemented
-    priority: medium
-    dependencies: [UI-013]
-
-  - id: UI-076
-    category: ui
-    name: Display loaded files list
-    description: Show list of loaded circuit files
-    status: implemented
-    priority: high
-    dependencies: [UI-001]
-
-  - id: UI-077
-    category: ui
-    name: Implement file reload
-    description: Button to reload files from source
-    status: implemented
-    priority: medium
-    dependencies: [UI-071]
-
-  - id: UI-078
-    category: ui
-    name: Display loading progress
-    description: Progress indicator for file loading
-    status: implemented
-    priority: medium
-    dependencies: [UI-017]
-
-  - id: UI-079
-    category: ui
-    name: Handle file load errors
-    description: Display errors when files fail to load
-    status: implemented
-    priority: high
-    dependencies: [UI-071, UI-018]
-
-  - id: UI-080
-    category: ui
-    name: Create empty state
-    description: Display when no files loaded
-    status: implemented
-    priority: medium
-    dependencies: [UI-001]
-
-
-  # ---------------------------------------------------------------------------
-# State Management (STATE-001 to STATE-015)
-# ---------------------------------------------------------------------------
-
-  - id: STATE-001
-    category: state
-    name: Define application state shape
-    description: TypeScript types for all application state
-    status: implemented
-    priority: critical
-    dependencies: [INFRA-004]
-
-  - id: STATE-002
-    category: state
-    name: Create project state slice
-    description: State for loaded files and parsed circuits
-    status: implemented
-    priority: critical
-    dependencies: [STATE-001]
-
-  - id: STATE-003
-    category: state
-    name: Create view state slice
-    description: State for filters, zoom, pan, selections
-    status: implemented
-    priority: critical
-    dependencies: [STATE-001]
-
-  - id: STATE-004
-    category: state
-    name: Create UI state slice
-    description: State for panel visibility, dialogs
-    status: implemented
-    priority: high
-    dependencies: [STATE-001]
-
-  - id: STATE-005
-    category: state
-    name: Create preferences state slice
-    description: State for user preferences (symbol style, theme)
-    status: implemented
-    priority: high
-    dependencies: [STATE-001]
-
-  - id: STATE-006
-    category: state
-    name: Implement React context for state
-    description: Create context provider for app state
-    status: implemented
-    priority: critical
-    dependencies:
-      [
-        STATE-002,
-        STATE-003,
-        STATE-004,
-        STATE-005,
-      ]
-
-  - id: STATE-007
-    category: state
-    name: Implement state actions
-    description: Action creators for state mutations
-    status: implemented
-    priority: critical
-    dependencies: [STATE-006]
-
-  - id: STATE-008
-    category: state
-    name: Implement state selectors
-    description: Memoized selectors for derived state
-    status: implemented
-    priority: high
-    dependencies: [STATE-006]
-
-  - id: STATE-009
-    category: state
-    name: Implement filter state updates
-    description: Actions for filter changes
-    status: implemented
-    priority: critical
-    dependencies: [STATE-007]
-
-  - id: STATE-010
-    category: state
-    name: Implement selection state updates
-    description: Actions for selection changes
-    status: implemented
-    priority: critical
-    dependencies: [STATE-007]
-
-  - id: STATE-011
-    category: state
-    name: Implement view state updates
-    description: Actions for pan, zoom changes
-    status: implemented
-    priority: high
-    dependencies: [STATE-007]
-
-  - id: STATE-012
-    category: state
-    name: Implement preferences persistence
-    description: Save/load preferences to localStorage
-    status: implemented
-    priority: high
-    dependencies: [STATE-005]
-
-  - id: STATE-013
-    category: state
-    name: Implement URL state sync
-    description: Sync filter state to URL params
-    status: implemented
-    priority: medium
-    dependencies: [STATE-003]
-
-  - id: STATE-014
-    category: state
-    name: Implement undo/redo for filters
-    description: History for filter state changes
-    status: implemented
-    priority: low
-    dependencies: [STATE-009]
-
-  - id: STATE-015
-    category: state
-    name: Export state management API
-    description: Clean hooks API for state access
-    status: implemented
-    priority: high
-    dependencies: [STATE-008]
-
-
-  # ---------------------------------------------------------------------------
-# Testing (TEST-001 to TEST-020)
-# ---------------------------------------------------------------------------
-
-  - id: TEST-001
-    category: testing
-    name: Write parser lexer unit tests
-    description: Test tokenization of all syntax elements
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-009]
-
-  - id: TEST-002
-    category: testing
-    name: Write parser AST builder unit tests
-    description: Test AST construction from tokens
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-018]
-
-  - id: TEST-003
-    category: testing
-    name: Write parser resolver unit tests
-    description: Test sub-circuit resolution
-    status: implemented
-    priority: critical
-    dependencies: [PARSE-027]
-
-  - id: TEST-004
-    category: testing
-    name: Write graph builder unit tests
-    description: Test graph construction from AST
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-004]
-
-  - id: TEST-005
-    category: testing
-    name: Write graph query unit tests
-    description: Test filter and traversal operations
-    status: implemented
-    priority: critical
-    dependencies: [GRAPH-016]
-
-  - id: TEST-006
-    category: testing
-    name: Write layout algorithm unit tests
-    description: Test force-directed layout
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-006]
-
-  - id: TEST-007
-    category: testing
-    name: Write routing algorithm unit tests
-    description: Test wire routing
-    status: implemented
-    priority: high
-    dependencies: [LAYOUT-013]
-
-  - id: TEST-008
-    category: testing
-    name: Write symbol registry unit tests
-    description: Test symbol lookup and rendering
-    status: implemented
-    priority: high
-    dependencies: [SYMBOL-030]
-
-  - id: TEST-009
-    category: testing
-    name: Write validation unit tests
-    description: Test all validation rules
-    status: implemented
-    priority: critical
-    dependencies: [VALID-013]
-
-  - id: TEST-010
-    category: testing
-    name: Write state management unit tests
-    description: Test state actions and selectors
-    status: implemented
-    priority: high
-    dependencies: [STATE-015]
-
-  - id: TEST-011
-    category: testing
-    name: Create test fixtures for circuits
-    description: Sample circuit.md files for testing
-    status: implemented
-    priority: high
-    dependencies: [INFRA-009]
-
-  - id: TEST-012
-    category: testing
-    name: Write E2E test for file loading
-    description: Test loading circuit files end-to-end
-    status: in_progress
-    priority: critical
-    dependencies: [INFRA-010, UI-072]
-
-  - id: TEST-013
-    category: testing
-    name: Write E2E test for net filtering
-    description: Test filtering schematic by net
-    status: in_progress
-    priority: critical
-    dependencies: [INFRA-010, UI-023]
-
-  - id: TEST-014
-    category: testing
-    name: Write E2E test for component filtering
-    description: Test filtering schematic by component
-    status: in_progress
-    priority: critical
-    dependencies: [INFRA-010, UI-024]
-
-  - id: TEST-015
-    category: testing
-    name: Write E2E test for neighborhood view
-    description: Test depth-limited component view
-    status: in_progress
-    priority: critical
-    dependencies: [INFRA-010, UI-026]
-
-  - id: TEST-016
-    category: testing
-    name: Write E2E test for canvas interaction
-    description: Test pan, zoom, selection
-    status: in_progress
-    priority: high
-    dependencies: [INFRA-010, UI-045]
-
-  - id: TEST-017
-    category: testing
-    name: Write E2E test for issues panel
-    description: Test validation issue display
-    status: in_progress
-    priority: high
-    dependencies: [INFRA-010, UI-063]
-
-  - id: TEST-018
-    category: testing
-    name: Set up test coverage reporting
-    description: Configure coverage thresholds
-    status: implemented
-    priority: high
-    dependencies: [INFRA-009]
-
-  - id: TEST-019
-    category: testing
-    name: Write snapshot tests for symbols
-    description: Visual regression tests for symbols
-    status: planned
-    priority: medium
-    dependencies: [SYMBOL-030]
-
-  - id: TEST-020
-    category: testing
-    name: Write accessibility tests
-    description: Test keyboard navigation and ARIA
-    status: planned
-    priority: medium
-    dependencies: [INFRA-010]
-
-
-  # ---------------------------------------------------------------------------
-# Documentation & Polish (DOC-001 to DOC-010)
-# ---------------------------------------------------------------------------
-
-  - id: DOC-001
-    category: docs
-    name: Create README for viewer
-    description: Usage instructions and development guide
-    status: planned
-    priority: high
-    dependencies: [INFRA-015]
-
-  - id: DOC-002
-    category: docs
-    name: Document parser API
-    description: JSDoc comments for parser module
-    status: planned
-    priority: medium
-    dependencies: [PARSE-030]
-
-  - id: DOC-003
-    category: docs
-    name: Document graph API
-    description: JSDoc comments for graph module
-    status: planned
-    priority: medium
-    dependencies: [GRAPH-020]
-
-  - id: DOC-004
-    category: docs
-    name: Document adding new symbols
-    description: Guide for extending symbol library
-    status: planned
-    priority: medium
-    dependencies: [SYMBOL-030]
-
-  - id: DOC-005
-    category: docs
-    name: Create keyboard shortcuts reference
-    description: Document all keyboard shortcuts
-    status: planned
-    priority: low
-    dependencies: [UI-054]
-
-  - id: DOC-006
-    category: docs
-    name: Add inline help tooltips
-    description: Tooltips explaining UI controls
-    status: planned
-    priority: low
-    dependencies: [UI-012]
-
-  - id: DOC-007
-    category: docs
-    name: Create demo walkthrough
-    description: Guided tour of viewer features
-    status: planned
-    priority: low
-    dependencies: [UI-001]
-
-  - id: DOC-008
-    category: docs
-    name: Performance optimization pass
-    description: Profile and optimize rendering
-    status: planned
-    priority: medium
-    dependencies: [UI-041]
-
-  - id: DOC-009
-    category: docs
-    name: Accessibility audit
-    description: Review and improve accessibility
-    status: planned
-    priority: medium
-    dependencies: [TEST-020]
-
-  - id: DOC-010
-    category: docs
-    name: Final QA and polish
-    description: Bug fixes and visual polish
-    status: planned
-    priority: high
-    dependencies: [TEST-017]
+- id: INFRA-001
+  category: infrastructure
+  name: Initialize pnpm project
+  description: Create package.json with pnpm, set up basic project structure
+  status: completed
+  priority: critical
+  dependencies: []
+- id: INFRA-002
+  category: infrastructure
+  name: Configure mise for Node.js version
+  description: Create .mise.toml with Node.js LTS version pinned
+  status: completed
+  priority: critical
+  dependencies: []
+- id: INFRA-003
+  category: infrastructure
+  name: Set up Vite with React
+  description: Initialize Vite project with React and TypeScript template
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-001
+  - INFRA-002
+- id: INFRA-004
+  category: infrastructure
+  name: Configure TypeScript
+  description: Set up tsconfig.json with strict mode and path aliases
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-003
+- id: INFRA-005
+  category: infrastructure
+  name: Install and configure Tailwind CSS
+  description: Set up Tailwind with PostCSS, create base styles
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-003
+- id: INFRA-006
+  category: infrastructure
+  name: Initialize shadcn/ui
+  description: Run shadcn init, configure components.json
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-005
+- id: INFRA-007
+  category: infrastructure
+  name: Configure ESLint
+  description: Set up ESLint with TypeScript, React, and accessibility rules
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-004
+- id: INFRA-008
+  category: infrastructure
+  name: Configure Prettier
+  description: Set up Prettier with consistent formatting rules
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-001
+- id: INFRA-009
+  category: infrastructure
+  name: Set up Vitest
+  description: Configure Vitest for unit testing with coverage reporting
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-003
+- id: INFRA-010
+  category: infrastructure
+  name: Set up Playwright
+  description: Configure Playwright for E2E testing with browser configs
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-003
+- id: INFRA-011
+  category: infrastructure
+  name: Create GitHub Actions CI workflow
+  description: Set up lint, test, build pipeline on push/PR
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-007
+  - INFRA-008
+  - INFRA-009
+  - INFRA-010
+- id: INFRA-012
+  category: infrastructure
+  name: Create project directory structure
+  description: Set up src/, tests/, public/ with module folders
+  status: completed
+  priority: high
+  dependencies:
+  - INFRA-003
+- id: INFRA-013
+  category: infrastructure
+  name: Configure path aliases
+  description: Set up @/ imports for clean module references
+  status: completed
+  priority: medium
+  dependencies:
+  - INFRA-004
+- id: INFRA-014
+  category: infrastructure
+  name: Add sample circuit.md files
+  description: Copy ESP32 IR Remote circuits to public/ for demo
+  status: completed
+  priority: medium
+  dependencies:
+  - INFRA-012
+- id: INFRA-015
+  category: infrastructure
+  name: Create development scripts
+  description: Add npm scripts for dev, build, test, lint, format
+  status: completed
+  priority: high
+  dependencies:
+  - INFRA-003
+  - INFRA-007
+  - INFRA-008
+  - INFRA-009
+- id: PARSE-001
+  category: parser
+  name: Define token types
+  description: Create TypeScript types for all circuit.md tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-004
+- id: PARSE-002
+  category: parser
+  name: Implement YAML frontmatter extraction
+  description: Parse optional YAML frontmatter for metadata
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-001
+- id: PARSE-003
+  category: parser
+  name: Implement net declaration tokenizer
+  description: 'Tokenize [NET_NAME]: net syntax'
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-004
+  category: parser
+  name: Implement component declaration tokenizer
+  description: 'Tokenize [REF]: type(params) syntax'
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-005
+  category: parser
+  name: Implement sub-circuit reference tokenizer
+  description: 'Tokenize [REF]: @./path.circuit.md syntax'
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-006
+  category: parser
+  name: Implement connection tokenizer
+  description: Tokenize [A --- B] connection syntax
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-007
+  category: parser
+  name: Implement inline passive tokenizer
+  description: Tokenize [A --- value --- B] inline passives
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-008
+  category: parser
+  name: Implement property tokenizer
+  description: Tokenize [key ==> value] property syntax
+  status: completed
+  priority: medium
+  dependencies:
+  - PARSE-001
+- id: PARSE-009
+  category: parser
+  name: Implement value parsing utilities
+  description: Parse component values (10k, 4.7µF, 100nF, 4k7, 2R2)
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-001
+- id: PARSE-010
+  category: parser
+  name: Implement pin reference parser
+  description: Parse pin syntax (U1.VCC, U1#1, net names)
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-011
+  category: parser
+  name: Define AST node types
+  description: Create TypeScript interfaces for AST nodes
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-001
+- id: PARSE-012
+  category: parser
+  name: Implement AST builder for nets
+  description: Build Net AST nodes from tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-003
+  - PARSE-011
+- id: PARSE-013
+  category: parser
+  name: Implement AST builder for components
+  description: Build Component AST nodes from tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-004
+  - PARSE-011
+- id: PARSE-014
+  category: parser
+  name: Implement AST builder for sub-circuits
+  description: Build SubCircuit AST nodes from tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-005
+  - PARSE-011
+- id: PARSE-015
+  category: parser
+  name: Implement AST builder for connections
+  description: Build Connection AST nodes from tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-006
+  - PARSE-011
+- id: PARSE-016
+  category: parser
+  name: Implement AST builder for inline passives
+  description: Build InlinePassive AST nodes, generate anonymous refs
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-007
+  - PARSE-011
+- id: PARSE-017
+  category: parser
+  name: Implement AST builder for properties
+  description: Build Property AST nodes from tokens
+  status: completed
+  priority: medium
+  dependencies:
+  - PARSE-008
+  - PARSE-011
+- id: PARSE-018
+  category: parser
+  name: Implement Circuit AST root builder
+  description: Combine all AST nodes into Circuit root structure
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-012
+  - PARSE-013
+  - PARSE-014
+  - PARSE-015
+  - PARSE-016
+  - PARSE-017
+- id: PARSE-019
+  category: parser
+  name: Track source locations in AST
+  description: Store file, line, column for all AST nodes
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-011
+- id: PARSE-020
+  category: parser
+  name: Implement parse error collection
+  description: Collect parse errors with location info, continue parsing
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-011
+- id: PARSE-021
+  category: parser
+  name: Implement file loader interface
+  description: Abstract file loading for browser/node compatibility
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-018
+- id: PARSE-022
+  category: parser
+  name: Implement sub-circuit path resolution
+  description: Resolve relative paths in @./ references
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-021
+- id: PARSE-023
+  category: parser
+  name: Implement recursive sub-circuit loading
+  description: Load and parse sub-circuits recursively
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-022
+- id: PARSE-024
+  category: parser
+  name: Detect circular sub-circuit references
+  description: Detect and report circular dependencies
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-023
+- id: PARSE-025
+  category: parser
+  name: Merge sub-circuit ASTs
+  description: Integrate sub-circuit ASTs into parent with namespacing
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-023
+- id: PARSE-026
+  category: parser
+  name: Resolve sub-circuit pin references
+  description: Map SUB.PIN syntax to internal sub-circuit nets
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-025
+- id: PARSE-027
+  category: parser
+  name: Build resolved circuit tree
+  description: Create fully resolved circuit with all sub-circuits expanded
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-026
+- id: PARSE-028
+  category: parser
+  name: Implement lazy sub-circuit resolution
+  description: Option to resolve sub-circuits on demand
+  status: completed
+  priority: medium
+  dependencies:
+  - PARSE-027
+- id: PARSE-029
+  category: parser
+  name: Cache parsed circuits
+  description: Cache parsed files to avoid re-parsing unchanged files
+  status: completed
+  priority: medium
+  dependencies:
+  - PARSE-027
+- id: PARSE-030
+  category: parser
+  name: Export parser public API
+  description: Create clean public interface for parser module
+  status: completed
+  priority: high
+  dependencies:
+  - PARSE-027
+- id: GRAPH-001
+  category: graph
+  name: Define graph node types
+  description: TypeScript types for ComponentNode, NetNode, PinNode
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-030
+- id: GRAPH-002
+  category: graph
+  name: Define graph edge types
+  description: TypeScript types for Connection edges
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-001
+- id: GRAPH-003
+  category: graph
+  name: Implement CircuitGraph class
+  description: Core graph data structure with nodes and edges
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-001
+  - GRAPH-002
+- id: GRAPH-004
+  category: graph
+  name: Implement graph builder from AST
+  description: Convert resolved AST to CircuitGraph
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-003
+  - PARSE-027
+- id: GRAPH-005
+  category: graph
+  name: Implement node lookup by reference
+  description: Fast lookup of nodes by reference designator
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-006
+  category: graph
+  name: Implement net lookup by name
+  description: Fast lookup of nets by name
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-007
+  category: graph
+  name: Implement adjacency queries
+  description: Get all nodes connected to a given node
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-008
+  category: graph
+  name: Implement component type queries
+  description: Get all components of a given type
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-009
+  category: graph
+  name: Implement net membership queries
+  description: Get all components connected to a given net
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-010
+  category: graph
+  name: Implement BFS traversal
+  description: Breadth-first traversal from a starting node
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-011
+  category: graph
+  name: Implement depth-limited BFS
+  description: BFS with configurable depth limit for neighborhood view
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-010
+- id: GRAPH-012
+  category: graph
+  name: Implement subgraph extraction
+  description: Extract subgraph containing only specified nodes
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-013
+  category: graph
+  name: Implement net-filtered subgraph
+  description: Extract subgraph for components on selected nets
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-012
+  - GRAPH-009
+- id: GRAPH-014
+  category: graph
+  name: Implement component-filtered subgraph
+  description: Extract subgraph for selected component and connections
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-012
+  - GRAPH-007
+- id: GRAPH-015
+  category: graph
+  name: Implement neighborhood subgraph
+  description: Extract N-depth neighborhood around a component
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-012
+  - GRAPH-011
+- id: GRAPH-016
+  category: graph
+  name: Implement combined filter queries
+  description: Support multiple filter criteria (AND/OR)
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-013
+  - GRAPH-014
+  - GRAPH-015
+- id: GRAPH-017
+  category: graph
+  name: Implement hierarchical graph support
+  description: Support collapsed/expanded sub-circuit nodes
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-018
+  category: graph
+  name: Implement graph statistics
+  description: Count nodes, edges, nets, components by type
+  status: completed
+  priority: medium
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-019
+  category: graph
+  name: Implement graph serialization
+  description: Serialize graph to JSON for debugging/persistence
+  status: completed
+  priority: low
+  dependencies:
+  - GRAPH-003
+- id: GRAPH-020
+  category: graph
+  name: Export graph public API
+  description: Create clean public interface for graph module
+  status: completed
+  priority: high
+  dependencies:
+  - GRAPH-016
+  - GRAPH-017
+- id: LAYOUT-001
+  category: layout
+  name: Define layout types
+  description: TypeScript types for positioned nodes and routed edges
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-020
+- id: LAYOUT-002
+  category: layout
+  name: Implement force-directed layout base
+  description: Basic force-directed graph layout algorithm
+  status: completed
+  priority: critical
+  dependencies:
+  - LAYOUT-001
+- id: LAYOUT-003
+  category: layout
+  name: Implement repulsion forces
+  description: Node-to-node repulsion to prevent overlap
+  status: completed
+  priority: critical
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-004
+  category: layout
+  name: Implement attraction forces
+  description: Edge-based attraction for connected nodes
+  status: completed
+  priority: critical
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-005
+  category: layout
+  name: Implement centering force
+  description: Force to keep graph centered in viewport
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-006
+  category: layout
+  name: Implement layout iteration
+  description: Iterative simulation with cooling for convergence
+  status: completed
+  priority: critical
+  dependencies:
+  - LAYOUT-003
+  - LAYOUT-004
+  - LAYOUT-005
+- id: LAYOUT-007
+  category: layout
+  name: Implement component size awareness
+  description: Account for component symbol sizes in layout
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-008
+  category: layout
+  name: Implement net grouping heuristics
+  description: Group components on same net closer together
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-009
+  category: layout
+  name: Implement hierarchical layout hints
+  description: Position power nets at top, ground at bottom
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-002
+- id: LAYOUT-010
+  category: layout
+  name: Implement connection routing base
+  description: Basic Manhattan (orthogonal) wire routing
+  status: completed
+  priority: critical
+  dependencies:
+  - LAYOUT-006
+- id: LAYOUT-011
+  category: layout
+  name: Implement routing obstacle avoidance
+  description: Route wires around component symbols
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-010
+- id: LAYOUT-012
+  category: layout
+  name: Implement wire crossing minimization
+  description: Heuristics to reduce wire crossings
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-010
+- id: LAYOUT-013
+  category: layout
+  name: Implement junction detection
+  description: Detect and mark wire junction points
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-010
+- id: LAYOUT-014
+  category: layout
+  name: Implement net label placement
+  description: Position net labels avoiding overlaps
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-010
+- id: LAYOUT-015
+  category: layout
+  name: Implement incremental layout updates
+  description: Update layout efficiently when filters change
+  status: completed
+  priority: medium
+  dependencies:
+  - LAYOUT-006
+- id: LAYOUT-016
+  category: layout
+  name: Implement layout bounds calculation
+  description: Calculate bounding box for viewport fitting
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-006
+- id: LAYOUT-017
+  category: layout
+  name: Implement sub-circuit block layout
+  description: Layout collapsed sub-circuits as rectangular blocks
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-006
+- id: LAYOUT-018
+  category: layout
+  name: Implement pin arrangement on blocks
+  description: Position pins on sub-circuit block edges
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-017
+- id: LAYOUT-019
+  category: layout
+  name: Implement layout caching
+  description: Cache layout results for unchanged subgraphs
+  status: completed
+  priority: low
+  dependencies:
+  - LAYOUT-006
+- id: LAYOUT-020
+  category: layout
+  name: Export layout public API
+  description: Create clean public interface for layout module
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-016
+  - LAYOUT-018
+- id: SYMBOL-001
+  category: symbols
+  name: Define symbol interface
+  description: TypeScript interface for schematic symbols
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-004
+- id: SYMBOL-002
+  category: symbols
+  name: Implement symbol registry
+  description: Registry mapping component types to symbols
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-003
+  category: symbols
+  name: Implement resistor symbol (IEEE)
+  description: Zigzag resistor symbol with pin positions
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-004
+  category: symbols
+  name: Implement resistor symbol (IEC)
+  description: Rectangle resistor symbol with pin positions
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-005
+  category: symbols
+  name: Implement capacitor symbol
+  description: Non-polarized capacitor symbol
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-006
+  category: symbols
+  name: Implement polarized capacitor symbol
+  description: Electrolytic capacitor symbol with + marker
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-007
+  category: symbols
+  name: Implement inductor symbol
+  description: Coil/hump inductor symbol
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-008
+  category: symbols
+  name: Implement diode symbol
+  description: Standard diode symbol
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-009
+  category: symbols
+  name: Implement LED symbol
+  description: Diode with emission arrows
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-008
+- id: SYMBOL-010
+  category: symbols
+  name: Implement Zener diode symbol
+  description: Zener diode with bent bar
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-008
+- id: SYMBOL-011
+  category: symbols
+  name: Implement TVS diode symbol
+  description: TVS/suppressor diode symbol
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-008
+- id: SYMBOL-012
+  category: symbols
+  name: Implement NPN transistor symbol
+  description: NPN BJT with emitter arrow
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-013
+  category: symbols
+  name: Implement PNP transistor symbol
+  description: PNP BJT with emitter arrow
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-012
+- id: SYMBOL-014
+  category: symbols
+  name: Implement N-MOSFET symbol
+  description: N-channel MOSFET symbol
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-015
+  category: symbols
+  name: Implement P-MOSFET symbol
+  description: P-channel MOSFET symbol
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-014
+- id: SYMBOL-016
+  category: symbols
+  name: Implement generic IC symbol
+  description: Rectangular IC with configurable pins
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-017
+  category: symbols
+  name: Implement connector symbol
+  description: Multi-pin connector symbol
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-018
+  category: symbols
+  name: Implement switch symbol
+  description: SPST switch symbol
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-019
+  category: symbols
+  name: Implement fuse symbol
+  description: Fuse/PTC symbol
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-020
+  category: symbols
+  name: Implement crystal symbol
+  description: Crystal oscillator symbol
+  status: completed
+  priority: low
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-021
+  category: symbols
+  name: Implement ground symbol
+  description: Ground reference symbol
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-022
+  category: symbols
+  name: Implement power symbol
+  description: VCC/power rail symbol
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-023
+  category: symbols
+  name: Implement net junction symbol
+  description: Wire junction dot
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-024
+  category: symbols
+  name: Implement sub-circuit block symbol
+  description: Expandable sub-circuit block with pins
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-016
+- id: SYMBOL-025
+  category: symbols
+  name: Implement symbol style toggle
+  description: Switch between IEEE and IEC symbols
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-002
+  - SYMBOL-003
+  - SYMBOL-004
+- id: SYMBOL-026
+  category: symbols
+  name: Implement symbol scaling
+  description: Scale symbols based on zoom level
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-027
+  category: symbols
+  name: Implement symbol hover states
+  description: Visual feedback on symbol hover
+  status: completed
+  priority: medium
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-028
+  category: symbols
+  name: Implement symbol selection states
+  description: Visual feedback for selected symbols
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-029
+  category: symbols
+  name: Implement reference designator labels
+  description: Render component reference labels
+  status: completed
+  priority: critical
+  dependencies:
+  - SYMBOL-001
+- id: SYMBOL-030
+  category: symbols
+  name: Export symbol public API
+  description: Create clean public interface for symbols module
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-025
+- id: VALID-001
+  category: validation
+  name: Define validation issue types
+  description: TypeScript types for errors, warnings, info
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-004
+- id: VALID-002
+  category: validation
+  name: Implement syntax error detection
+  description: Detect malformed bracket syntax
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-001
+  - PARSE-020
+- id: VALID-003
+  category: validation
+  name: Implement unclosed bracket detection
+  description: Detect unclosed bracket pairs
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-001
+- id: VALID-004
+  category: validation
+  name: Implement invalid connection format detection
+  description: Detect malformed connection syntax
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-001
+- id: VALID-005
+  category: validation
+  name: Implement undeclared net detection
+  description: Warn when nets used before declaration
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-001
+  - PARSE-018
+- id: VALID-006
+  category: validation
+  name: Implement undeclared component detection
+  description: Warn when components used before declaration
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-001
+  - PARSE-018
+- id: VALID-007
+  category: validation
+  name: Implement missing sub-circuit detection
+  description: Error when referenced sub-circuit file not found
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-001
+  - PARSE-022
+- id: VALID-008
+  category: validation
+  name: Implement duplicate reference detection
+  description: Warn on duplicate reference designators
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-001
+  - PARSE-018
+- id: VALID-009
+  category: validation
+  name: Implement floating pin detection
+  description: Warn when component pins are unconnected
+  status: completed
+  priority: medium
+  dependencies:
+  - VALID-001
+  - GRAPH-003
+- id: VALID-010
+  category: validation
+  name: Implement single-connection net detection
+  description: Warn when net has only one connection
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-001
+  - GRAPH-003
+- id: VALID-011
+  category: validation
+  name: Implement unused net detection
+  description: Warn when declared net has no connections
+  status: completed
+  priority: medium
+  dependencies:
+  - VALID-001
+  - GRAPH-003
+- id: VALID-012
+  category: validation
+  name: Implement circular reference detection
+  description: Error on circular sub-circuit references
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-001
+  - PARSE-024
+- id: VALID-013
+  category: validation
+  name: Implement validation result aggregation
+  description: Collect all validation issues with locations
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-002
+  - VALID-003
+  - VALID-004
+  - VALID-005
+  - VALID-006
+  - VALID-007
+  - VALID-008
+  - VALID-009
+  - VALID-010
+  - VALID-011
+  - VALID-012
+- id: VALID-014
+  category: validation
+  name: Implement validation severity levels
+  description: Categorize issues as error, warning, info
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-013
+- id: VALID-015
+  category: validation
+  name: Implement file-grouped validation results
+  description: Group validation issues by source file
+  status: completed
+  priority: medium
+  dependencies:
+  - VALID-013
+- id: VALID-016
+  category: validation
+  name: Implement validation caching
+  description: Cache validation results for unchanged files
+  status: completed
+  priority: low
+  dependencies:
+  - VALID-013
+- id: VALID-017
+  category: validation
+  name: Design ERC pin direction metadata
+  description: Design circuit.md extension for pin directions
+  status: completed
+  priority: low
+  dependencies:
+  - VALID-001
+  notes: Deferred feature - design only, no implementation
+- id: VALID-018
+  category: validation
+  name: Implement validation on load
+  description: Run validation automatically when circuit loads
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-013
+- id: VALID-019
+  category: validation
+  name: Implement validation refresh
+  description: Re-validate on file changes or manual trigger
+  status: completed
+  priority: medium
+  dependencies:
+  - VALID-018
+- id: VALID-020
+  category: validation
+  name: Export validation public API
+  description: Create clean public interface for validation module
+  status: completed
+  priority: high
+  dependencies:
+  - VALID-014
+  - VALID-015
+- id: UI-001
+  category: ui
+  name: Create App shell component
+  description: Main application layout with header, panels, canvas
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-006
+- id: UI-002
+  category: ui
+  name: Create header component
+  description: App header with project name and controls
+  status: completed
+  priority: high
+  dependencies:
+  - UI-001
+- id: UI-003
+  category: ui
+  name: Create resizable panel layout
+  description: Split panels for filters, canvas, properties
+  status: completed
+  priority: high
+  dependencies:
+  - UI-001
+- id: UI-004
+  category: ui
+  name: Install shadcn Button component
+  description: Add Button from shadcn/ui
+  status: completed
+  priority: high
+  dependencies:
+  - INFRA-006
+- id: UI-005
+  category: ui
+  name: Install shadcn Input component
+  description: Add Input from shadcn/ui
+  status: completed
+  priority: high
+  dependencies:
+  - INFRA-006
+- id: UI-006
+  category: ui
+  name: Install shadcn Checkbox component
+  description: Add Checkbox from shadcn/ui
+  status: completed
+  priority: high
+  dependencies:
+  - INFRA-006
+- id: UI-007
+  category: ui
+  name: Install shadcn Select component
+  description: Add Select/Combobox from shadcn/ui
+  status: implemented
+  priority: high
+  dependencies:
+  - INFRA-006
+- id: UI-008
+  category: ui
+  name: Install shadcn Slider component
+  description: Add Slider from shadcn/ui
+  status: implemented
+  priority: high
+  dependencies:
+  - INFRA-006
+- id: UI-009
+  category: ui
+  name: Install shadcn Tabs component
+  description: Add Tabs from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-010
+  category: ui
+  name: Install shadcn ScrollArea component
+  description: Add ScrollArea from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-011
+  category: ui
+  name: Install shadcn Badge component
+  description: Add Badge from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-012
+  category: ui
+  name: Install shadcn Tooltip component
+  description: Add Tooltip from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-013
+  category: ui
+  name: Install shadcn Dialog component
+  description: Add Dialog from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-014
+  category: ui
+  name: Install shadcn Command component
+  description: Add Command palette from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-015
+  category: ui
+  name: Install shadcn Separator component
+  description: Add Separator from shadcn/ui
+  status: implemented
+  priority: low
+  dependencies:
+  - INFRA-006
+- id: UI-016
+  category: ui
+  name: Install shadcn Card component
+  description: Add Card from shadcn/ui
+  status: implemented
+  priority: medium
+  dependencies:
+  - INFRA-006
+- id: UI-017
+  category: ui
+  name: Create loading spinner component
+  description: Loading indicator for async operations
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-001
+- id: UI-018
+  category: ui
+  name: Create error boundary component
+  description: Graceful error handling in UI
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-001
+- id: UI-019
+  category: ui
+  name: Create keyboard shortcuts handler
+  description: Global keyboard shortcut handling
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-001
+- id: UI-020
+  category: ui
+  name: Implement dark mode support
+  description: Toggle between light and dark themes
+  status: implemented
+  priority: low
+  dependencies:
+  - UI-001
+  - INFRA-005
+- id: UI-021
+  category: ui
+  name: Create FilterPanel component
+  description: Container for all filter controls
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-003
+- id: UI-022
+  category: ui
+  name: Create search input with autocomplete
+  description: Text search for components and nets
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-021
+  - UI-005
+  - UI-014
+- id: UI-023
+  category: ui
+  name: Create net filter list
+  description: Checkbox list of nets for filtering
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-021
+  - UI-006
+  - UI-010
+- id: UI-024
+  category: ui
+  name: Create component filter list
+  description: Checkbox list of components for filtering
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-021
+  - UI-006
+  - UI-010
+- id: UI-025
+  category: ui
+  name: Create component type filter
+  description: Filter by component type (resistor, cap, etc.)
+  status: completed
+  priority: high
+  dependencies:
+  - UI-021
+  - UI-007
+- id: UI-026
+  category: ui
+  name: Create depth slider control
+  description: Slider for neighborhood depth selection
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-021
+  - UI-008
+- id: UI-027
+  category: ui
+  name: Create clear filters button
+  description: Reset all filters to default
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-021
+  - UI-004
+- id: UI-028
+  category: ui
+  name: Create view mode selector
+  description: Toggle between view modes
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-021
+  - UI-009
+- id: UI-029
+  category: ui
+  name: Implement filter state persistence
+  description: Persist filter state in URL or localStorage
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-021
+- id: UI-030
+  category: ui
+  name: Implement filter debouncing
+  description: Debounce filter updates for performance
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-021
+- id: UI-031
+  category: ui
+  name: Create filter summary badge
+  description: Show count of active filters
+  status: completed
+  priority: low
+  dependencies:
+  - UI-021
+  - UI-011
+- id: UI-032
+  category: ui
+  name: Implement net highlight on hover
+  description: Highlight net in filter list on canvas hover
+  status: completed
+  priority: medium
+  dependencies:
+  - UI-023
+- id: UI-033
+  category: ui
+  name: Implement component highlight on hover
+  description: Highlight component in filter list on canvas hover
+  status: completed
+  priority: medium
+  dependencies:
+  - UI-024
+- id: UI-034
+  category: ui
+  name: Create collapsible filter sections
+  description: Expand/collapse filter categories
+  status: completed
+  priority: low
+  dependencies:
+  - UI-021
+- id: UI-035
+  category: ui
+  name: Create filter presets
+  description: Save and load filter configurations
+  status: completed
+  priority: low
+  dependencies:
+  - UI-021
+- id: UI-036
+  category: ui
+  name: Create SchematicCanvas component
+  description: Main canvas for schematic rendering
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-003
+- id: UI-037
+  category: ui
+  name: Implement canvas pan controls
+  description: Click-drag to pan the canvas
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-036
+- id: UI-038
+  category: ui
+  name: Implement canvas zoom controls
+  description: Scroll wheel and buttons for zoom
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-036
+- id: UI-039
+  category: ui
+  name: Implement zoom to fit
+  description: Fit entire schematic in viewport
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-038
+  - LAYOUT-016
+- id: UI-040
+  category: ui
+  name: Implement zoom to selection
+  description: Zoom to selected component/net
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-038
+- id: UI-041
+  category: ui
+  name: Create SVG renderer for symbols
+  description: Render schematic symbols as SVG
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-036
+  - SYMBOL-030
+- id: UI-042
+  category: ui
+  name: Create wire renderer
+  description: Render connections as SVG paths
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-036
+  - LAYOUT-010
+- id: UI-043
+  category: ui
+  name: Create junction dot renderer
+  description: Render wire junctions
+  status: completed
+  priority: high
+  dependencies:
+  - UI-042
+  - SYMBOL-023
+- id: UI-044
+  category: ui
+  name: Create net label renderer
+  description: Render net name labels on wires
+  status: completed
+  priority: high
+  dependencies:
+  - UI-042
+  - LAYOUT-014
+- id: UI-045
+  category: ui
+  name: Implement component click selection
+  description: Click to select components
+  status: completed
+  priority: critical
+  dependencies:
+  - UI-041
+- id: UI-046
+  category: ui
+  name: Implement net click selection
+  description: Click wires to select nets
+  status: completed
+  priority: high
+  dependencies:
+  - UI-042
+- id: UI-047
+  category: ui
+  name: Implement multi-select
+  description: Shift+click for multi-selection
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-045
+- id: UI-048
+  category: ui
+  name: Implement hover highlighting
+  description: Highlight elements on mouse hover
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-041
+  - SYMBOL-027
+- id: UI-049
+  category: ui
+  name: Implement selection highlighting
+  description: Visual feedback for selected elements
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-045
+  - SYMBOL-028
+- id: UI-050
+  category: ui
+  name: Implement canvas minimap
+  description: Overview minimap for large schematics
+  status: implemented
+  priority: low
+  dependencies:
+  - UI-036
+- id: UI-051
+  category: ui
+  name: Create zoom level indicator
+  description: Display current zoom percentage
+  status: completed
+  priority: low
+  dependencies:
+  - UI-038
+- id: UI-052
+  category: ui
+  name: Create canvas toolbar
+  description: Zoom controls, fit, reset buttons
+  status: completed
+  priority: high
+  dependencies:
+  - UI-036
+  - UI-004
+- id: UI-053
+  category: ui
+  name: Implement canvas context menu
+  description: Right-click context menu on elements
+  status: completed
+  priority: low
+  dependencies:
+  - UI-036
+- id: UI-054
+  category: ui
+  name: Implement canvas keyboard navigation
+  description: Arrow keys to pan, +/- to zoom
+  status: completed
+  priority: medium
+  dependencies:
+  - UI-036
+  - UI-019
+- id: UI-055
+  category: ui
+  name: Implement canvas touch support
+  description: Touch gestures for pan and pinch zoom
+  status: completed
+  priority: low
+  dependencies:
+  - UI-037
+  - UI-038
+- id: UI-056
+  category: ui
+  name: Create PropertiesPanel component
+  description: Panel showing selected element details
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-003
+- id: UI-057
+  category: ui
+  name: Display component properties
+  description: Show ref, type, params for selected component
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-056
+- id: UI-058
+  category: ui
+  name: Display component connections
+  description: List connections for selected component
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-056
+- id: UI-059
+  category: ui
+  name: Display net properties
+  description: Show net name, connection count
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-056
+- id: UI-060
+  category: ui
+  name: Display net members
+  description: List components connected to selected net
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-056
+- id: UI-061
+  category: ui
+  name: Display sub-circuit summary
+  description: Show sub-circuit name, exposed pins
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-056
+- id: UI-062
+  category: ui
+  name: Create expand sub-circuit button
+  description: Button to expand/navigate into sub-circuit
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-061
+  - UI-004
+- id: UI-063
+  category: ui
+  name: Create IssuesPanel component
+  description: Panel listing validation issues
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-003
+  - VALID-020
+- id: UI-064
+  category: ui
+  name: Display issue count badge
+  description: Show error/warning counts in panel header
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-063
+  - UI-011
+- id: UI-065
+  category: ui
+  name: Display issues grouped by file
+  description: Group issues by source file
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-063
+- id: UI-066
+  category: ui
+  name: Display issue severity icons
+  description: Error, warning, info icons for issues
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-063
+- id: UI-067
+  category: ui
+  name: Implement click-to-navigate for issues
+  description: Click issue to highlight affected element
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-063
+- id: UI-068
+  category: ui
+  name: Implement issue filtering by severity
+  description: Filter to show only errors, warnings, etc.
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-063
+- id: UI-069
+  category: ui
+  name: Create collapsible issue details
+  description: Expand issue for full description
+  status: implemented
+  priority: low
+  dependencies:
+  - UI-063
+- id: UI-070
+  category: ui
+  name: Display source location for issues
+  description: Show file:line for each issue
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-063
+- id: UI-071
+  category: ui
+  name: Create file loader service
+  description: Service to load circuit.md files
+  status: implemented
+  priority: critical
+  dependencies:
+  - PARSE-030
+- id: UI-072
+  category: ui
+  name: Implement dev server file loading
+  description: Load files from public/ in dev mode
+  status: implemented
+  priority: critical
+  dependencies:
+  - UI-071
+- id: UI-073
+  category: ui
+  name: Create file drop zone
+  description: Drag-and-drop zone for file upload
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-001
+- id: UI-074
+  category: ui
+  name: Implement multi-file drop support
+  description: Handle multiple files dropped together
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-073
+- id: UI-075
+  category: ui
+  name: Create file browser dialog
+  description: Dialog to browse and select files
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-013
+- id: UI-076
+  category: ui
+  name: Display loaded files list
+  description: Show list of loaded circuit files
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-001
+- id: UI-077
+  category: ui
+  name: Implement file reload
+  description: Button to reload files from source
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-071
+- id: UI-078
+  category: ui
+  name: Display loading progress
+  description: Progress indicator for file loading
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-017
+- id: UI-079
+  category: ui
+  name: Handle file load errors
+  description: Display errors when files fail to load
+  status: implemented
+  priority: high
+  dependencies:
+  - UI-071
+  - UI-018
+- id: UI-080
+  category: ui
+  name: Create empty state
+  description: Display when no files loaded
+  status: implemented
+  priority: medium
+  dependencies:
+  - UI-001
+- id: STATE-001
+  category: state
+  name: Define application state shape
+  description: TypeScript types for all application state
+  status: completed
+  priority: critical
+  dependencies:
+  - INFRA-004
+- id: STATE-002
+  category: state
+  name: Create project state slice
+  description: State for loaded files and parsed circuits
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-001
+- id: STATE-003
+  category: state
+  name: Create view state slice
+  description: State for filters, zoom, pan, selections
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-001
+- id: STATE-004
+  category: state
+  name: Create UI state slice
+  description: State for panel visibility, dialogs
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-001
+- id: STATE-005
+  category: state
+  name: Create preferences state slice
+  description: State for user preferences (symbol style, theme)
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-001
+- id: STATE-006
+  category: state
+  name: Implement React context for state
+  description: Create context provider for app state
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-002
+  - STATE-003
+  - STATE-004
+  - STATE-005
+- id: STATE-007
+  category: state
+  name: Implement state actions
+  description: Action creators for state mutations
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-006
+- id: STATE-008
+  category: state
+  name: Implement state selectors
+  description: Memoized selectors for derived state
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-006
+- id: STATE-009
+  category: state
+  name: Implement filter state updates
+  description: Actions for filter changes
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-007
+- id: STATE-010
+  category: state
+  name: Implement selection state updates
+  description: Actions for selection changes
+  status: completed
+  priority: critical
+  dependencies:
+  - STATE-007
+- id: STATE-011
+  category: state
+  name: Implement view state updates
+  description: Actions for pan, zoom changes
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-007
+- id: STATE-012
+  category: state
+  name: Implement preferences persistence
+  description: Save/load preferences to localStorage
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-005
+- id: STATE-013
+  category: state
+  name: Implement URL state sync
+  description: Sync filter state to URL params
+  status: completed
+  priority: medium
+  dependencies:
+  - STATE-003
+- id: STATE-014
+  category: state
+  name: Implement undo/redo for filters
+  description: History for filter state changes
+  status: completed
+  priority: low
+  dependencies:
+  - STATE-009
+- id: STATE-015
+  category: state
+  name: Export state management API
+  description: Clean hooks API for state access
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-008
+- id: TEST-001
+  category: testing
+  name: Write parser lexer unit tests
+  description: Test tokenization of all syntax elements
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-009
+- id: TEST-002
+  category: testing
+  name: Write parser AST builder unit tests
+  description: Test AST construction from tokens
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-018
+- id: TEST-003
+  category: testing
+  name: Write parser resolver unit tests
+  description: Test sub-circuit resolution
+  status: completed
+  priority: critical
+  dependencies:
+  - PARSE-027
+- id: TEST-004
+  category: testing
+  name: Write graph builder unit tests
+  description: Test graph construction from AST
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-004
+- id: TEST-005
+  category: testing
+  name: Write graph query unit tests
+  description: Test filter and traversal operations
+  status: completed
+  priority: critical
+  dependencies:
+  - GRAPH-016
+- id: TEST-006
+  category: testing
+  name: Write layout algorithm unit tests
+  description: Test force-directed layout
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-006
+- id: TEST-007
+  category: testing
+  name: Write routing algorithm unit tests
+  description: Test wire routing
+  status: completed
+  priority: high
+  dependencies:
+  - LAYOUT-013
+- id: TEST-008
+  category: testing
+  name: Write symbol registry unit tests
+  description: Test symbol lookup and rendering
+  status: completed
+  priority: high
+  dependencies:
+  - SYMBOL-030
+- id: TEST-009
+  category: testing
+  name: Write validation unit tests
+  description: Test all validation rules
+  status: completed
+  priority: critical
+  dependencies:
+  - VALID-013
+- id: TEST-010
+  category: testing
+  name: Write state management unit tests
+  description: Test state actions and selectors
+  status: completed
+  priority: high
+  dependencies:
+  - STATE-015
+- id: TEST-011
+  category: testing
+  name: Create test fixtures for circuits
+  description: Sample circuit.md files for testing
+  status: implemented
+  priority: high
+  dependencies:
+  - INFRA-009
+- id: TEST-012
+  category: testing
+  name: Write E2E test for file loading
+  description: Test loading circuit files end-to-end
+  status: in_progress
+  priority: critical
+  dependencies:
+  - INFRA-010
+  - UI-072
+- id: TEST-013
+  category: testing
+  name: Write E2E test for net filtering
+  description: Test filtering schematic by net
+  status: in_progress
+  priority: critical
+  dependencies:
+  - INFRA-010
+  - UI-023
+- id: TEST-014
+  category: testing
+  name: Write E2E test for component filtering
+  description: Test filtering schematic by component
+  status: in_progress
+  priority: critical
+  dependencies:
+  - INFRA-010
+  - UI-024
+- id: TEST-015
+  category: testing
+  name: Write E2E test for neighborhood view
+  description: Test depth-limited component view
+  status: in_progress
+  priority: critical
+  dependencies:
+  - INFRA-010
+  - UI-026
+- id: TEST-016
+  category: testing
+  name: Write E2E test for canvas interaction
+  description: Test pan, zoom, selection
+  status: in_progress
+  priority: high
+  dependencies:
+  - INFRA-010
+  - UI-045
+- id: TEST-017
+  category: testing
+  name: Write E2E test for issues panel
+  description: Test validation issue display
+  status: in_progress
+  priority: high
+  dependencies:
+  - INFRA-010
+  - UI-063
+- id: TEST-018
+  category: testing
+  name: Set up test coverage reporting
+  description: Configure coverage thresholds
+  status: implemented
+  priority: high
+  dependencies:
+  - INFRA-009
+- id: TEST-019
+  category: testing
+  name: Write snapshot tests for symbols
+  description: Visual regression tests for symbols
+  status: planned
+  priority: medium
+  dependencies:
+  - SYMBOL-030
+- id: TEST-020
+  category: testing
+  name: Write accessibility tests
+  description: Test keyboard navigation and ARIA
+  status: planned
+  priority: medium
+  dependencies:
+  - INFRA-010
+- id: DOC-001
+  category: docs
+  name: Create README for viewer
+  description: Usage instructions and development guide
+  status: planned
+  priority: high
+  dependencies:
+  - INFRA-015
+- id: DOC-002
+  category: docs
+  name: Document parser API
+  description: JSDoc comments for parser module
+  status: planned
+  priority: medium
+  dependencies:
+  - PARSE-030
+- id: DOC-003
+  category: docs
+  name: Document graph API
+  description: JSDoc comments for graph module
+  status: planned
+  priority: medium
+  dependencies:
+  - GRAPH-020
+- id: DOC-004
+  category: docs
+  name: Document adding new symbols
+  description: Guide for extending symbol library
+  status: planned
+  priority: medium
+  dependencies:
+  - SYMBOL-030
+- id: DOC-005
+  category: docs
+  name: Create keyboard shortcuts reference
+  description: Document all keyboard shortcuts
+  status: planned
+  priority: low
+  dependencies:
+  - UI-054
+- id: DOC-006
+  category: docs
+  name: Add inline help tooltips
+  description: Tooltips explaining UI controls
+  status: planned
+  priority: low
+  dependencies:
+  - UI-012
+- id: DOC-007
+  category: docs
+  name: Create demo walkthrough
+  description: Guided tour of viewer features
+  status: planned
+  priority: low
+  dependencies:
+  - UI-001
+- id: DOC-008
+  category: docs
+  name: Performance optimization pass
+  description: Profile and optimize rendering
+  status: planned
+  priority: medium
+  dependencies:
+  - UI-041
+- id: DOC-009
+  category: docs
+  name: Accessibility audit
+  description: Review and improve accessibility
+  status: planned
+  priority: medium
+  dependencies:
+  - TEST-020
+- id: DOC-010
+  category: docs
+  name: Final QA and polish
+  description: Bug fixes and visual polish
+  status: planned
+  priority: high
+  dependencies:
+  - TEST-017
