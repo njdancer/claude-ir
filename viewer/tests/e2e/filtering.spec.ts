@@ -95,4 +95,31 @@ test.describe('Filtering', () => {
     // Should be back to "Show All" mode
     await expect(page.getByText('Show All')).toBeVisible()
   })
+
+  test('should filter by neighborhood when selecting neighborhood mode', async ({ page }) => {
+    // Click the filter mode dropdown
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+
+    // Select "Neighborhood View" option
+    await page.getByRole('option', { name: /Neighborhood/i }).click()
+
+    // Should show neighborhood UI with center component selector
+    await expect(page.getByText('Center Component')).toBeVisible()
+    await expect(page.getByText('Depth')).toBeVisible()
+  })
+
+  test('should allow selecting center component for neighborhood', async ({ page }) => {
+    // Select neighborhood mode
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+    await page.getByRole('option', { name: /Neighborhood/i }).click()
+
+    // Click the center component selector
+    const centerSelect = page.getByRole('combobox').nth(1)
+    await centerSelect.click()
+
+    // Should show component options
+    await expect(page.getByRole('option', { name: 'R1' })).toBeVisible()
+  })
 })
