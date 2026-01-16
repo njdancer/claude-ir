@@ -39,51 +39,60 @@ test.describe('Filtering', () => {
   })
 
   test('should show filter panel in sidebar', async ({ page }) => {
+    // Filter tab should be visible
     await expect(page.getByRole('tab', { name: /filter/i })).toBeVisible()
   })
 
-  test('should have filter mode options', async ({ page }) => {
-    // Should have all, net, component, neighborhood mode options
+  test('should have filter mode dropdown', async ({ page }) => {
+    // Should have filter mode selector showing "Show All" by default
+    await expect(page.getByText('Filter Mode')).toBeVisible()
     await expect(page.getByText('Show All')).toBeVisible()
   })
 
-  test('should filter by net', async ({ page }) => {
+  test('should filter by net when selecting net mode', async ({ page }) => {
+    // Click the filter mode dropdown
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+
+    // Select "Filter by Net" option
+    await page.getByRole('option', { name: /Filter by Net/i }).click()
+
+    // Should show net selection UI with "Selected Nets" label
+    await expect(page.getByText('Selected Nets')).toBeVisible()
+  })
+
+  test('should filter by component when selecting component mode', async ({ page }) => {
+    // Click the filter mode dropdown
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+
+    // Select "Filter by Component" option
+    await page.getByRole('option', { name: /Filter by Component/i }).click()
+
+    // Should show component selection UI
+    await expect(page.getByText('Selected Components')).toBeVisible()
+  })
+
+  test('should show clear button when filter is active', async ({ page }) => {
     // Select net filter mode
-    const netModeButton = page.getByRole('button', { name: /by net/i })
-    await netModeButton.click()
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+    await page.getByRole('option', { name: /Filter by Net/i }).click()
 
-    // Should show net dropdown
-    await expect(page.getByText(/select.*net/i)).toBeVisible()
-  })
-
-  test('should filter by component', async ({ page }) => {
-    // Select component filter mode
-    const componentModeButton = page.getByRole('button', { name: /by component/i })
-    await componentModeButton.click()
-
-    // Should show component dropdown
-    await expect(page.getByText(/select.*component/i)).toBeVisible()
-  })
-
-  test('should have clear filter button', async ({ page }) => {
-    // Select a filter mode first
-    const netModeButton = page.getByRole('button', { name: /by net/i })
-    await netModeButton.click()
-
-    // Clear button should appear
+    // Clear button should appear (since we're not in "all" mode)
     await expect(page.getByRole('button', { name: /clear/i })).toBeVisible()
   })
 
-  test('should reset to show all', async ({ page }) => {
-    // Select net mode
-    const netModeButton = page.getByRole('button', { name: /by net/i })
-    await netModeButton.click()
+  test('should reset to show all when clicking clear', async ({ page }) => {
+    // Select net filter mode
+    const filterModeSelect = page.getByRole('combobox').first()
+    await filterModeSelect.click()
+    await page.getByRole('option', { name: /Filter by Net/i }).click()
 
-    // Click show all to reset
-    const showAllButton = page.getByRole('button', { name: /show all/i })
-    await showAllButton.click()
+    // Click clear
+    await page.getByRole('button', { name: /clear/i }).click()
 
-    // Should be back to all mode
-    await expect(showAllButton).toHaveAttribute('data-state', 'on')
+    // Should be back to "Show All" mode
+    await expect(page.getByText('Show All')).toBeVisible()
   })
 })

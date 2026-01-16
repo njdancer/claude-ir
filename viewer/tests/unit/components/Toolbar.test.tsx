@@ -26,7 +26,7 @@ describe('Toolbar', () => {
     const onZoomIn = vi.fn()
     render(<Toolbar {...defaultProps} onZoomIn={onZoomIn} />)
 
-    const zoomInButton = screen.getByTitle('Zoom in')
+    const zoomInButton = screen.getByLabelText('Zoom in')
     fireEvent.click(zoomInButton)
 
     expect(onZoomIn).toHaveBeenCalled()
@@ -36,7 +36,7 @@ describe('Toolbar', () => {
     const onZoomOut = vi.fn()
     render(<Toolbar {...defaultProps} onZoomOut={onZoomOut} />)
 
-    const zoomOutButton = screen.getByTitle('Zoom out')
+    const zoomOutButton = screen.getByLabelText('Zoom out')
     fireEvent.click(zoomOutButton)
 
     expect(onZoomOut).toHaveBeenCalled()
@@ -46,7 +46,7 @@ describe('Toolbar', () => {
     const onZoomReset = vi.fn()
     render(<Toolbar {...defaultProps} onZoomReset={onZoomReset} />)
 
-    const resetButton = screen.getByTitle('Reset zoom')
+    const resetButton = screen.getByLabelText('Fit to view')
     fireEvent.click(resetButton)
 
     expect(onZoomReset).toHaveBeenCalled()
@@ -56,22 +56,22 @@ describe('Toolbar', () => {
     const onToggleGrid = vi.fn()
     render(<Toolbar {...defaultProps} onToggleGrid={onToggleGrid} />)
 
-    const gridButton = screen.getByTitle('Hide grid')
+    const gridButton = screen.getByLabelText('Hide grid')
     fireEvent.click(gridButton)
 
     expect(onToggleGrid).toHaveBeenCalled()
   })
 
-  it('should show "Show grid" tooltip when grid is hidden', () => {
+  it('should show "Show grid" label when grid is hidden', () => {
     render(<Toolbar {...defaultProps} showGrid={false} />)
-    expect(screen.getByTitle('Show grid')).toBeInTheDocument()
+    expect(screen.getByLabelText('Show grid')).toBeInTheDocument()
   })
 
   it('should call onOpenSettings when settings button is clicked', () => {
     const onOpenSettings = vi.fn()
     render(<Toolbar {...defaultProps} onOpenSettings={onOpenSettings} />)
 
-    const settingsButton = screen.getByTitle('Settings')
+    const settingsButton = screen.getByLabelText('Settings')
     fireEvent.click(settingsButton)
 
     expect(onOpenSettings).toHaveBeenCalled()

@@ -48,48 +48,57 @@ test.describe('Schematic Canvas', () => {
   test('should zoom in with toolbar button', async ({ page }) => {
     const zoomInButton = page.getByRole('button', { name: /zoom in/i })
 
-    // Get initial zoom level from display
-    const zoomDisplay = page.locator('text=/\\d+%/')
-    const initialZoom = await zoomDisplay.textContent()
+    // Get initial zoom level from display (shows as button text like "100%")
+    const zoomDisplay = page.locator('button:has-text("%")')
+    const initialText = await zoomDisplay.textContent()
+    const initialZoom = parseInt(initialText?.replace('%', '') || '100')
 
     // Click zoom in
     await zoomInButton.click()
 
     // Zoom should increase
-    const newZoom = await zoomDisplay.textContent()
-    expect(parseInt(newZoom || '100')).toBeGreaterThan(parseInt(initialZoom || '100'))
+    const newText = await zoomDisplay.textContent()
+    const newZoom = parseInt(newText?.replace('%', '') || '100')
+    expect(newZoom).toBeGreaterThan(initialZoom)
   })
 
   test('should zoom out with toolbar button', async ({ page }) => {
     const zoomOutButton = page.getByRole('button', { name: /zoom out/i })
 
     // Get initial zoom level
-    const zoomDisplay = page.locator('text=/\\d+%/')
-    const initialZoom = await zoomDisplay.textContent()
+    const zoomDisplay = page.locator('button:has-text("%")')
+    const initialText = await zoomDisplay.textContent()
+    const initialZoom = parseInt(initialText?.replace('%', '') || '100')
 
     // Click zoom out
     await zoomOutButton.click()
 
     // Zoom should decrease
-    const newZoom = await zoomDisplay.textContent()
-    expect(parseInt(newZoom || '100')).toBeLessThan(parseInt(initialZoom || '100'))
+    const newText = await zoomDisplay.textContent()
+    const newZoom = parseInt(newText?.replace('%', '') || '100')
+    expect(newZoom).toBeLessThan(initialZoom)
   })
 
   test('should toggle grid visibility', async ({ page }) => {
+    // Find grid toggle button (either "Show grid" or "Hide grid")
     const gridToggle = page.getByRole('button', { name: /grid/i })
     const svg = page.locator('svg.w-full')
 
-    // Grid should be visible initially
-    await expect(svg.locator('pattern#grid')).toBeVisible()
+    // Grid pattern definition should exist initially
+    await expect(svg.locator('pattern#grid')).toBeAttached()
 
-    // Toggle grid off
+    // Grid rect (using the pattern) should exist initially
+    await expect(svg.locator('rect[fill="url(#grid)"]')).toBeAttached()
+
+    // Toggle grid off - button click should work
     await gridToggle.click()
 
-    // Grid pattern should be hidden or removed
-    // (The actual implementation might vary)
+    // After toggle, the rect using the pattern should be removed
+    await expect(svg.locator('rect[fill="url(#grid)"]')).not.toBeAttached()
   })
 
   test('should toggle net labels', async ({ page }) => {
+    // Find labels toggle button (either "Show labels" or "Hide labels")
     const labelsToggle = page.getByRole('button', { name: /labels/i })
 
     // Toggle should work without error

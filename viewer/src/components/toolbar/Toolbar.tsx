@@ -45,7 +45,7 @@ export function Toolbar({
     <div className="flex items-center gap-2 p-2 border-b bg-white">
       {/* Zoom controls */}
       <div className="flex items-center gap-1 border-r pr-2 mr-2">
-        <Button variant="ghost" size="icon" onClick={onZoomOut} title="Zoom out">
+        <Button variant="ghost" size="icon" onClick={onZoomOut} aria-label="Zoom out">
           <ZoomOut className="h-4 w-4" />
         </Button>
 
@@ -59,11 +59,11 @@ export function Toolbar({
           {zoomPercent}%
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={onZoomIn} title="Zoom in">
+        <Button variant="ghost" size="icon" onClick={onZoomIn} aria-label="Zoom in">
           <ZoomIn className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={onZoomReset} title="Fit to view">
+        <Button variant="ghost" size="icon" onClick={onZoomReset} aria-label="Fit to view">
           <Maximize2 className="h-4 w-4" />
         </Button>
       </div>
@@ -74,7 +74,7 @@ export function Toolbar({
           variant={showGrid ? 'secondary' : 'ghost'}
           size="icon"
           onClick={onToggleGrid}
-          title={showGrid ? 'Hide grid' : 'Show grid'}
+          aria-label={showGrid ? 'Hide grid' : 'Show grid'}
         >
           <Grid3X3 className="h-4 w-4" />
         </Button>
@@ -83,7 +83,7 @@ export function Toolbar({
           variant={showNetLabels ? 'secondary' : 'ghost'}
           size="icon"
           onClick={onToggleNetLabels}
-          title={showNetLabels ? 'Hide net labels' : 'Show net labels'}
+          aria-label={showNetLabels ? 'Hide labels' : 'Show labels'}
         >
           {showNetLabels ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
         </Button>
@@ -103,7 +103,7 @@ export function Toolbar({
       <div className="flex-1" />
 
       {/* Settings */}
-      <Button variant="ghost" size="icon" onClick={onOpenSettings} title="Settings">
+      <Button variant="ghost" size="icon" onClick={onOpenSettings} aria-label="Settings">
         <Settings className="h-4 w-4" />
       </Button>
     </div>

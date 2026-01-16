@@ -30,7 +30,7 @@ test.describe('File Loading', () => {
   })
 
   test('should show dropzone on welcome screen', async ({ page }) => {
-    const dropzone = page.locator('text=Drop a .circuit.md file here')
+    const dropzone = page.getByText('or click to browse')
     await expect(dropzone).toBeVisible()
   })
 

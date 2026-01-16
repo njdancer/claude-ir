@@ -7,7 +7,7 @@ test.describe('Circuit Schematic Viewer', () => {
 
   test('should display welcome screen on initial load', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Circuit Schematic Viewer' })).toBeVisible()
-    await expect(page.getByText('Drop a .circuit.md file')).toBeVisible()
+    await expect(page.getByText(/visualize and explore/)).toBeVisible()
   })
 
   test('should have a working toolbar', async ({ page }) => {
@@ -39,8 +39,8 @@ test.describe('Circuit Schematic Viewer', () => {
     await page.getByRole('button', { name: /settings/i }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
 
-    // Close dialog
+    // Close dialog by clicking the close button or outside
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('dialog')).not.toBeVisible()
+    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 5000 })
   })
 })
