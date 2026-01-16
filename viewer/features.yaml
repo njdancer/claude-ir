@@ -2077,7 +2077,7 @@ features:
   category: testing
   name: Write snapshot tests for symbols
   description: Visual regression tests for symbols
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - SYMBOL-030
@@ -2085,7 +2085,7 @@ features:
   category: testing
   name: Write accessibility tests
   description: Test keyboard navigation and ARIA
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - INFRA-010
@@ -2093,7 +2093,7 @@ features:
   category: docs
   name: Create README for viewer
   description: Usage instructions and development guide
-  status: planned
+  status: completed
   priority: high
   dependencies:
   - INFRA-015
@@ -2101,7 +2101,7 @@ features:
   category: docs
   name: Document parser API
   description: JSDoc comments for parser module
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - PARSE-030
@@ -2109,7 +2109,7 @@ features:
   category: docs
   name: Document graph API
   description: JSDoc comments for graph module
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - GRAPH-020
@@ -2117,7 +2117,7 @@ features:
   category: docs
   name: Document adding new symbols
   description: Guide for extending symbol library
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - SYMBOL-030
@@ -2125,7 +2125,7 @@ features:
   category: docs
   name: Create keyboard shortcuts reference
   description: Document all keyboard shortcuts
-  status: planned
+  status: completed
   priority: low
   dependencies:
   - UI-054
@@ -2157,7 +2157,7 @@ features:
   category: docs
   name: Accessibility audit
   description: Review and improve accessibility
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - TEST-020
