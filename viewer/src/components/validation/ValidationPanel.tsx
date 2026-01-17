@@ -123,11 +123,7 @@ interface IssueRowProps {
 
 function IssueRow({ issue, onClick }: IssueRowProps) {
   const Icon =
-    issue.severity === 'error'
-      ? AlertCircle
-      : issue.severity === 'warning'
-        ? AlertTriangle
-        : Info
+    issue.severity === 'error' ? AlertCircle : issue.severity === 'warning' ? AlertTriangle : Info
 
   const colorClass =
     issue.severity === 'error'
@@ -145,7 +141,7 @@ function IssueRow({ issue, onClick }: IssueRowProps) {
       onClick={onClick}
     >
       <Icon className={cn('mt-0.5 h-4 w-4 flex-shrink-0', colorClass)} />
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="break-words">{issue.message}</p>
         {issue.location && (
           <p className="text-xs text-slate-400">

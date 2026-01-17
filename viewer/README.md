@@ -40,7 +40,6 @@ The viewer accepts files in the `circuit.md` markdown format:
 
 [VCC]: net
 [GND]: net
-
 [R1]: resistor(10k)
 [C1]: capacitor(100nF)
 
@@ -63,15 +62,15 @@ The viewer is built with:
 
 ### Core Modules
 
-| Module | Description |
-|--------|-------------|
-| `parser/` | Parses circuit.md files into an AST |
-| `graph/` | Converts AST to a circuit graph model |
-| `layout/` | Auto-layout algorithms for schematic placement |
-| `symbols/` | SVG symbol definitions (IEEE/IEC) |
-| `validation/` | Circuit validation rules |
-| `state/` | React context and state management |
-| `components/` | React UI components |
+| Module        | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `parser/`     | Parses circuit.md files into an AST            |
+| `graph/`      | Converts AST to a circuit graph model          |
+| `layout/`     | Auto-layout algorithms for schematic placement |
+| `symbols/`    | SVG symbol definitions (IEEE/IEC)              |
+| `validation/` | Circuit validation rules                       |
+| `state/`      | React context and state management             |
+| `components/` | React UI components                            |
 
 ## Testing
 

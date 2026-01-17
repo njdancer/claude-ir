@@ -109,8 +109,8 @@ describe('Accessibility', () => {
       const contrastClasses = [
         'text-slate-800', // Dark text on light bg
         'text-slate-600', // Medium contrast
-        'bg-white',       // Light background
-        'text-red-600',   // Error state
+        'bg-white', // Light background
+        'text-red-600', // Error state
         'text-green-600', // Success state
       ]
 
@@ -121,19 +121,21 @@ describe('Accessibility', () => {
 
   describe('Focus Management', () => {
     it('should maintain focus after toolbar actions', async () => {
-      render(<Toolbar
-        zoom={1}
-        showGrid={true}
-        showNetLabels={true}
-        showValues={true}
-        onZoomIn={vi.fn()}
-        onZoomOut={vi.fn()}
-        onZoomReset={vi.fn()}
-        onToggleGrid={vi.fn()}
-        onToggleNetLabels={vi.fn()}
-        onToggleValues={vi.fn()}
-        onOpenSettings={vi.fn()}
-      />)
+      render(
+        <Toolbar
+          zoom={1}
+          showGrid={true}
+          showNetLabels={true}
+          showValues={true}
+          onZoomIn={vi.fn()}
+          onZoomOut={vi.fn()}
+          onZoomReset={vi.fn()}
+          onToggleGrid={vi.fn()}
+          onToggleNetLabels={vi.fn()}
+          onToggleValues={vi.fn()}
+          onOpenSettings={vi.fn()}
+        />
+      )
 
       const zoomInButton = screen.getByLabelText('Zoom in')
       zoomInButton.focus()
@@ -143,19 +145,21 @@ describe('Accessibility', () => {
 
   describe('Semantic HTML', () => {
     it('should use proper heading hierarchy', () => {
-      render(<FilterPanel
-        filter={{
-          mode: 'all',
-          nets: [],
-          components: [],
-          neighborhoodCenter: null,
-          neighborhoodDepth: 1,
-        }}
-        netNames={[]}
-        componentRefs={[]}
-        onFilterChange={vi.fn()}
-        onResetFilter={vi.fn()}
-      />)
+      render(
+        <FilterPanel
+          filter={{
+            mode: 'all',
+            nets: [],
+            components: [],
+            neighborhoodCenter: null,
+            neighborhoodDepth: 1,
+          }}
+          netNames={[]}
+          componentRefs={[]}
+          onFilterChange={vi.fn()}
+          onResetFilter={vi.fn()}
+        />
+      )
 
       // Check for proper header structure
       const heading = screen.getByText('Filters')

@@ -32,9 +32,11 @@ console.log(getGraphStats(graph))
 Converts a parsed AST into a circuit graph.
 
 **Parameters:**
+
 - `ast` - A `CircuitAST` from the parser
 
 **Returns:** `CircuitGraph`
+
 - `nodes` - Map of node ID to `CircuitGraphNode`
 - `edges` - Array of `GraphEdge` connections
 - `filename` - Source filename
@@ -51,12 +53,12 @@ Builds a graph with resolved sub-circuits expanded inline.
 ```typescript
 interface ComponentGraphNode {
   type: 'component'
-  id: string            // Unique identifier
-  ref: string           // Reference designator (e.g., 'R1')
+  id: string // Unique identifier
+  ref: string // Reference designator (e.g., 'R1')
   componentType: string // Type (e.g., 'resistor')
-  params: string[]      // Parameters (e.g., ['10k'])
-  pins: string[]        // Known pins (e.g., ['1', '2'])
-  label: string         // Display label
+  params: string[] // Parameters (e.g., ['10k'])
+  pins: string[] // Known pins (e.g., ['1', '2'])
+  label: string // Display label
   metadata: Record<string, unknown>
 }
 ```
@@ -67,7 +69,7 @@ interface ComponentGraphNode {
 interface NetGraphNode {
   type: 'net'
   id: string
-  name: string     // Net name (e.g., 'VCC')
+  name: string // Net name (e.g., 'VCC')
   isPower: boolean // True for power nets
   label: string
   metadata: Record<string, unknown>
@@ -84,7 +86,7 @@ interface SubcircuitGraphNode {
   path: string
   exposedPins: string[]
   expanded: boolean
-  childGraph?: CircuitGraph  // When expanded
+  childGraph?: CircuitGraph // When expanded
   label: string
   metadata: Record<string, unknown>
 }
@@ -96,9 +98,9 @@ interface SubcircuitGraphNode {
 interface InlinePassiveGraphNode {
   type: 'inline_passive'
   id: string
-  ref: string              // Generated ref (e.g., '_R1')
+  ref: string // Generated ref (e.g., '_R1')
   passiveType: 'resistor' | 'capacitor' | 'inductor' | 'fuse'
-  value: string            // Value (e.g., '10k')
+  value: string // Value (e.g., '10k')
   label: string
   metadata: Record<string, unknown>
 }
@@ -110,9 +112,9 @@ interface InlinePassiveGraphNode {
 interface GraphEdge {
   id: string
   sourceId: string
-  sourcePin?: string  // Pin on source component
+  sourcePin?: string // Pin on source component
   targetId: string
-  targetPin?: string  // Pin on target component
+  targetPin?: string // Pin on target component
 }
 ```
 
@@ -236,8 +238,8 @@ Filter functions return a `QueryResult` object:
 
 ```typescript
 interface QueryResult {
-  graph: CircuitGraph      // The filtered subgraph
-  boundaryNodes: Set<string>  // Nodes at the filter boundary
+  graph: CircuitGraph // The filtered subgraph
+  boundaryNodes: Set<string> // Nodes at the filter boundary
 }
 ```
 
@@ -257,7 +259,7 @@ function inspectComponent(graph: CircuitGraph, ref: string) {
 
   return {
     component: node,
-    connections: edges.map(edge => ({
+    connections: edges.map((edge) => ({
       pin: edge.sourceId === ref ? edge.sourcePin : edge.targetPin,
       connectedTo: edge.sourceId === ref ? edge.targetId : edge.sourceId,
     })),

@@ -55,7 +55,7 @@ export function Sidebar({
       <div className="flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-slate-500" />
-          <span className="text-sm font-medium truncate max-w-[180px]">
+          <span className="max-w-[180px] truncate text-sm font-medium">
             {filename || 'No file loaded'}
           </span>
         </div>
@@ -67,7 +67,7 @@ export function Sidebar({
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col">
         <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-4">
           <TabsTrigger
             value="filter"
@@ -97,7 +97,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="filter" className="flex-1 m-0 overflow-auto">
+        <TabsContent value="filter" className="m-0 flex-1 overflow-auto">
           <FilterPanel
             filter={filter}
             netNames={netNames}
@@ -107,11 +107,11 @@ export function Sidebar({
           />
         </TabsContent>
 
-        <TabsContent value="validation" className="flex-1 m-0 overflow-auto">
+        <TabsContent value="validation" className="m-0 flex-1 overflow-auto">
           <ValidationPanel validation={validation} onIssueClick={handleIssueClick} />
         </TabsContent>
 
-        <TabsContent value="source" className="flex-1 m-0 overflow-hidden">
+        <TabsContent value="source" className="m-0 flex-1 overflow-hidden">
           <SourcePanel
             content={sourceContent}
             highlightLine={highlightLine}

@@ -33,6 +33,7 @@ Shield connects to ground for EMI shielding.
 
 [J2.VBUS --- VBUS_RAW]: net
 [VBUS_RAW]: net
+
 [J2.GND --- GND]
 [J2.SHIELD --- GND]
 [J2.DP --- USB_DP]

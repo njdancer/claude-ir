@@ -57,7 +57,9 @@ export const DEMO_CIRCUITS: DemoCircuit[] = [
 /**
  * Load a demo circuit by filename
  */
-export async function loadDemoCircuit(filename: string): Promise<{ filename: string; content: string }> {
+export async function loadDemoCircuit(
+  filename: string
+): Promise<{ filename: string; content: string }> {
   const response = await fetch(`/demo-circuits/${filename}`)
   if (!response.ok) {
     throw new Error(`Failed to load demo circuit: ${response.statusText}`)

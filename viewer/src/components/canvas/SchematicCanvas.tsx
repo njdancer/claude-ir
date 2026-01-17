@@ -54,16 +54,13 @@ export function SchematicCanvas({
   const registry = useMemo(() => createSymbolRegistry(), [])
 
   // Mouse event handlers
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 0) {
-        // Left click - start panning
-        setIsDragging(true)
-        setLastMousePos({ x: e.clientX, y: e.clientY })
-      }
-    },
-    []
-  )
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
+      // Left click - start panning
+      setIsDragging(true)
+      setLastMousePos({ x: e.clientX, y: e.clientY })
+    }
+  }, [])
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -102,7 +99,7 @@ export function SchematicCanvas({
 
   if (!graph || !layout) {
     return (
-      <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400">
+      <div className="flex h-full items-center justify-center bg-slate-50 text-slate-400">
         <div className="text-center">
           <p className="text-lg">No circuit loaded</p>
           <p className="text-sm">Drop a .circuit.md file to view</p>
@@ -114,7 +111,7 @@ export function SchematicCanvas({
   return (
     <svg
       ref={svgRef}
-      className="w-full h-full"
+      className="h-full w-full"
       viewBox={viewBox}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -126,12 +123,7 @@ export function SchematicCanvas({
       {/* Background grid */}
       {showGrid && (
         <defs>
-          <pattern
-            id="grid"
-            width={gridSize}
-            height={gridSize}
-            patternUnits="userSpaceOnUse"
-          >
+          <pattern id="grid" width={gridSize} height={gridSize} patternUnits="userSpaceOnUse">
             <path
               d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
               fill="none"

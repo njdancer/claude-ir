@@ -1,19 +1,6 @@
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import {
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  Grid3X3,
-  Eye,
-  EyeOff,
-  Settings,
-} from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { ZoomIn, ZoomOut, Maximize2, Grid3X3, Eye, EyeOff, Settings } from 'lucide-react'
 
 interface ToolbarProps {
   zoom: number
@@ -49,9 +36,9 @@ export function Toolbar({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-2 p-2 border-b bg-white">
+      <div className="flex items-center gap-2 border-b bg-white p-2">
         {/* Zoom controls */}
-        <div className="flex items-center gap-1 border-r pr-2 mr-2">
+        <div className="mr-2 flex items-center gap-1 border-r pr-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onZoomOut} aria-label="Zoom out">
@@ -103,7 +90,7 @@ export function Toolbar({
         </div>
 
         {/* View toggles */}
-        <div className="flex items-center gap-1 border-r pr-2 mr-2">
+        <div className="mr-2 flex items-center gap-1 border-r pr-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -148,7 +135,9 @@ export function Toolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{showValues ? 'Hide component values' : 'Show component values (10k, 100nF, etc.)'}</p>
+              <p>
+                {showValues ? 'Hide component values' : 'Show component values (10k, 100nF, etc.)'}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>

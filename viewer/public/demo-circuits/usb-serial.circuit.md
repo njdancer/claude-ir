@@ -78,12 +78,12 @@ when opening a serial port).
 
 ### Truth Table
 
-| DTR | RTS | EN    | GPIO0 |
-|-----|-----|-------|-------|
-| 0   | 0   | HIGH  | HIGH  | (normal operation)
-| 0   | 1   | HIGH  | LOW   | (boot mode select)
-| 1   | 0   | LOW   | HIGH  | (reset)
-| 1   | 1   | HIGH  | HIGH  | (normal operation)
+| DTR | RTS | EN   | GPIO0 |
+| --- | --- | ---- | ----- | ------------------ |
+| 0   | 0   | HIGH | HIGH  | (normal operation) |
+| 0   | 1   | HIGH | LOW   | (boot mode select) |
+| 1   | 0   | LOW  | HIGH  | (reset)            |
+| 1   | 1   | HIGH | HIGH  | (normal operation) |
 
 ### Bypass Jumpers
 
@@ -115,6 +115,7 @@ Internal nets for the cross-coupling:
 [JP3.B --- RTS_INTERNAL]
 
 Q1 controls EN pin:
+
 - Base driven by DTR through 10kΩ
 - Collector pulls EN low when conducting
 - Emitter connected to RTS (cross-coupled)
@@ -125,6 +126,7 @@ Q1 controls EN pin:
 [Q1.E --- RTS_INTERNAL]
 
 Q2 controls GPIO0 pin:
+
 - Base driven by RTS through 10kΩ
 - Collector pulls GPIO0 low when conducting
 - Emitter connected to DTR (cross-coupled)

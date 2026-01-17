@@ -29,15 +29,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setError: (error: string) => dispatch({ type: 'project/setError', payload: error }),
 
       // View actions
-      setFilter: (filter: Partial<FilterConfig>) => dispatch({ type: 'view/setFilter', payload: filter }),
+      setFilter: (filter: Partial<FilterConfig>) =>
+        dispatch({ type: 'view/setFilter', payload: filter }),
       resetFilter: () => dispatch({ type: 'view/resetFilter' }),
       setViewport: (viewport: Partial<ViewportTransform>) =>
         dispatch({ type: 'view/setViewport', payload: viewport }),
       resetViewport: () => dispatch({ type: 'view/resetViewport' }),
       selectNodes: (nodeIds: string[]) => dispatch({ type: 'view/selectNodes', payload: nodeIds }),
-      toggleNodeSelection: (nodeId: string) => dispatch({ type: 'view/toggleNodeSelection', payload: nodeId }),
+      toggleNodeSelection: (nodeId: string) =>
+        dispatch({ type: 'view/toggleNodeSelection', payload: nodeId }),
       clearSelection: () => dispatch({ type: 'view/clearSelection' }),
-      setHoveredNode: (nodeId: string | null) => dispatch({ type: 'view/setHoveredNode', payload: nodeId }),
+      setHoveredNode: (nodeId: string | null) =>
+        dispatch({ type: 'view/setHoveredNode', payload: nodeId }),
       toggleShowValidation: () => dispatch({ type: 'view/toggleShowValidation' }),
       toggleShowNetLabels: () => dispatch({ type: 'view/toggleShowNetLabels' }),
       toggleShowValues: () => dispatch({ type: 'view/toggleShowValues' }),

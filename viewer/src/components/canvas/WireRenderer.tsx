@@ -50,9 +50,7 @@ export const WireRenderer = memo(function WireRenderer({
       {showJunctions &&
         edge.waypoints
           .filter((wp) => wp.isJunction)
-          .map((wp, index) => (
-            <circle key={index} cx={wp.x} cy={wp.y} r={4} fill={strokeColor} />
-          ))}
+          .map((wp, index) => <circle key={index} cx={wp.x} cy={wp.y} r={4} fill={strokeColor} />)}
     </g>
   )
 })

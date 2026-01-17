@@ -56,7 +56,10 @@ export function getNodesByType(
 /**
  * Get all components of a specific component type
  */
-export function getComponentsByType(graph: CircuitGraph, componentType: string): CircuitGraphNode[] {
+export function getComponentsByType(
+  graph: CircuitGraph,
+  componentType: string
+): CircuitGraphNode[] {
   return Array.from(graph.nodes.values()).filter(
     (n) => n.type === 'component' && n.componentType === componentType
   )

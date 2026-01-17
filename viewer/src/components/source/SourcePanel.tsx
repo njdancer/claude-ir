@@ -54,12 +54,10 @@ export function SourcePanel({ content, highlightLine, onLineClick }: SourcePanel
                 className={`${isHighlighted ? 'bg-yellow-100' : 'hover:bg-slate-50'} cursor-pointer`}
                 onClick={() => onLineClick?.(lineNum)}
               >
-                <td className="select-none text-right pr-3 pl-2 text-slate-400 border-r border-slate-200 bg-slate-50 w-10">
+                <td className="w-10 border-r border-slate-200 bg-slate-50 pr-3 pl-2 text-right text-slate-400 select-none">
                   {lineNum}
                 </td>
-                <td className="pl-3 pr-2 whitespace-pre text-slate-700">
-                  {highlightSyntax(line)}
-                </td>
+                <td className="pr-2 pl-3 whitespace-pre text-slate-700">{highlightSyntax(line)}</td>
               </tr>
             )
           })}
@@ -80,7 +78,7 @@ function highlightSyntax(line: string): React.ReactNode {
 
   // Headers
   if (line.startsWith('#')) {
-    return <span className="text-blue-600 font-semibold">{line}</span>
+    return <span className="font-semibold text-blue-600">{line}</span>
   }
 
   // Net declaration: [NET_NAME]: net
@@ -89,7 +87,7 @@ function highlightSyntax(line: string): React.ReactNode {
     return (
       <>
         <span className="text-slate-500">{netMatch[1]}</span>
-        <span className="text-green-600 font-medium">{netMatch[2]}</span>
+        <span className="font-medium text-green-600">{netMatch[2]}</span>
         <span className="text-purple-600">{netMatch[3]}</span>
       </>
     )
@@ -101,7 +99,7 @@ function highlightSyntax(line: string): React.ReactNode {
     return (
       <>
         <span className="text-slate-500">{subcircuitMatch[1]}</span>
-        <span className="text-orange-600 font-medium">{subcircuitMatch[2]}</span>
+        <span className="font-medium text-orange-600">{subcircuitMatch[2]}</span>
         <span className="text-slate-500">{subcircuitMatch[3]}</span>
         <span className="text-cyan-600">{subcircuitMatch[4]}</span>
       </>
@@ -114,7 +112,7 @@ function highlightSyntax(line: string): React.ReactNode {
     return (
       <>
         <span className="text-slate-500">{componentMatch[1]}</span>
-        <span className="text-orange-600 font-medium">{componentMatch[2]}</span>
+        <span className="font-medium text-orange-600">{componentMatch[2]}</span>
         <span className="text-slate-500">{componentMatch[3]}</span>
         <span className="text-blue-600">{componentMatch[4]}</span>
         {componentMatch[5] && <span className="text-slate-600">{componentMatch[5]}</span>}
@@ -125,7 +123,7 @@ function highlightSyntax(line: string): React.ReactNode {
   // Connection: [A --- B] or [A --- value --- B]
   const connectionMatch = line.match(/^(\[)([^\]]+)(\])$/)
   if (connectionMatch && connectionMatch[2].includes('---')) {
-    const parts = connectionMatch[2].split('---').map(p => p.trim())
+    const parts = connectionMatch[2].split('---').map((p) => p.trim())
     return (
       <>
         <span className="text-slate-500">[</span>

@@ -1,4 +1,10 @@
-import type { CircuitAST, ConnectionNode, InlinePassiveNode, Endpoint, SourceLocation } from '@/parser'
+import type {
+  CircuitAST,
+  ConnectionNode,
+  InlinePassiveNode,
+  Endpoint,
+  SourceLocation,
+} from '@/parser'
 import type { CircuitGraph } from '@/graph'
 import type { ValidationIssue, ValidationResult, IssueSeverity, IssueCategory } from './types'
 
@@ -147,7 +153,11 @@ function validateDuplicates(ast: CircuitAST, issues: ValidationIssue[]): void {
 /**
  * Validate connectivity (floating nets, single connections)
  */
-function validateConnectivity(ast: CircuitAST, graph: CircuitGraph, issues: ValidationIssue[]): void {
+function validateConnectivity(
+  ast: CircuitAST,
+  graph: CircuitGraph,
+  issues: ValidationIssue[]
+): void {
   // Count connections per net
   const netConnectionCounts = new Map<string, number>()
 

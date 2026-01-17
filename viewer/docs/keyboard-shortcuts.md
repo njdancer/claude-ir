@@ -10,47 +10,47 @@ Keyboard shortcuts are planned but not yet implemented. The shortcuts below desc
 
 ### Navigation
 
-| Shortcut | Action |
-|----------|--------|
-| `+` or `=` | Zoom in |
-| `-` | Zoom out |
-| `0` | Reset zoom to 100% |
-| `F` | Fit schematic to view |
-| Arrow keys | Pan the view |
-| `Home` | Center view on schematic |
+| Shortcut   | Action                   |
+| ---------- | ------------------------ |
+| `+` or `=` | Zoom in                  |
+| `-`        | Zoom out                 |
+| `0`        | Reset zoom to 100%       |
+| `F`        | Fit schematic to view    |
+| Arrow keys | Pan the view             |
+| `Home`     | Center view on schematic |
 
 ### Selection
 
-| Shortcut | Action |
-|----------|--------|
-| `Escape` | Clear selection |
-| `A` | Select all components |
-| `Tab` | Cycle through components |
-| `Shift+Tab` | Cycle backwards |
+| Shortcut    | Action                   |
+| ----------- | ------------------------ |
+| `Escape`    | Clear selection          |
+| `A`         | Select all components    |
+| `Tab`       | Cycle through components |
+| `Shift+Tab` | Cycle backwards          |
 
 ### Display Options
 
-| Shortcut | Action |
-|----------|--------|
-| `G` | Toggle grid visibility |
-| `L` | Toggle net labels |
-| `V` | Toggle component values |
-| `S` | Open settings dialog |
+| Shortcut | Action                  |
+| -------- | ----------------------- |
+| `G`      | Toggle grid visibility  |
+| `L`      | Toggle net labels       |
+| `V`      | Toggle component values |
+| `S`      | Open settings dialog    |
 
 ### Filter Modes
 
-| Shortcut | Action |
-|----------|--------|
-| `1` | Show all (no filter) |
-| `2` | Filter by nets |
-| `3` | Filter by components |
-| `4` | Neighborhood view |
+| Shortcut | Action               |
+| -------- | -------------------- |
+| `1`      | Show all (no filter) |
+| `2`      | Filter by nets       |
+| `3`      | Filter by components |
+| `4`      | Neighborhood view    |
 
 ### File Operations
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+O` | Open file picker |
+| Shortcut | Action                                 |
+| -------- | -------------------------------------- |
+| `Ctrl+O` | Open file picker                       |
 | `Ctrl+S` | Export current view (when implemented) |
 
 ## Implementation Notes

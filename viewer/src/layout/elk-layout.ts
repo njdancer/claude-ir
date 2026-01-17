@@ -96,7 +96,10 @@ function getNodeDimensions(node: CircuitGraphNode): { width: number; height: num
 /**
  * Create ELK ports for a component node
  */
-function createPorts(node: CircuitGraphNode, edges: Array<{ sourceId: string; targetId: string; sourcePin?: string; targetPin?: string }>): ElkPort[] {
+function createPorts(
+  node: CircuitGraphNode,
+  edges: Array<{ sourceId: string; targetId: string; sourcePin?: string; targetPin?: string }>
+): ElkPort[] {
   const ports: ElkPort[] = []
   const seenPorts = new Set<string>()
 
@@ -195,15 +198,12 @@ function createPorts(node: CircuitGraphNode, edges: Array<{ sourceId: string; ta
 /**
  * Convert CircuitGraph to ELK JSON format
  */
-function graphToElk(
-  graph: CircuitGraph,
-  options: ElkLayoutOptions
-): ElkNode {
+function graphToElk(graph: CircuitGraph, options: ElkLayoutOptions): ElkNode {
   const opts = { ...DEFAULT_ELK_OPTIONS, ...options }
 
   // Create ELK children (nodes)
   const children: ElkNode[] = []
-  const simpleEdges = graph.edges.map(e => ({
+  const simpleEdges = graph.edges.map((e) => ({
     sourceId: e.sourceId,
     targetId: e.targetId,
     sourcePin: e.sourcePin,
@@ -233,12 +233,8 @@ function graphToElk(
 
   // Create ELK edges
   const edges: ElkEdge[] = graph.edges.map((edge, index) => {
-    const sourcePort = edge.sourcePin
-      ? `${edge.sourceId}.${edge.sourcePin}`
-      : edge.sourceId
-    const targetPort = edge.targetPin
-      ? `${edge.targetId}.${edge.targetPin}`
-      : edge.targetId
+    const sourcePort = edge.sourcePin ? `${edge.sourceId}.${edge.sourcePin}` : edge.sourceId
+    const targetPort = edge.targetPin ? `${edge.targetId}.${edge.targetPin}` : edge.targetId
 
     return {
       id: edge.id || `e${index}`,
@@ -305,7 +301,7 @@ function elkToLayoutResult(
   // Process edges
   if (elkGraph.edges) {
     for (const elkEdge of elkGraph.edges) {
-      const originalEdge = originalGraph.edges.find(e => e.id === elkEdge.id)
+      const originalEdge = originalGraph.edges.find((e) => e.id === elkEdge.id)
 
       // Build waypoints from ELK sections
       const waypoints: Waypoint[] = []
@@ -471,7 +467,7 @@ function fallbackLayout(graph: CircuitGraph, options: ElkLayoutOptions): LayoutR
   }
 
   // Simple direct edges
-  const edges: RoutedEdge[] = graph.edges.map(edge => {
+  const edges: RoutedEdge[] = graph.edges.map((edge) => {
     const sourceNode = nodes.get(edge.sourceId)
     const targetNode = nodes.get(edge.targetId)
 

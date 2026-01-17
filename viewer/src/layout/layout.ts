@@ -298,7 +298,13 @@ function getConnectionPoint(node: PositionedNode, pin?: string): Position {
  */
 export function routeEdges(
   nodes: Map<string, PositionedNode>,
-  edges: Array<{ id: string; sourceId: string; targetId: string; sourcePin?: string; targetPin?: string }>,
+  edges: Array<{
+    id: string
+    sourceId: string
+    targetId: string
+    sourcePin?: string
+    targetPin?: string
+  }>,
   options: Partial<LayoutOptions>
 ): RoutedEdge[] {
   const opts = { ...DEFAULT_OPTIONS, ...options }

@@ -192,7 +192,10 @@ function registerSymbol(registry: SymbolRegistry, metadata: SymbolMetadata): voi
 /**
  * Get symbol for a component type
  */
-export function getSymbolForType(registry: SymbolRegistry, componentType: string): SymbolMetadata | undefined {
+export function getSymbolForType(
+  registry: SymbolRegistry,
+  componentType: string
+): SymbolMetadata | undefined {
   const key = componentType.toLowerCase()
   const symbolIds = registry.typeMap.get(key)
 
@@ -224,7 +227,10 @@ export function getSymbolForType(registry: SymbolRegistry, componentType: string
 /**
  * Get all symbols in a category
  */
-export function getSymbolsByCategory(registry: SymbolRegistry, category: SymbolCategory): SymbolMetadata[] {
+export function getSymbolsByCategory(
+  registry: SymbolRegistry,
+  category: SymbolCategory
+): SymbolMetadata[] {
   const result: SymbolMetadata[] = []
   for (const metadata of registry.symbols.values()) {
     if (metadata.category === category) {

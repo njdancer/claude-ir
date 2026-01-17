@@ -202,7 +202,7 @@ function AppContent() {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-4 top-16 z-10"
+            className="absolute top-16 left-4 z-10"
             onClick={actions.toggleSidebar}
           >
             <PanelLeft className="h-5 w-5" />
@@ -235,7 +235,7 @@ function AppContent() {
                 </p>
                 <FileDropzone onFileLoad={handleFileLoad} className="h-48" />
 
-                <div className="flex items-center gap-4 justify-center pt-2">
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <span className="text-sm text-slate-500">or</span>
                 </div>
 
@@ -297,7 +297,9 @@ function AppContent() {
       {/* Settings dialog */}
       <SettingsDialog
         open={ui.settingsDialogOpen}
-        onOpenChange={(open) => (open ? actions.openSettingsDialog() : actions.closeSettingsDialog())}
+        onOpenChange={(open) =>
+          open ? actions.openSettingsDialog() : actions.closeSettingsDialog()
+        }
         symbolStandard={preferences.symbolStandard}
         theme={preferences.theme}
         showGrid={preferences.showGrid}

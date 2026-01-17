@@ -122,18 +122,18 @@ Serial activity and user-programmable indicators.
 
 Summary of dedicated GPIO usage:
 
-| GPIO | Function          | Direction | Notes                    |
-|------|-------------------|-----------|--------------------------|
-| 0    | Boot mode         | Input     | Strapping pin, pull-up   |
-| 1    | UART TXD          | Output    | Also drives TX LED       |
-| 2    | (Available)       | I/O       | Strapping pin, pull-down |
-| 3    | UART RXD          | Input     | Also drives RX LED       |
-| 4    | Temp sensor data  | I/O       | DHT22 single-wire        |
-| 15   | (Available)       | I/O       | Strapping pin, pull-down |
-| 16   | User LED 1        | Output    | Blue LED via MOSFET      |
-| 17   | User LED 2        | Output    | Blue LED via MOSFET      |
-| 18   | IR transmit       | Output    | 38kHz modulated signal   |
-| 19   | IR receive        | Input     | Demodulated signal       |
+| GPIO | Function         | Direction | Notes                    |
+| ---- | ---------------- | --------- | ------------------------ |
+| 0    | Boot mode        | Input     | Strapping pin, pull-up   |
+| 1    | UART TXD         | Output    | Also drives TX LED       |
+| 2    | (Available)      | I/O       | Strapping pin, pull-down |
+| 3    | UART RXD         | Input     | Also drives RX LED       |
+| 4    | Temp sensor data | I/O       | DHT22 single-wire        |
+| 15   | (Available)      | I/O       | Strapping pin, pull-down |
+| 16   | User LED 1       | Output    | Blue LED via MOSFET      |
+| 17   | User LED 2       | Output    | Blue LED via MOSFET      |
+| 18   | IR transmit      | Output    | 38kHz modulated signal   |
+| 19   | IR receive       | Input     | Demodulated signal       |
 
 All other GPIOs available via breakout header for expansion.
 
@@ -142,6 +142,7 @@ All other GPIOs available via breakout header for expansion.
 ### Power Architecture
 
 Synchronous buck converter (AP63203) chosen over LDO for efficiency:
+
 - LDO would dissipate ~0.6W as heat at typical load
 - Buck converter dissipates ~0.09W, enabling smaller package
 - 2A rating provides headroom for WiFi TX + IR emission peaks
@@ -149,6 +150,7 @@ Synchronous buck converter (AP63203) chosen over LDO for efficiency:
 ### IR LED Drive
 
 Single MOSFET drives all four LEDs for simplicity:
+
 - All LEDs emit simultaneously for maximum coverage
 - 100mA per LED provides good range with reasonable power
 - 3.3V supply (not 5V) reduces resistor power dissipation

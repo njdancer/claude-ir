@@ -87,13 +87,7 @@ export interface SymbolRenderContext {
 /**
  * Category of symbols
  */
-export type SymbolCategory =
-  | 'passive'
-  | 'semiconductor'
-  | 'ic'
-  | 'connector'
-  | 'power'
-  | 'misc'
+export type SymbolCategory = 'passive' | 'semiconductor' | 'ic' | 'connector' | 'power' | 'misc'
 
 /**
  * Symbol metadata for registry

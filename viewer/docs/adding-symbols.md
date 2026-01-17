@@ -16,14 +16,14 @@ Symbols are defined as SVG path data with metadata about pins, bounding boxes, a
 
 ```typescript
 interface SymbolDefinition {
-  id: string                    // Unique identifier
-  name: string                  // Display name
-  standard?: SymbolStandard     // 'ieee' or 'iec'
-  width: number                 // Bounding box width
-  height: number                // Bounding box height
-  paths: SymbolPath[]           // SVG path definitions
-  pins: PinPosition[]           // Pin locations
-  origin: { x: number; y: number }  // Center point
+  id: string // Unique identifier
+  name: string // Display name
+  standard?: SymbolStandard // 'ieee' or 'iec'
+  width: number // Bounding box width
+  height: number // Bounding box height
+  paths: SymbolPath[] // SVG path definitions
+  pins: PinPosition[] // Pin locations
+  origin: { x: number; y: number } // Center point
 }
 ```
 
@@ -32,11 +32,13 @@ interface SymbolDefinition {
 ### Step 1: Design the SVG Path
 
 Symbols are defined using SVG path commands. The coordinate system:
+
 - Origin (0,0) is typically the center of the symbol
 - Positive X is right, positive Y is down
 - Standard grid unit is 10px
 
 Example resistor (IEEE style):
+
 ```typescript
 export const resistorIEEE: SymbolDefinition = {
   id: 'resistor-ieee',
@@ -66,11 +68,11 @@ Pins define where wires connect to the symbol:
 
 ```typescript
 interface PinPosition {
-  id: string      // Pin identifier (matches connection syntax)
-  x: number       // X position relative to origin
-  y: number       // Y position relative to origin
-  label?: string  // Optional display label
-  side?: 'left' | 'right' | 'top' | 'bottom'  // Hint for wire routing
+  id: string // Pin identifier (matches connection syntax)
+  x: number // X position relative to origin
+  y: number // Y position relative to origin
+  label?: string // Optional display label
+  side?: 'left' | 'right' | 'top' | 'bottom' // Hint for wire routing
 }
 ```
 
@@ -94,7 +96,7 @@ function generateICPins(pinCount: number, spacing: number = 20): PinPosition[] {
   for (let i = 0; i < rightPins; i++) {
     pins.push({
       id: String(leftPins + rightPins - i),
-      x: 80,  // IC width
+      x: 80, // IC width
       y: i * spacing + spacing,
       side: 'right',
     })
@@ -111,21 +113,21 @@ In `src/symbols/registry.ts`, add your symbol to the registry:
 ```typescript
 registerSymbol(registry, {
   definition: myNewSymbol,
-  matchTypes: ['my-component', 'mycomp', 'mc'],  // Type aliases
-  category: 'passive',  // 'passive', 'semiconductor', 'ic', 'connector', 'power', 'misc'
+  matchTypes: ['my-component', 'mycomp', 'mc'], // Type aliases
+  category: 'passive', // 'passive', 'semiconductor', 'ic', 'connector', 'power', 'misc'
 })
 ```
 
 ## Symbol Categories
 
-| Category | Description | Examples |
-|----------|-------------|----------|
-| `passive` | Passive components | Resistors, capacitors, inductors |
-| `semiconductor` | Active semiconductors | Diodes, transistors, MOSFETs |
-| `ic` | Integrated circuits | Microcontrollers, op-amps |
-| `connector` | Connectors and switches | Headers, buttons, jacks |
-| `power` | Power symbols | Ground, VCC, supply |
-| `misc` | Other symbols | Junctions, test points |
+| Category        | Description             | Examples                         |
+| --------------- | ----------------------- | -------------------------------- |
+| `passive`       | Passive components      | Resistors, capacitors, inductors |
+| `semiconductor` | Active semiconductors   | Diodes, transistors, MOSFETs     |
+| `ic`            | Integrated circuits     | Microcontrollers, op-amps        |
+| `connector`     | Connectors and switches | Headers, buttons, jacks          |
+| `power`         | Power symbols           | Ground, VCC, supply              |
+| `misc`          | Other symbols           | Junctions, test points           |
 
 ## IEEE vs IEC Standards
 
@@ -233,12 +235,12 @@ Symbols receive render context for dynamic styling:
 
 ```typescript
 interface SymbolRenderContext {
-  selected: boolean     // Is the component selected?
-  hovered: boolean      // Is the component hovered?
-  highlighted: boolean  // Is the component part of a highlight group?
-  dimmed: boolean       // Is the component outside current filter?
-  showValue: boolean    // Should the value label be shown?
-  showRef: boolean      // Should the reference label be shown?
+  selected: boolean // Is the component selected?
+  hovered: boolean // Is the component hovered?
+  highlighted: boolean // Is the component part of a highlight group?
+  dimmed: boolean // Is the component outside current filter?
+  showValue: boolean // Should the value label be shown?
+  showRef: boolean // Should the reference label be shown?
 }
 ```
 
@@ -283,7 +285,12 @@ export function createGenericIC(name: string, pinCount: number): SymbolDefinitio
     height,
     origin: { x: 40, y: height / 2 },
     paths: [
-      { d: `M 10 0 L 70 0 L 70 ${height} L 10 ${height} Z`, stroke: 'currentColor', fill: '#fff', strokeWidth: 2 },
+      {
+        d: `M 10 0 L 70 0 L 70 ${height} L 10 ${height} Z`,
+        stroke: 'currentColor',
+        fill: '#fff',
+        strokeWidth: 2,
+      },
       { d: 'M 10 10 A 5 5 0 0 0 10 20', stroke: 'currentColor', fill: 'none', strokeWidth: 1 }, // Notch
     ],
     pins: generateICPins(pinCount),

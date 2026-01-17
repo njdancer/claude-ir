@@ -88,9 +88,7 @@ export function FileDropzone({
     <div
       className={cn(
         'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors',
-        isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-slate-300 hover:border-slate-400',
+        isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400',
         error && 'border-red-300 bg-red-50',
         className
       )}

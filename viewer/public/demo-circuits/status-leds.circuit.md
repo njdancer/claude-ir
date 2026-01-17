@@ -57,6 +57,7 @@ Same configuration as TX LED, cathode to GPIO3 (RXD).
 ## User Programmable LEDs
 
 Blue LEDs driven through N-channel MOSFETs for:
+
 - Consistent brightness (5V supply handles 3.2V forward voltage)
 - Minimal GPIO current draw (~nA gate current)
 - GPIO protection from LED faults

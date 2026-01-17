@@ -92,12 +92,9 @@ describe('resolver', () => {
       files.set('level15.circuit.md', '[END]: net')
 
       const loader = createMapLoader(files)
-      const result = await resolve(
-        '[START]: @./level0.circuit.md',
-        'main.circuit.md',
-        loader,
-        { maxDepth: 5 }
-      )
+      const result = await resolve('[START]: @./level0.circuit.md', 'main.circuit.md', loader, {
+        maxDepth: 5,
+      })
 
       expect(result.errors.some((e) => e.message.includes('depth'))).toBe(true)
     })

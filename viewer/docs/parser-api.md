@@ -32,14 +32,17 @@ if (result.errors.length === 0) {
 Converts source text into a stream of tokens.
 
 **Parameters:**
+
 - `source` - The circuit.md source text
 - `filename` - Optional filename for error reporting (default: 'input')
 
 **Returns:** `LexerResult`
+
 - `tokens` - Array of `CircuitToken` objects
 - `errors` - Array of `ParseError` objects
 
 **Example:**
+
 ```typescript
 import { tokenize } from '@/parser'
 
@@ -59,10 +62,12 @@ const result = tokenize('[R1]: resistor(10k)')
 Parses source text into a complete AST.
 
 **Parameters:**
+
 - `source` - The circuit.md source text
 - `filename` - Optional filename for error reporting
 
 **Returns:** `ParseResult`
+
 - `ast` - The `CircuitAST` object
 - `errors` - Array of `ParseError` objects
 
@@ -71,14 +76,17 @@ Parses source text into a complete AST.
 Resolves sub-circuit references in an AST by loading and parsing referenced files.
 
 **Parameters:**
+
 - `ast` - The parsed AST with potential sub-circuit references
 - `options` - Resolution options including file loader
 
 **Returns:** `Promise<ResolveResult>`
+
 - `ast` - Fully resolved AST with inlined sub-circuits
 - `errors` - Array of resolution errors
 
 **Example:**
+
 ```typescript
 import { parse, resolve, createMapLoader } from '@/parser'
 
@@ -95,17 +103,17 @@ const resolved = await resolve(result.ast, {
 
 ## Token Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `NET_DECLARATION` | Net declaration | `[VCC]: net` |
-| `COMPONENT_DECLARATION` | Component with type and params | `[R1]: resistor(10k)` |
-| `SUBCIRCUIT_REFERENCE` | Reference to external file | `[U1]: @./power.circuit.md` |
-| `CONNECTION` | Connection between endpoints | `[VCC --- R1.1]` |
-| `INLINE_PASSIVE` | Inline component declaration | `[A --- 10k --- B]` |
-| `PROPERTY` | Key-value property | `[voltage ==> 3.3V]` |
-| `TEXT` | Non-circuit markdown content | `# Title` |
-| `FRONTMATTER` | YAML frontmatter block | `---\nname: Circuit\n---` |
-| `EOF` | End of file marker | - |
+| Type                    | Description                    | Example                     |
+| ----------------------- | ------------------------------ | --------------------------- |
+| `NET_DECLARATION`       | Net declaration                | `[VCC]: net`                |
+| `COMPONENT_DECLARATION` | Component with type and params | `[R1]: resistor(10k)`       |
+| `SUBCIRCUIT_REFERENCE`  | Reference to external file     | `[U1]: @./power.circuit.md` |
+| `CONNECTION`            | Connection between endpoints   | `[VCC --- R1.1]`            |
+| `INLINE_PASSIVE`        | Inline component declaration   | `[A --- 10k --- B]`         |
+| `PROPERTY`              | Key-value property             | `[voltage ==> 3.3V]`        |
+| `TEXT`                  | Non-circuit markdown content   | `# Title`                   |
+| `FRONTMATTER`           | YAML frontmatter block         | `---\nname: Circuit\n---`   |
+| `EOF`                   | End of file marker             | -                           |
 
 ## AST Node Types
 
@@ -116,7 +124,7 @@ Represents a declared net (electrical connection point).
 ```typescript
 interface NetNode {
   type: 'net'
-  name: string      // e.g., 'VCC', 'GND', 'NODE1'
+  name: string // e.g., 'VCC', 'GND', 'NODE1'
   location: SourceLocation
 }
 ```
@@ -128,9 +136,9 @@ Represents a declared component.
 ```typescript
 interface ComponentNode {
   type: 'component'
-  ref: string           // e.g., 'R1', 'U1'
+  ref: string // e.g., 'R1', 'U1'
   componentType: string // e.g., 'resistor', 'esp32'
-  params: string[]      // e.g., ['10k'], ['ESP32-WROOM-32']
+  params: string[] // e.g., ['10k'], ['ESP32-WROOM-32']
   location: SourceLocation
 }
 ```
@@ -142,9 +150,9 @@ Represents a reference to an external circuit file.
 ```typescript
 interface SubcircuitNode {
   type: 'subcircuit'
-  ref: string    // e.g., 'U1'
-  path: string   // e.g., './power.circuit.md'
-  resolved?: CircuitAST  // Populated after resolution
+  ref: string // e.g., 'U1'
+  path: string // e.g., './power.circuit.md'
+  resolved?: CircuitAST // Populated after resolution
   location: SourceLocation
 }
 ```
@@ -156,7 +164,7 @@ Represents a connection between two endpoints.
 ```typescript
 interface ConnectionNode {
   type: 'connection'
-  from: Endpoint  // { ref: 'R1', pin: '1' } or { net: 'VCC' }
+  from: Endpoint // { ref: 'R1', pin: '1' } or { net: 'VCC' }
   to: Endpoint
   location: SourceLocation
 }
@@ -171,9 +179,9 @@ interface InlinePassiveNode {
   type: 'inline_passive'
   from: Endpoint
   to: Endpoint
-  value: string       // e.g., '10k', '100nF'
+  value: string // e.g., '10k', '100nF'
   passiveType: 'resistor' | 'capacitor' | 'inductor' | 'fuse'
-  generatedRef: string  // e.g., '_R1', '_C1'
+  generatedRef: string // e.g., '_R1', '_C1'
   location: SourceLocation
 }
 ```
@@ -195,6 +203,7 @@ interface ParseError {
 ```
 
 **Example error handling:**
+
 ```typescript
 const result = parse(source, filename)
 
