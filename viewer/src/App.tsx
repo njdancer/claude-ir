@@ -217,6 +217,7 @@ function AppContent() {
             componentRefs={componentRefs}
             validation={project.validation}
             filename={project.filename}
+            sourceContent={project.sourceContent}
             onFilterChange={setFilter}
             onResetFilter={resetFilter}
             onClose={actions.toggleSidebar}

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { RoutedEdge } from '@/layout'
 
 interface WireRendererProps {
@@ -9,8 +10,9 @@ interface WireRendererProps {
 
 /**
  * Renders a wire (routed edge) as SVG path
+ * Memoized to prevent unnecessary re-renders
  */
-export function WireRenderer({
+export const WireRenderer = memo(function WireRenderer({
   edge,
   selected = false,
   highlighted = false,
@@ -53,12 +55,13 @@ export function WireRenderer({
           ))}
     </g>
   )
-}
+})
 
 /**
  * Renders a net label
+ * Memoized to prevent unnecessary re-renders
  */
-export function NetLabel({
+export const NetLabel = memo(function NetLabel({
   x,
   y,
   name,
@@ -93,4 +96,4 @@ export function NetLabel({
       </text>
     </g>
   )
-}
+})

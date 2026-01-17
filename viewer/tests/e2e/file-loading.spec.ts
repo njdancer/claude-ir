@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import path from 'path'
 
 // Sample circuit.md content for testing
 const SIMPLE_CIRCUIT = `# Simple Test Circuit

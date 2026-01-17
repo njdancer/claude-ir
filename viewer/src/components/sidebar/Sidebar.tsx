@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { Filter, AlertTriangle, FileText, X } from 'lucide-react'
+import { Filter, AlertTriangle, FileText, X, Code } from 'lucide-react'
 import { FilterPanel } from './FilterPanel'
 import { ValidationPanel } from '../validation/ValidationPanel'
+import { SourcePanel } from '../source/SourcePanel'
 import type { FilterConfig } from '@/state'
-import type { ValidationResult } from '@/validation'
+import type { ValidationResult, ValidationIssue } from '@/validation'
 
 interface SidebarProps {
   filter: FilterConfig
@@ -13,6 +14,7 @@ interface SidebarProps {
   componentRefs: string[]
   validation: ValidationResult | null
   filename: string | null
+  sourceContent: string | null
   onFilterChange: (filter: Partial<FilterConfig>) => void
   onResetFilter: () => void
   onClose?: () => void
@@ -27,11 +29,21 @@ export function Sidebar({
   componentRefs,
   validation,
   filename,
+  sourceContent,
   onFilterChange,
   onResetFilter,
   onClose,
 }: SidebarProps) {
   const [activeTab, setActiveTab] = useState('filter')
+  const [highlightLine, setHighlightLine] = useState<number | undefined>(undefined)
+
+  // Handle clicking on a validation issue - navigate to source line
+  const handleIssueClick = useCallback((issue: ValidationIssue) => {
+    if (issue.location?.line) {
+      setHighlightLine(issue.location.line)
+      setActiveTab('source')
+    }
+  }, [])
 
   const errorCount = validation?.counts.error ?? 0
   const warningCount = validation?.counts.warning ?? 0
@@ -76,6 +88,13 @@ export function Sidebar({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger
+            value="source"
+            className="gap-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            <Code className="h-4 w-4" />
+            Source
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="filter" className="flex-1 m-0 overflow-auto">
@@ -89,7 +108,15 @@ export function Sidebar({
         </TabsContent>
 
         <TabsContent value="validation" className="flex-1 m-0 overflow-auto">
-          <ValidationPanel validation={validation} />
+          <ValidationPanel validation={validation} onIssueClick={handleIssueClick} />
+        </TabsContent>
+
+        <TabsContent value="source" className="flex-1 m-0 overflow-hidden">
+          <SourcePanel
+            content={sourceContent}
+            highlightLine={highlightLine}
+            onLineClick={setHighlightLine}
+          />
         </TabsContent>
       </Tabs>
     </div>

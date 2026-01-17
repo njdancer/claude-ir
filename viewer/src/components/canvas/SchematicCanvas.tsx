@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useState, useMemo } from 'react'
 import type { CircuitGraph, ComponentGraphNode, NetGraphNode } from '@/graph'
 import type { LayoutResult } from '@/layout'
 import type { SymbolRenderContext } from '@/symbols'
@@ -50,8 +50,8 @@ export function SchematicCanvas({
   const [isDragging, setIsDragging] = useState(false)
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
 
-  // Create symbol registry
-  const registry = createSymbolRegistry()
+  // Create symbol registry (memoized for performance)
+  const registry = useMemo(() => createSymbolRegistry(), [])
 
   // Mouse event handlers
   const handleMouseDown = useCallback(

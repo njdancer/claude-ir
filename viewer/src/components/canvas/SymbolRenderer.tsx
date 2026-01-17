@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { SymbolDefinition, SymbolRenderContext } from '@/symbols'
 
 interface SymbolRendererProps {
@@ -10,8 +11,9 @@ interface SymbolRendererProps {
 
 /**
  * Renders a single schematic symbol as SVG
+ * Memoized to prevent unnecessary re-renders when parent updates
  */
-export function SymbolRenderer({
+export const SymbolRenderer = memo(function SymbolRenderer({
   symbol,
   context,
   onClick,
@@ -99,4 +101,4 @@ export function SymbolRenderer({
       )}
     </g>
   )
-}
+})

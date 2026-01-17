@@ -119,9 +119,9 @@ describe('ELK Layout', () => {
     const rightLayout = await layoutGraphElk(graph, { direction: 'RIGHT' })
     const downLayout = await layoutGraphElk(graph, { direction: 'DOWN' })
 
-    // Different directions should produce different layouts
-    const r1Right = rightLayout.nodes.get('R1')!
-    const r1Down = downLayout.nodes.get('R1')!
+    // Both layouts should have nodes
+    expect(rightLayout.nodes.get('R1')).toBeDefined()
+    expect(downLayout.nodes.get('R1')).toBeDefined()
 
     // The positions or bounds should differ
     const rightWidth = rightLayout.bounds.width

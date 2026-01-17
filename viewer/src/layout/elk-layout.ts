@@ -76,11 +76,12 @@ const DEFAULT_ELK_OPTIONS: Required<ElkLayoutOptions> = {
  */
 function getNodeDimensions(node: CircuitGraphNode): { width: number; height: number } {
   switch (node.type) {
-    case 'component':
+    case 'component': {
       // Larger nodes for components with many pins
       const pinCount = node.pins?.length || 2
       const height = Math.max(60, pinCount * 15)
       return { width: 80, height }
+    }
     case 'subcircuit':
       return { width: 120, height: 100 }
     case 'net':

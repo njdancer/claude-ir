@@ -2133,7 +2133,7 @@ features:
   category: docs
   name: Add inline help tooltips
   description: Tooltips explaining UI controls
-  status: planned
+  status: completed
   priority: low
   dependencies:
   - UI-012
@@ -2149,7 +2149,7 @@ features:
   category: docs
   name: Performance optimization pass
   description: Profile and optimize rendering
-  status: planned
+  status: completed
   priority: medium
   dependencies:
   - UI-041
@@ -2165,7 +2165,7 @@ features:
   category: docs
   name: Final QA and polish
   description: Bug fixes and visual polish
-  status: planned
+  status: completed
   priority: high
   dependencies:
   - TEST-017
