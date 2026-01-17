@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppStateProvider,
   useAppState,
@@ -52,10 +52,18 @@ function AppContent() {
   const componentRefs = useMemo(() => selectComponentRefs(state), [state])
   const filteredGraph = useMemo(() => selectFilteredGraph(state), [state])
 
+  // Track what content we've started processing to prevent re-entry
+  const processingContentRef = useRef<string | null>(null)
+
   // Process circuit file when loaded
   useEffect(() => {
     if (!project.sourceContent || !project.filename) return
-    if (project.loading === false && project.ast) return // Already processed
+
+    // Skip if we've already started processing this content
+    if (processingContentRef.current === project.sourceContent) return
+
+    // Mark this content as being processed
+    processingContentRef.current = project.sourceContent
 
     // Capture values for async function
     const sourceContent = project.sourceContent
@@ -85,7 +93,7 @@ function AppContent() {
     }
 
     processCircuit()
-  }, [project.sourceContent, project.filename, project.loading, project.ast, actions])
+  }, [project.sourceContent, project.filename, actions])
 
   // File load handler
   const handleFileLoad = useCallback(
