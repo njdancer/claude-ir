@@ -2312,7 +2312,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Transistor_BJT:Q_NPN_BCE"
+		(symbol "Transistor_BJT:Q_NPN_BEC"
 			(pin_names (offset 0) (hide yes))
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -2321,7 +2321,7 @@
 				(at 5.08 1.27 0)
 				(effects (font (size 1.27 1.27)) (justify left))
 			)
-			(property "Value" "Q_NPN_BCE"
+			(property "Value" "Q_NPN_BEC"
 				(at 5.08 -1.27 0)
 				(effects (font (size 1.27 1.27)) (justify left))
 			)
@@ -2341,7 +2341,7 @@
 				(at 0 0 0)
 				(effects (font (size 1.27 1.27)) (hide yes))
 			)
-			(symbol "Q_NPN_BCE_0_1"
+			(symbol "Q_NPN_BEC_0_1"
 				(polyline
 					(pts (xy -2.54 0) (xy 0.635 0))
 					(stroke (width 0) (type default))
@@ -2359,7 +2359,7 @@
 					(fill (type none))
 				)
 			)
-			(symbol "Q_NPN_BCE_1_1"
+			(symbol "Q_NPN_BEC_1_1"
 				(polyline
 					(pts (xy 0.635 0.635) (xy 2.54 2.54))
 					(stroke (width 0) (type default))
@@ -2390,13 +2390,13 @@
 					(at 2.54 5.08 270)
 					(length 2.54)
 					(name "C" (effects (font (size 1.27 1.27))))
-					(number "2" (effects (font (size 1.27 1.27))))
+					(number "3" (effects (font (size 1.27 1.27))))
 				)
 				(pin passive line
 					(at 2.54 -5.08 90)
 					(length 2.54)
 					(name "E" (effects (font (size 1.27 1.27))))
-					(number "3" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
 				)
 			)
 			(embedded_fonts no)
@@ -4885,7 +4885,7 @@
 			(at 195.58 73.66 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17922"
 			(at 195.58 73.66 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -4930,7 +4930,7 @@
 			(at 179.07 115.57 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 179.07 115.57 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5269,7 +5269,7 @@
 			(at 113.03 100.33 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C124375"
+		(property "LCSC" ""
 			(at 113.03 100.33 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5342,7 +5342,7 @@
 			(at 252.73 106.68 90)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 252.73 112.268 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5471,7 +5471,7 @@
 			(at 162.56 57.1501 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 166.878 58.42 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5952,7 +5952,7 @@
 			(at 259.08 148.59 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm"
+		(property "Footprint" "JLC-MCP:SW-SMD_L3.9-W3.0-P4.45"
 			(at 259.08 148.59 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6049,7 +6049,7 @@
 			(at 198.12 151.13 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 198.12 151.13 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6065,7 +6065,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_BJT:Q_NPN_BCE")
+		(lib_id "Transistor_BJT:Q_NPN_BEC")
 		(at 176.53 144.78 0)
 		(mirror x)
 		(unit 1)
@@ -6078,7 +6078,7 @@
 			(at 181.61 146.0501 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "Q_NPN_BCE"
+		(property "Value" "Q_NPN_BEC"
 			(at 181.61 143.5101 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -6254,7 +6254,7 @@
 			(at 252.73 83.82 90)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 252.73 89.408 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6350,7 +6350,7 @@
 			(at 163.83 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 163.83 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6560,7 +6560,7 @@
 			(at 259.08 137.16 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm"
+		(property "Footprint" "JLC-MCP:SW-SMD_L3.9-W3.0-P4.45"
 			(at 259.08 137.16 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6657,7 +6657,7 @@
 			(at 87.63 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 87.63 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -6875,7 +6875,7 @@
 			(at 252.73 95.25 90)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 252.73 100.838 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7102,7 +7102,7 @@
 			(at 195.58 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17922"
 			(at 195.58 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7425,7 +7425,7 @@
 			(at 101.6 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 101.6 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7557,7 +7557,7 @@
 			(at 195.58 62.23 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17922"
 			(at 195.58 62.23 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7685,7 +7685,7 @@
 			(at 170.18 49.5299 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 165.862 48.26 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7989,7 +7989,7 @@
 			(at 198.12 91.44 90)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 198.12 85.852 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8256,7 +8256,7 @@
 			(at 195.58 39.37 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17922"
 			(at 195.58 39.37 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8300,7 +8300,7 @@
 			(at 163.83 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 163.83 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8345,7 +8345,7 @@
 			(at 161.29 168.91 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17902"
 			(at 161.29 168.91 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8378,7 +8378,7 @@
 			(at 252.73 118.11 90)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 252.73 123.698 90)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8639,7 +8639,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_BJT:Q_NPN_BCE")
+		(lib_id "Transistor_BJT:Q_NPN_BEC")
 		(at 176.53 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -8652,7 +8652,7 @@
 			(at 181.61 130.8099 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "Q_NPN_BCE"
+		(property "Value" "Q_NPN_BEC"
 			(at 181.61 133.3499 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -9221,7 +9221,7 @@
 			(at 43.18 163.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17922"
 			(at 43.18 163.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
