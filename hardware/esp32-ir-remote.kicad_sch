@@ -11339,6 +11339,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C55528" (at 205.74 73.66 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "c5b6f4ae-e422-4a66-8bdf-18d6b43c90d7")
 		)
@@ -11572,6 +11575,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C99772" (at 262.89 121.92 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "9bb40e9f-3bc0-4fcc-842f-7d9b595812ba")
 		)
@@ -12403,6 +12409,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C83333" (at 176.53 36.83 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "5891f8b0-8098-4493-a5d3-be016799f4ee")
 		)
@@ -12768,6 +12777,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C85160" (at 262.89 99.06 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "c4e5e2a8-0011-4484-bbb0-7c16e84cc33c")
 		)
@@ -13348,6 +13360,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C455280" (at 259.08 153.67 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "2"
 			(uuid "938e781e-3c78-41b6-a69e-24f2f8335b70")
 		)
@@ -13820,7 +13835,7 @@
 				)
 			)
 		)
-		(property "Value" "150Ω"
+		(property "Value" "470Ω"
 			(at 252.73 83.82 90)
 			(effects
 				(font
@@ -13855,7 +13870,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17471"
+		(property "LCSC" "C17710"
 			(at 252.73 87.63 0)
 			(effects
 				(font
@@ -14490,6 +14505,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C99772" (at 262.89 76.2 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "ccba96dc-7a5c-41a2-91a9-ee9eae7be248")
 		)
@@ -14698,6 +14716,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C86881" (at 232.41 45.72 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "2c447333-3527-4533-a7fb-678f325b8139")
 		)
@@ -14766,6 +14787,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C455280" (at 259.08 142.24 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "2"
 			(uuid "3beedf42-8d5c-4476-ab73-87513bd6f202")
 		)
@@ -15574,6 +15598,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C14663" (at 105.41 121.92 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "4f146005-b6f9-4d76-a211-cfce61cc9149")
 		)
@@ -16081,7 +16108,7 @@
 				)
 			)
 		)
-		(property "Value" "3.9µH"
+		(property "Value" "4.7µH"
 			(at 165.1 81.28 90)
 			(effects
 				(font
@@ -16116,6 +16143,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C78804" (at 165.1 83.82 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "2"
 			(uuid "4ae4db9c-52e5-4ab6-83a5-a1c44d5cf6bc")
 		)
@@ -16415,6 +16445,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C85160" (at 262.89 110.49 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "3c4778f5-1750-4172-8aaa-485006470549")
 		)
@@ -16492,6 +16525,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C85161" (at 262.89 87.63 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "9e9fc960-1c1d-450e-acfb-cc970cad1d54")
 		)
@@ -17462,6 +17498,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C86881" (at 241.3 29.21 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "9c99debe-8c75-4720-a1f2-76d89d197400")
 		)
@@ -18297,6 +18336,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C55528" (at 205.74 62.23 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "2dcb407d-6967-4b8d-bf06-759453e5bcf9")
 		)
@@ -18528,7 +18570,7 @@
 				)
 			)
 		)
-		(property "Value" "10kΩ"
+		(property "Value" "470Ω"
 			(at 198.12 91.44 90)
 			(effects
 				(font
@@ -18563,7 +18605,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17710"
 			(at 198.12 87.63 0)
 			(effects
 				(font
@@ -19369,7 +19411,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17955"
+		(property "LCSC" "C17414"
 			(at 161.29 168.91 0)
 			(effects
 				(font
@@ -19589,6 +19631,9 @@
 				(hide yes)
 			)
 		)
+    (property "LCSC" "C142747" (at 157.48 26.67 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(pin "1"
 			(uuid "e5d560c0-4105-4ffc-acde-0263c01492dd")
 		)
