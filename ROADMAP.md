@@ -10,13 +10,16 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-➡️ **Active phase: H1 — Schematic verification.** H1.0 done (28 protocol
-fixtures preserved). H1.1 done: **ERC baseline = 9 violations (1 error, 8
-warnings), all expected** (see H1.1 below); netlist resynced to schematic.
-Next action: H1.2 — library hygiene + reconcile docs that lag the schematic
-(auto-reset jumpers→0Ω resistors). F1.1–F1.3 are already done; F1.5 lists a
-~10-minute breadboard check for whenever the ESP8266 is plugged in (no ESP
-board was on USB this session — only Bluetooth/Cricut serial ports present).
+➡️ **Active phase: H1 — Schematic verification.** Done this session: H1.0
+(28 protocol fixtures preserved), H1.1 (ERC baseline = 9 violations, all
+expected; netlist resynced), H1.2 census (no orphan; LCSC backfill mapped),
+**H1.4 datasheet review (clean — see `datasheet-review-h1.4.md`)**. The board
+is electrically sound; remaining H1 work is a **batch of small KiCad-GUI edits**
+(H1.2 convention cleanup + LCSC fields + the H1.4 action items: R13 gate
+resistor, L1→4.7µH, TSOP Vs filter, drop redundant PWR_FLAG) then H1.3
+hierarchical refactor and H1.5 human PDF review. These need the KiCad GUI =
+a Mac bench session. F1.1–F1.3 done; F1.4 firmware + F1.5 bench check pending
+(no ESP board was on USB this session — only Bluetooth/Cricut ports present).
 
 ## Done (context for new sessions)
 
@@ -87,7 +90,7 @@ Make the schematic provably correct before any layout effort builds on it.
         | D11,D12 | Blue user LED | C86881 |
         | F1  | Polyfuse 1.1A (1812) | C142747 |
         | SW1,SW2 | Tact switch TS-1088R | C455280 |
-        | L1  | Inductor — **DECISION:** sch=3.9µH vs BOM SRP5030T-4R7M (4.7µH, C2045677). See Nick checklist. |
+        | L1  | Inductor — **DECIDED (H1.4): use 4.7µH** (3.9µH is in-range but 4.7µH = datasheet typical + better JLCPCB Basic stock, zero downside). Spec Isat ≥~2.7A, DCR <100mΩ, Basic part. |
   - [ ] **Kill the dual-BOM problem:** after the schematic carries all LCSC
         fields, regenerate the BOM from it (`kicad-cli sch export bom` / the
         kicad MCP) so `esp32-ir-remote_bom.csv` is complete, then either delete
@@ -105,17 +108,23 @@ Make the schematic provably correct before any layout effort builds on it.
       into sub-sheets matching `hardware/notes/` (power, usb-serial, mcu,
       ir-tx, ir-rx, temp-sensor, status-leds). Gate: netlist diff before vs
       after is electrically empty (net names may change; connectivity may not).
-- [ ] **H1.4 Adversarial datasheet review:** one subagent per subsystem,
-      given only the datasheet (`hardware/datasheets/`) + exported netlist,
-      independently re-derives required connections and reports mismatches.
-      Specific items the review MUST cover:
-  - [ ] ESP32 strapping pins incl. GPIO12/MTDI (flash voltage — must not be
-        pulled high at boot) and GPIO6-11 not used as I/O
-  - [ ] CH340C: R232 tied LOW, V3/VCC config at 3.3V, decoupling
-  - [ ] AP63203: BST cap, inductor rating, input/output caps per datasheet
-  - [ ] USB-C: CC pull-downs, VBUS protection ordering (fuse before TVS)
-  - [ ] IR MOSFET gate network and LED current math vs TSAL6200 datasheet
-  - [ ] Every IC power pin decoupled; every unused input handled
+- [x] **H1.4 Adversarial datasheet review — DONE.** 6 parallel subagents (one
+      per subsystem) re-derived required connections from datasheets vs the
+      netlist; every ERROR/HIGH item re-verified against the netlist directly.
+      Full record: [`hardware/notes/datasheet-review-h1.4.md`](hardware/notes/datasheet-review-h1.4.md).
+      **All MUST-cover items checked & clean** (strapping incl. GPIO12 safe &
+      GPIO6-11 flash-internal; CH340C R232-LOW + V3/VCC@3.3V; AP63203 BST/caps;
+      USB-C CC pull-downs + fuse-before-TVS ✓; IR MOSFET + LED math; decoupling).
+      A reported "auto-reset bases floating" showstopper was a **false positive**
+      (refuted by netlist re-check — circuit is the correct cross-coupled design).
+      **Action items fold into the H1.2 GUI session** (none block; all small):
+  - [ ] **HIGH:** R13 gate resistor 10kΩ → ~330Ω–1kΩ (10k too slow for 38kHz IR).
+  - [ ] **MED:** L1 → 4.7µH (decided above); add TSOP Vs RC filter (~100Ω+100nF).
+  - [ ] **LOW:** D7 green 150Ω→470Ω–1k; confirm J1 GPIO6-11 breakout intent;
+        remove redundant PWR_FLAG on U2 V3 (clears the 1 ERC error); firmware
+        guard vs stuck-high IR_TX.
+  - [x] Replaced 3 broken (HTML-saved) datasheet PDFs with genuine vendor PDFs;
+        YAGEO 100nF cap one still HTML (generic passive, low priority).
 - [ ] **H1.5 Human gate:** export schematic PDF (`kicad-cli sch export pdf`),
       Nick eyeballs it. Findings fixed → ERC clean → netlist committed.
 
