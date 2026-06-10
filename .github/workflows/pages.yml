@@ -35,7 +35,11 @@ jobs:
           apt-get install -y --no-install-recommends pandoc git
       - uses: actions/checkout@v4
       - name: Build site
-        run: ./scripts/build-site.sh _site
+        # safe.directory: the workspace mount is owned by the runner uid but
+        # steps run as root, so git (used by build-site.sh) refuses it otherwise
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          ./scripts/build-site.sh _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
