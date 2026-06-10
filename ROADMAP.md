@@ -60,7 +60,12 @@ Installed and configured `mixelpixx/KiCAD-MCP-Server` at
 `--system-site-packages` venv (`.venv`, KiCad py3.9 + pcbnew 9.0.6 + cairosvg
 etc.) created, smoke-tested (MCP handshake returns **155 tools**, "SERVER
 READY"). Added to `.mcp.json` as **`kicad-edit`** (alongside the existing
-read-only `kicad`). **Restart the session to load it.** It exposes schematic/PCB
+read-only `kicad`). **Loaded & smoke-tested 2026-06-10:** project open,
+schematic component queries, and board PNG render all work against the real
+project. *KiCad 9 caveat:* `get_board_2d_view` fails unless you pass an
+explicit `layers` list (e.g. `["F.Cu","B.Cu","Edge.Cuts","F.SilkS"]`) — the
+server's bare `pcb export svg` call relies on KiCad 8 defaults. Schematic
+*editing* tools remain unproven. It exposes schematic/PCB
 *editing* (add_schematic_component/wire, place_component, route, autoroute),
 *rendering* (`get_board_2d_view`, `kicad://board/preview.png`), and *export*
 (svg/pdf/3d/bom/gerber/CPL). Two potential uses: (a) do some of the **Board v1.2
