@@ -10,10 +10,10 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-✅ **GitHub Pages live:** every push to main now publishes schematic PDF/SVG,
-BOM CSV, and all rendered docs to <http://nick.dncr.me/claude-ir/> (see
-"Publishing" below). The `kicad-edit` MCP is loaded and working (restart done).
-Next thread: the **Board v1.2 change set** via `kicad-edit` or the KiCad GUI.
+✅ **GitHub Pages live** (build + deploy green, content verified at GitHub's
+edge), **but the URL needs a one-record DNS fix from Nick** — see "Publishing"
+below. The `kicad-edit` MCP is loaded and working (restart done). Next thread:
+the **Board v1.2 change set** via `kicad-edit` or the KiCad GUI.
 
 ➡️ **Active phase: H1 — Schematic verification.** Done this session: H1.0
 (28 protocol fixtures preserved), H1.1 (ERC baseline = 9 violations, all
@@ -69,10 +69,22 @@ carefully — MCP edits on a hand-drawn schematic are unproven; verify every
 change with `hardware-check.sh` + netlist diff); (b) generate board preview
 PNGs for the Pages docs below.
 
-### Publishing: GitHub Pages artifacts — **DONE (2026-06-10)**
+### Publishing: GitHub Pages artifacts — **DONE (2026-06-10)**, DNS fix pending (Nick)
 
-Every push to main publishes to <http://nick.dncr.me/claude-ir/> (Nick's
-user-level custom domain fronts project pages; the github.io URL also works).
+Every push to main publishes the site; deploys verified working (content
+served correctly when resolving against GitHub's Pages edge directly).
+**⚠️ Blocker (Nick, ~1 min):** the `njdancer.github.io` user-pages repo has
+custom domain `nick.dncr.me`, so ALL project pages 301 there — but that
+hostname has **no DNS record** in the Cloudflare `dncr.me` zone (user site has
+been dead a while; GitHub's LE cert for it has lapsed too). Fix either way:
+- **Restore it:** add CNAME `nick` → `njdancer.github.io` (DNS-only) in
+  Cloudflare, then re-tick "Enforce HTTPS" in the njdancer.github.io repo's
+  Pages settings once the cert re-provisions. Site (and Nick's user site) then
+  live at <https://nick.dncr.me/claude-ir/>.
+- **Or drop it:** remove the custom domain from njdancer.github.io's Pages
+  settings; everything serves at <https://njdancer.github.io/claude-ir/>.
+No DNS tooling available from Claude (Cloudflare MCP here has no DNS-record
+tools; no wrangler/API token) — and it's Nick's personal/email domain anyway.
 - **`scripts/build-site.sh`** is the single source of truth for site content:
   schematic PDF + per-sheet SVGs + grouped BOM CSV (with LCSC) via `kicad-cli`,
   plus every tracked `*.md` rendered to HTML with pandoc (repo paths mirrored
