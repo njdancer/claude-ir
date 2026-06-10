@@ -63,3 +63,4 @@ tools/kicad-mcp-server/
 
 # Stray local node_modules (no source tracked here)
 viewer/
+_site/

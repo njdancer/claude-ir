@@ -1,0 +1,51 @@
+# Publish board artifacts + rendered docs to GitHub Pages on every push to
+# main. The build job runs inside the official KiCad image so kicad-cli
+# matches the version used on the bench (KiCad 9); scripts/build-site.sh is
+# the single source of truth for what gets published and runs identically
+# locally and here.
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: kicad/kicad:9.0
+      # The image's default user (kicad) can't write to the workspace mount
+      options: --user root
+    steps:
+      # git must exist before checkout so it does a real clone (build-site.sh
+      # needs `git ls-files` / `rev-parse`, which the tarball fallback breaks)
+      - name: Install pandoc + git
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends pandoc git
+      - uses: actions/checkout@v4
+      - name: Build site
+        run: ./scripts/build-site.sh _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

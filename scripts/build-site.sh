@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+#
+# build-site.sh - Build the static site published to GitHub Pages
+#
+# Exports board artifacts from the KiCad schematic (PDF, per-sheet SVGs,
+# BOM CSV) and renders every tracked markdown doc to HTML, then writes an
+# index.html linking it all. Runs locally (macOS, KiCad app bundle) and in
+# CI (kicad/kicad docker image). Requires kicad-cli, pandoc, and git.
+#
+# Usage:
+#   ./scripts/build-site.sh [output-dir]    # default: _site
+#
+
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+OUT="${1:-_site}"
+SCH="hardware/esp32-ir-remote.kicad_sch"
+
+# --- Locate kicad-cli (same preference order as hardware-check.sh) --------
+find_kicad_cli() {
+    if [ -n "${KICAD_CLI:-}" ]; then
+        echo "$KICAD_CLI"
+        return
+    fi
+    local mac_cli="/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
+    if [ -x "$mac_cli" ]; then
+        echo "$mac_cli"
+        return
+    fi
+    if command -v kicad-cli >/dev/null 2>&1; then
+        command -v kicad-cli
+        return
+    fi
+}
+
+KICAD_CLI_BIN="$(find_kicad_cli)"
+if [ -z "$KICAD_CLI_BIN" ]; then
+    echo "ERROR: kicad-cli not found (PATH, app bundle, or \$KICAD_CLI)" >&2
+    exit 1
+fi
+command -v pandoc >/dev/null 2>&1 || { echo "ERROR: pandoc not found" >&2; exit 1; }
+
+echo "kicad-cli: $KICAD_CLI_BIN ($("$KICAD_CLI_BIN" version))"
+echo "pandoc:    $(pandoc --version | head -1)"
+
+rm -rf "$OUT"
+mkdir -p "$OUT/hardware/schematic-svg"
+
+# --- KiCad exports ---------------------------------------------------------
+echo "Exporting schematic PDF..."
+"$KICAD_CLI_BIN" sch export pdf -o "$OUT/hardware/schematic.pdf" "$SCH"
+
+echo "Exporting schematic SVGs..."
+"$KICAD_CLI_BIN" sch export svg -o "$OUT/hardware/schematic-svg" "$SCH"
+
+echo "Exporting BOM CSV..."
+"$KICAD_CLI_BIN" sch export bom \
+    -o "$OUT/hardware/bom.csv" \
+    --fields 'Reference,Value,Footprint,LCSC,${QUANTITY}' \
+    --labels 'Refs,Value,Footprint,LCSC,Qty' \
+    --group-by 'Value,Footprint,LCSC' \
+    "$SCH"
+
+# PCB renders (kicad-cli pcb render / pcb export svg) deliberately omitted
+# until H2 layout exists - 66 unplaced footprints render as noise.
+
+# --- Render markdown docs --------------------------------------------------
+# Mirror repo paths under docs/ so relative links between docs keep working
+# after the .md -> .html rewrite below.
+echo "Rendering markdown docs..."
+DOCS=$(git ls-files '*.md' | grep -v '^\.claude/')
+for f in $DOCS; do
+    outf="$OUT/docs/${f%.md}.html"
+    mkdir -p "$(dirname "$outf")"
+    pandoc -s --from gfm --to html5 \
+        --metadata title="${f#./}" \
+        -o "$outf" "$f"
+    # Rewrite relative .md links to the rendered .html ([^":]* keeps
+    # scheme-qualified URLs like https://... untouched)
+    sed -E -i.bak 's|href="([^":]*)\.md(#[^"]*)?"|href="\1.html\2"|g' "$outf"
+    rm -f "$outf.bak"
+done
+
+# --- index.html --------------------------------------------------------------
+echo "Writing index.html..."
+
+svg_links=""
+for svg in "$OUT"/hardware/schematic-svg/*.svg; do
+    name="$(basename "$svg")"
+    svg_links+="<li><a href=\"hardware/schematic-svg/$name\">$name</a></li>"
+done
+
+doc_links=""
+for f in $DOCS; do
+    doc_links+="<li><a href=\"docs/${f%.md}.html\">$f</a></li>"
+done
+
+commit="$(git rev-parse --short HEAD)"
+built="$(date -u +'%Y-%m-%d %H:%M UTC')"
+
+cat > "$OUT/index.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claude-ir — ESP32 IR remote board</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 46rem;
+         margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #ddd; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  li { margin: .2rem 0; }
+  footer { margin-top: 3rem; color: #777; font-size: .85rem;
+           border-top: 1px solid #ddd; padding-top: .5rem; }
+  code { background: #f2f2f2; padding: 0 .25em; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>claude-ir</h1>
+<p>ESP32 smart controller for an ActronAir (Midea) air conditioner. The IR
+protocol is fully reverse-engineered; the custom dev board is in design.
+Source: <a href="https://github.com/njdancer/claude-ir">github.com/njdancer/claude-ir</a></p>
+
+<h2>Board artifacts</h2>
+<ul>
+  <li><a href="hardware/schematic.pdf"><strong>Schematic (PDF)</strong></a></li>
+  <li><a href="hardware/bom.csv">BOM (CSV, grouped, with LCSC part numbers)</a></li>
+  <li>Schematic sheets (SVG):<ul>$svg_links</ul></li>
+</ul>
+<p><em>PCB previews/renders will appear here once layout starts (phase H2).</em></p>
+
+<h2>Key documents</h2>
+<ul>
+  <li><a href="docs/ROADMAP.html">Roadmap</a> — project state and next actions</li>
+  <li><a href="docs/specs/hardware-dev-board-v1.html">Hardware spec — dev board v1</a></li>
+  <li><a href="docs/re-findings.html">IR protocol reverse-engineering findings</a></li>
+  <li><a href="docs/hardware/notes/README.html">Hardware design notes</a> — per-subsystem rationale</li>
+  <li><a href="docs/hardware/notes/datasheet-review-h1.4.html">Datasheet review (H1.4)</a></li>
+</ul>
+
+<h2>All documents</h2>
+<ul>$doc_links</ul>
+
+<footer>Built from <code>$commit</code> on $built by GitHub Actions.</footer>
+</body>
+</html>
+EOF
+
+echo "Site built in $OUT/ ($(find "$OUT" -type f | wc -l | tr -d ' ') files)"
