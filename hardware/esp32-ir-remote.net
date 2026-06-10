@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/Users/nickdancer/Documents/claude-ir/hardware/esp32-ir-remote.kicad_sch")
-    (date "2026-06-11T02:42:02+1000")
+    (date "2026-06-11T09:06:21+1000")
     (tool "Eeschema 9.0.6")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
@@ -1815,10 +1815,8 @@
       (node (ref "J4") (pin "3") (pinfunction "Pin_3") (pintype "passive"))
       (node (ref "U3") (pin "37") (pinfunction "IO23") (pintype "bidirectional")))
     (net (code "20") (name "/ESP_GPIO25") (class "Default")
-      (node (ref "J4") (pin "4") (pinfunction "Pin_4") (pintype "passive"))
       (node (ref "U3") (pin "10") (pinfunction "IO25") (pintype "bidirectional")))
     (net (code "21") (name "/ESP_GPIO26") (class "Default")
-      (node (ref "J4") (pin "5") (pinfunction "Pin_5") (pintype "passive"))
       (node (ref "U3") (pin "11") (pinfunction "IO26") (pintype "bidirectional")))
     (net (code "22") (name "/ESP_GPIO32") (class "Default")
       (node (ref "J4") (pin "6") (pinfunction "Pin_6") (pintype "passive"))

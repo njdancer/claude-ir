@@ -241,7 +241,10 @@ for fp in board.GetFootprints():
         if p.GetNetCode() > 0:
             names[p.GetNetCode()] = p.GetNetname()
 
-MAX_ROUNDS = 40
+import os
+ONLY = set(os.environ.get("NETS", "").split(",")) - {""}
+ALLOW_RIP = os.environ.get("RIPUP", "1") == "1"
+MAX_ROUNDS = int(os.environ.get("ROUNDS", "40"))
 rip_history = set()
 for rnd in range(MAX_ROUNDS):
     occ, owner, net_cells, hop_cells, net_pads = build_model()
@@ -251,6 +254,7 @@ for rnd in range(MAX_ROUNDS):
     split = []
     for nc in net_pads:
         if nc == gnd: continue
+        if ONLY and names.get(nc, "").lstrip("/") not in ONLY: continue
         comps = components(nc, net_cells, hop_cells)
         if len(comps) > 1:
             comps.sort(key=len, reverse=True)
@@ -274,6 +278,9 @@ for rnd in range(MAX_ROUNDS):
                 b2, v2, _ = masks_for(nc, name, occ, owner, net_pads, hw=0.125)
                 goal, prev = astar(b2, v2, other, main_c)
                 used_hw = 0.125
+            if goal is None and not ALLOW_RIP:
+                print(f"  [{name}] SPLIT REMAINS (rip-up disabled)")
+                continue
             if goal is None:
                 # bounded rip-up: try ignoring one candidate net's tracks
                 bbx = [c[1] for c in main_c | other]; bby = [c[2] for c in main_c | other]

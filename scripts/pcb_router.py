@@ -21,7 +21,7 @@ GRID = 0.1  # mm
 X0, Y0, X1, Y1 = 100.0, 60.0, 180.0, 115.0
 NX = int(round((X1 - X0) / GRID)) + 1
 NY = int(round((Y1 - Y0) / GRID)) + 1
-CLEAR = 0.131        # working clearance, just above JLCPCB 0.127 floor
+CLEAR = 0.128        # working clearance, just above JLCPCB 0.127 floor
 EDGE_MARGIN = 0.45   # copper-to-edge (board rule 0.3 + margin)
 ANTENNA_X = 104.6    # no copper west of this (WROOM antenna strip)
 F, B = 0, 1
@@ -223,7 +223,7 @@ def main():
     SQRT2 = math.sqrt(2)
     DIRS = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0),
             (1, 1, SQRT2), (1, -1, SQRT2), (-1, 1, SQRT2), (-1, -1, SQRT2)]
-    VIA_COST = 14.0
+    VIA_COST = 8.0
 
     for nc in ordered:
         name = net_names[nc]
@@ -232,7 +232,7 @@ def main():
         if name in POWER_NETS:
             LAYER_PENALTY = {F: 0.30, B: 0.0}   # power distributes on B
         else:
-            LAYER_PENALTY = {F: 0.0, B: 0.05}   # signals may use B freely
+            LAYER_PENALTY = {F: 0.0, B: 0.0}   # signals may use B freely
 
         def build_masks(hw_):
             foreign = occ & (owner != nc)
