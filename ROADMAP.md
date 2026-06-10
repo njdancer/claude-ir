@@ -54,14 +54,46 @@ Make the schematic provably correct before any layout effort builds on it.
     regenerating surfaced an already-committed design change (auto-reset
     bypass JP2/JP3 header jumpers → R21/R26 0Ω SMD links) plus the LCSC
     fields from e1f89f4. `usb-serial.md` updated to match; spec lags (H1.2).
-- [ ] **H1.2 Library hygiene:** resolve known smells found by symbol census:
-  - [ ] Two ESP32 symbols present (`RF_Module:ESP32-WROOM-32E` AND custom
-        `ESP32-WROOM-32E-Breakout`) — confirm one is orphaned and remove it
-  - [ ] Mixed conventions: generic `Device:R`/`Device:C` alongside
-        part-specific `PCM_JLCPCB-*` symbols — standardize on generic symbols
-        with LCSC part numbers in fields
-  - [ ] Verify every symbol has a footprint and LCSC field; cross-check
-        against `hardware/esp32-ir-remote_bom.csv` and `hardware/BOM.md`
+- [~] **H1.2 Library hygiene:** census done this session; edits pending
+      (KiCad GUI / surgical):
+  - [x] ~~Two ESP32 symbols~~ **NOT an orphan — no removal.** `RF_Module:ESP32-
+        WROOM-32E` = U3 (the MCU, 39 nodes). The second symbol is **J1**, an
+        intentional *DevKitC debug breakout header* ("Debug breakout header
+        matching ESP32-DevKitC V4 pinout", 2×19 pin-header footprint, 38 pins
+        mirroring U3's GPIOs). Keep both. H1.4 should verify J1↔U3 pin mapping
+        matches the real DevKitC pinout.
+  - [ ] **Convention cleanup (8 symbols):** 6 resistors use
+        `PCM_JLCPCB-Resistors` and 2 transistors use `PCM_JLCPCB-Transistors`;
+        everything else uses generic `Device:*` (44 symbols). Standardize the
+        8 onto generic symbols carrying LCSC in fields. *KiCad GUI edit.*
+  - [ ] **LCSC backfill (15 of 65 comps), KiCad GUI edit — mapping
+        pre-computed below.** All 65 comps have footprints ✓; 15 lack an LCSC
+        field. `hardware/BOM.md` (hand-curated) has the LCSC numbers but is
+        **stale vs the schematic on reference designators** (it even swaps
+        J1/J2 and mislabels R21) — so match by *function/value*, NOT by ref.
+        Schematic is the source of truth (BOM.md's own footer agrees). Add
+        these LCSC fields to the schematic symbols (high-confidence,
+        function-matched to BOM.md):
+
+        | Sch ref | Function (schematic value) | LCSC |
+        |---------|----------------------------|------|
+        | C10 | 100nF decoupling | C1591 (same as C4/C7/C9) |
+        | D1  | TVS (SMBJ5.0A) | C83333 |
+        | D4,D5 | IR LED TSAL6200 (match D2,D3) | C55528 |
+        | D6  | Red 5V power LED | C99772 |
+        | D7  | Y-green 3.3V power LED | C85161 |
+        | D8,D9 | Amber serial TX/RX LED | C85160 |
+        | D10 | Red IR-TX indicator LED | C99772 |
+        | D11,D12 | Blue user LED | C86881 |
+        | F1  | Polyfuse 1.1A (1812) | C142747 |
+        | SW1,SW2 | Tact switch TS-1088R | C455280 |
+        | L1  | Inductor — **DECISION:** sch=3.9µH vs BOM SRP5030T-4R7M (4.7µH, C2045677). See Nick checklist. |
+  - [ ] **Kill the dual-BOM problem:** after the schematic carries all LCSC
+        fields, regenerate the BOM from it (`kicad-cli sch export bom` / the
+        kicad MCP) so `esp32-ir-remote_bom.csv` is complete, then either delete
+        `hardware/BOM.md` or demote it to rationale-only (it currently
+        disagrees with the schematic on designators, R15 value, R21 identity,
+        J1/J2, and JP2/JP3 — all already correct in the schematic).
   - [ ] **Spec reconciliation (schematic wins):** `specs/hardware-dev-board-v1.md`
         §Auto-Reset + BOM still describe JP2/JP3 header bypass jumpers, but the
         schematic uses R21/R26 0Ω SMD links (already fixed in
