@@ -1,4 +1,15 @@
-# ESP32 IR Remote - Bill of Materials
+# ESP32 IR Remote - Bill of Materials (HISTORICAL — do not order from this)
+
+> **⚠️ DEMOTED 2026-06-11.** This hand-curated document is **stale**: it
+> disagrees with the schematic on reference designators (it predates the
+> v1.2 changes: J1 removed, J3–J6 added, R27–R30 added) and carried several
+> wrong LCSC codes that have since been fixed in the schematic (R13/R22 had
+> the 18Ω code, Q3 had the 2N7002 code, R14/R15 had 0805 codes on 1206
+> footprints). **The schematic is the single source of truth for parts;
+> the generated [`esp32-ir-remote_bom.csv`](esp32-ir-remote_bom.csv)
+> (regenerate via `kicad-cli sch export bom`, see `scripts/build-site.sh`)
+> is the orderable BOM.** This file is kept only for the part-selection
+> rationale and supplier notes below.
 
 ## Status
 

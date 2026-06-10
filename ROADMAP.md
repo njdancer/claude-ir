@@ -10,10 +10,18 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **Board v1.2 change set COMPLETE (2026-06-11, headless via kicad-edit MCP +
+scripted s-expr surgery, every step netlist-verified).** ERC is now **0 errors**
+(8 deliberate dual-label warnings). J1 removed; Qwiic/spare-GPIO/ext-IR/JTAG
+connection points added; all H1.4 fixes in; LCSC coverage complete (only the 3
+hand-solder pin headers blank); BOM regenerated from schematic, `BOM.md` demoted.
+Five latent BOM bugs found & fixed (R13/R22→18Ω code, Q3→2N7002 code, R14/R15→
+0805 codes on 1206 footprints). **Remaining H1:** H1.3 hierarchical refactor
+(optional, netlist-gated) and **H1.5 Nick eyeballs the schematic PDF** (on the
+Pages site). Then H2 layout. F1.4 firmware + F1.5 bench check still pending.
+
 ✅ **GitHub Pages live at <https://njdancer.github.io/claude-ir/>** — every
-push to main publishes schematic PDF/SVG, BOM CSV, and all rendered docs (see
-"Publishing" below). The `kicad-edit` MCP is loaded and working (restart done).
-Next thread: the **Board v1.2 change set** via `kicad-edit` or the KiCad GUI.
+push to main publishes schematic PDF/SVG, BOM CSV, and all rendered docs.
 
 ➡️ **Active phase: H1 — Schematic verification.** Done this session: H1.0
 (28 protocol fixtures preserved), H1.1 (ERC baseline = 9 violations, all
@@ -26,32 +34,29 @@ hierarchical refactor and H1.5 human PDF review. These need the KiCad GUI =
 a Mac bench session. F1.1–F1.3 done; F1.4 firmware + F1.5 bench check pending
 (no ESP board was on USB this session — only Bluetooth/Cricut ports present).
 
-### Board v1.2 change set (one KiCad-GUI bench session)
+### Board v1.2 change set — **DONE (2026-06-11)**, commits 83a91b9…
 
-Everything below is a single batch of schematic edits. Spec v1.2
-(`specs/hardware-dev-board-v1.md`) is the authority; the schematic is the truth
-to be brought in line. After editing: `./scripts/hardware-check.sh` → review
-netlist diff → commit schematic+netlist.
-
-**Macro feature changes (decided 2026-06-10):**
-1. **Remove J1** (2×19 DevKitC debug breakout header).
-2. **Add I2C Qwiic** 4-pin JST-SH: GND/3V3/SDA=GPIO21/SCL=GPIO22 (+ 2×4.7k I2C
-   pull-up footprints).
-3. **Add spare-GPIO + power header** (2×5, 2.54mm): GPIO25/26/32/33/34/23 +
-   3V3 + 5V + GND.
-4. **Add external IR-emitter header** (2-pin) = extra IR branch on Q3 drain
-   with its own series-resistor footprint.
-5. **Add JTAG footprint** (2×5, DNP): GPIO12=TDI/13=TCK/14=TMS/15=TDO + 3V3/GND.
-6. Keep WROOM-32E (PCB antenna); no U.FL. Battery stays v2.
-
-**H1.4 circuit fixes:** R13 gate resistor 10k→~330Ω–1k; L1→4.7µH (Isat ≥2.7A,
-Basic part); add TSOP Vs RC filter (~100Ω + 100nF); D7 green 150Ω→470Ω–1k;
-remove redundant PWR_FLAG on CH340C V3 (clears the 1 ERC error).
-
-**H1.2 library/BOM:** standardize 8 `PCM_JLCPCB-*` symbols → generic `Device:*`;
-backfill LCSC fields on the 15 gap parts (table in H1.2); then regenerate the
-BOM from the schematic and demote `hardware/BOM.md`. Prefer JLCPCB **Basic**
-parts for all new/changed parts (verify on LCSC via Chrome).
+All items landed headlessly (kicad-edit MCP + scripted s-expression surgery),
+each verified by ERC + machine-checked netlist-partition diff and committed
+separately:
+1. **J1 removed** (38-pin DevKitC breakout + harness; 22 freed GPIOs NC'd,
+   GPIO6-11 flash pins no longer broken out — closes the H1.4 LOW item).
+2. **J3 Qwiic** JST-SH (C160404): GND/3V3/SDA=21/SCL=22 + R28/R29 4.7k
+   pull-up footprints (C17936, DNP).
+3. **J4 spare header** 2×5: 3V3/5V/GPIO23·25·26·32·33·34/2×GND.
+4. **J5 ext-IR header** + R30 18Ω series footprint (DNP): EXT_IR_A net →
+   +3.3V; cathode side on IR_DRAIN (Q3 drain, now labelled).
+5. **J6 JTAG** 2×5 DNP, ARM 10-pin layout incl. EN as nRESET.
+6. **H1.4 fixes:** R13 470Ω; L1 4.7µH = SWPA6045S4R7MT **C78804** (no Basic
+   4.7µH power inductor exists anymore — one Extended feeder fee accepted);
+   TSOP Vs RC filter (R27 100Ω C17901 + C9, net IR_RX_VS + PWR_FLAG);
+   D7's R16 → 470Ω; redundant PWR_FLAG removed → **ERC 0 errors**.
+7. **H1.2:** 8 PCM_JLCPCB symbols → generic (electrically-empty, verified);
+   LCSC backfill complete; **5 latent BOM bugs fixed** (R13/R22 carried the
+   18Ω code C17955; Q3 carried the 2N7002 code C8545 → C53550; R14 → C17900,
+   R15 → C4410 — both had 0805 codes on 1206 footprints); BOM regenerated
+   (`esp32-ir-remote_bom.csv`, with DNP column); `BOM.md` demoted to
+   rationale-only.
 
 ### Tooling: second KiCad MCP (`kicad-edit`) — **needs a session restart**
 
@@ -60,12 +65,26 @@ Installed and configured `mixelpixx/KiCAD-MCP-Server` at
 `--system-site-packages` venv (`.venv`, KiCad py3.9 + pcbnew 9.0.6 + cairosvg
 etc.) created, smoke-tested (MCP handshake returns **155 tools**, "SERVER
 READY"). Added to `.mcp.json` as **`kicad-edit`** (alongside the existing
-read-only `kicad`). **Loaded & smoke-tested 2026-06-10:** project open,
-schematic component queries, and board PNG render all work against the real
-project. *KiCad 9 caveat:* `get_board_2d_view` fails unless you pass an
-explicit `layers` list (e.g. `["F.Cu","B.Cu","Edge.Cuts","F.SilkS"]`) — the
-server's bare `pcb export svg` call relies on KiCad 8 defaults. Schematic
-*editing* tools remain unproven. It exposes schematic/PCB
+read-only `kicad`). **Battle-tested on the v1.2 change set (2026-06-11).
+Known bugs/quirks (most have open upstream issues — repo is active, v2.2.3
+upstream vs our older install; consider updating):**
+- `get_board_2d_view` needs an explicit `layers` list on KiCad 9+ (upstream
+  issue #235).
+- `add_schematic_component` **ignores its `angle` param** (symbol placed at 0°;
+  only the ref text rotates). Fix the instance `(at x y angle)` by hand after.
+- `replace_schematic_component` **drops the Datasheet and LCSC fields** and
+  doesn't adapt to symbol-geometry differences (the PCM NMOS symbol is the
+  *mirror* of `Q_NMOS_GSD` — pins land in air; fix with `(mirror y)`).
+- Delete/add operations **re-serialize the whole .kicad_sch onto one line**;
+  re-pretty-print before committing (s-expr formatter snippet in git history,
+  commit ea57f23) or diffs become useless.
+- Labels are emitted with `bottom` justification → text sits offset/overlapping
+  in renders (upstream issue #234); power-symbol refs (#FLG04 etc.) aren't
+  hidden, so ref+value both render ("doubled" text). Cosmetic; GUI cleanup in
+  H1.3.
+- KiCad 9's own netlister drops/renames **label-less 2-pin nets** (false
+  `wire_dangling` ERC + net missing from netlist). Name the net with a label.
+It exposes schematic/PCB
 *editing* (add_schematic_component/wire, place_component, route, autoroute),
 *rendering* (`get_board_2d_view`, `kicad://board/preview.png`), and *export*
 (svg/pdf/3d/bom/gerber/CPL). Two potential uses: (a) do some of the **Board v1.2
@@ -128,7 +147,7 @@ Make the schematic provably correct before any layout effort builds on it.
     regenerating surfaced an already-committed design change (auto-reset
     bypass JP2/JP3 header jumpers → R21/R26 0Ω SMD links) plus the LCSC
     fields from e1f89f4. `usb-serial.md` updated to match; spec lags (H1.2).
-- [~] **H1.2 Library hygiene:** census done this session; edits pending
+- [x] **H1.2 Library hygiene — DONE 2026-06-11:** census done this session; edits pending
       (KiCad GUI / surgical):
   - [x] ~~Two ESP32 symbols~~ **NOT an orphan — no removal.** `RF_Module:ESP32-
         WROOM-32E` = U3 (the MCU, 39 nodes). The second symbol is **J1**, an
@@ -136,12 +155,11 @@ Make the schematic provably correct before any layout effort builds on it.
         matching ESP32-DevKitC V4 pinout", 2×19 pin-header footprint, 38 pins
         mirroring U3's GPIOs). Keep both. H1.4 should verify J1↔U3 pin mapping
         matches the real DevKitC pinout.
-  - [ ] **Convention cleanup (8 symbols):** 6 resistors use
+  - [x] **Convention cleanup (8 symbols) — DONE 2026-06-11:** 6 resistors use
         `PCM_JLCPCB-Resistors` and 2 transistors use `PCM_JLCPCB-Transistors`;
         everything else uses generic `Device:*` (44 symbols). Standardize the
         8 onto generic symbols carrying LCSC in fields. *KiCad GUI edit.*
-  - [ ] **LCSC backfill (15 of 65 comps), KiCad GUI edit — mapping
-        pre-computed below.** All 65 comps have footprints ✓; 15 lack an LCSC
+  - [x] **LCSC backfill — DONE 2026-06-11 (headless).** All 65 comps have footprints ✓; 15 lack an LCSC
         field. `hardware/BOM.md` (hand-curated) has the LCSC numbers but is
         **stale vs the schematic on reference designators** (it even swaps
         J1/J2 and mislabels R21) — so match by *function/value*, NOT by ref.
@@ -162,7 +180,7 @@ Make the schematic provably correct before any layout effort builds on it.
         | F1  | Polyfuse 1.1A (1812) | C142747 |
         | SW1,SW2 | Tact switch TS-1088R | C455280 |
         | L1  | Inductor — **DECIDED (H1.4): use 4.7µH** (3.9µH is in-range but 4.7µH = datasheet typical + better JLCPCB Basic stock, zero downside). Spec Isat ≥~2.7A, DCR <100mΩ, Basic part. |
-  - [ ] **Kill the dual-BOM problem:** after the schematic carries all LCSC
+  - [x] **Kill the dual-BOM problem — DONE 2026-06-11:** after the schematic carries all LCSC
         fields, regenerate the BOM from it (`kicad-cli sch export bom` / the
         kicad MCP) so `esp32-ir-remote_bom.csv` is complete, then either delete
         `hardware/BOM.md` or demote it to rationale-only (it currently
@@ -188,9 +206,9 @@ Make the schematic provably correct before any layout effort builds on it.
       A reported "auto-reset bases floating" showstopper was a **false positive**
       (refuted by netlist re-check — circuit is the correct cross-coupled design).
       **Action items fold into the H1.2 GUI session** (none block; all small):
-  - [ ] **HIGH:** R13 gate resistor 10kΩ → ~330Ω–1kΩ (10k too slow for 38kHz IR).
-  - [ ] **MED:** L1 → 4.7µH (decided above); add TSOP Vs RC filter (~100Ω+100nF).
-  - [ ] **LOW:** D7 green 150Ω→470Ω–1k; confirm J1 GPIO6-11 breakout intent;
+  - [x] **HIGH (done):** R13 gate resistor 10kΩ → ~330Ω–1kΩ (10k too slow for 38kHz IR).
+  - [x] **MED (done):** L1 → 4.7µH (decided above); add TSOP Vs RC filter (~100Ω+100nF).
+  - [x] **LOW (done except firmware item):** D7 green 150Ω→470Ω (R16); confirm J1 GPIO6-11 breakout intent;
         remove redundant PWR_FLAG on U2 V3 (clears the 1 ERC error); firmware
         guard vs stuck-high IR_TX.
   - [x] Replaced 3 broken (HTML-saved) datasheet PDFs with genuine vendor PDFs;

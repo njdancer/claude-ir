@@ -5752,7 +5752,7 @@
 			(at 212.09 87.63 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C8545"
+		(property "LCSC" "C53550"
 			(at 212.09 87.63 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -7782,7 +7782,7 @@
 			(at 208.28 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C149504"
+		(property "LCSC" "C17900"
 			(at 208.28 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8046,7 +8046,7 @@
 			(at 252.73 76.2 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C17513"
+		(property "LCSC" "C4410"
 			(at 252.73 76.2 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8708,6 +8708,9 @@
 			(at 255.27 40.64 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C25803" (at 255.27 40.64 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R23") (unit 1)))
 		)
@@ -8736,6 +8739,9 @@
 			(at 223.52 36.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C17513" (at 223.52 36.83 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R20") (unit 1)))
 		)
@@ -8764,6 +8770,9 @@
 			(at 144.78 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C21189" (at 144.78 132.08 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R21") (unit 1)))
 		)
@@ -8792,6 +8801,9 @@
 			(at 246.38 57.15 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C25803" (at 246.38 57.15 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R24") (unit 1)))
 		)
@@ -8820,6 +8832,9 @@
 			(at 231.14 29.21 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C17513" (at 231.14 29.21 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R25") (unit 1)))
 		)
@@ -8848,6 +8863,9 @@
 			(at 144.78 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C21189" (at 144.78 144.78 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "R26") (unit 1)))
 		)
@@ -8877,6 +8895,9 @@
 			(at 250.19 35.56 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C8545" (at 250.19 35.56 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "Q4") (unit 1)))
 		)
@@ -8906,6 +8927,9 @@
 			(at 241.3 52.07 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+    (property "LCSC" "C8545" (at 241.3 52.07 0)
+      (effects (font (size 1.27 1.27)) (hide yes))
+    )
 		(instances
 			(project "project" (path "/" (reference "Q5") (unit 1)))
 		)
