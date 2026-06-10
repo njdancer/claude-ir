@@ -18,9 +18,9 @@ fetch — use it instead of web searches for part sourcing (the kicad-edit
 local JLCPCB DB is empty). **Restart to load it.**
 
 **Next session picks from:** H1.5 (Nick eyeballs the schematic PDF on the
-Pages site — the human gate), optional H1.3 hierarchical refactor, updating
-`tools/kicad-mcp-server` to upstream v2.2.3 (several bugs we hit are fixed
-there), or H2.1 layout constraints. F1.4/F1.5 firmware+bench also open.
+Pages site — the human gate), optional H1.3 hierarchical refactor, or H2.1
+layout constraints. F1.4/F1.5 firmware+bench also open. Optional good
+citizenship: file the unreported kicad-edit bugs upstream (see Tooling).
 
 ✅ **Board v1.2 change set COMPLETE (2026-06-11, headless via kicad-edit MCP +
 scripted s-expr surgery, every step netlist-verified).** ERC is now **0 errors**
@@ -78,8 +78,9 @@ Installed and configured `mixelpixx/KiCAD-MCP-Server` at
 etc.) created, smoke-tested (MCP handshake returns **155 tools**, "SERVER
 READY"). Added to `.mcp.json` as **`kicad-edit`** (alongside the existing
 read-only `kicad`). **Battle-tested on the v1.2 change set (2026-06-11).
-Known bugs/quirks (most have open upstream issues — repo is active, v2.2.3
-upstream vs our older install; consider updating):**
+Our install IS upstream HEAD (8fd5c8c, 2026-06-03) — the bugs below are
+open upstream (#234/#235 have issues/PRs pending; the ignored-`angle` and
+field-dropping-replace bugs appear unreported — worth filing):**
 - `get_board_2d_view` needs an explicit `layers` list on KiCad 9+ (upstream
   issue #235).
 - `add_schematic_component` **ignores its `angle` param** (symbol placed at 0°;
