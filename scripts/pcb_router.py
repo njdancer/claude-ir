@@ -33,17 +33,25 @@ IR_NETS = {"IR_DRAIN", "EXT_IR_A", "/EXT_IR_A", "Net-(D2-A)", "Net-(D3-A)",
 def net_widths(name):
     """(track half-width, via diameter, via drill) in mm."""
     if name in POWER_NETS:
-        return 0.30, 0.8, 0.4
+        return 0.30, 0.6, 0.3
     if name in IR_NETS or name.lstrip("/") in {n.lstrip("/") for n in IR_NETS}:
-        return 0.25, 0.8, 0.4
+        return 0.25, 0.6, 0.3
     return 0.125, 0.5, 0.3
 
+# short, position-locked local families first; long flexible transit last
 ROUTE_ORDER_HEAD = [
-    "Net-(U1-SW)", "Net-(U1-BST)", "Net-(F1-Pad2)", "+5V", "+3.3V",
-    "USB_D-", "USB_D+",
-    "IR_DRAIN", "Net-(D2-A)", "Net-(D3-A)", "Net-(D4-A)", "Net-(D5-A)",
+    "Net-(U1-SW)", "Net-(U1-BST)",
+    "Net-(Q1-B)", "Net-(Q2-B)", "Net-(Q1-E)", "Net-(Q2-E)",
+    "Net-(U2-~{DTR})", "Net-(U2-~{RTS})",
+    "Net-(Q3-G)", "Net-(D10-A)",
+    "Net-(D11-K)", "Net-(D11-A)", "Net-(D12-K)", "Net-(D12-A)",
+    "Net-(D6-A)", "Net-(D7-A)", "Net-(D8-A)", "Net-(D9-A)",
+    "Net-(J2-CC1)", "Net-(J2-CC2)", "Net-(JP1-B)", "IR_RX_VS",
+    "Net-(D2-A)", "Net-(D3-A)", "Net-(D4-A)", "Net-(D5-A)", "EXT_IR_A",
+    "USB_D-", "USB_D+", "Net-(F1-Pad2)", "+5V", "IR_DRAIN",
+    "ESP_EN",
 ]
-ROUTE_ORDER_TAIL = []
+ROUTE_ORDER_TAIL = ["+3.3V"]
 
 def mm2c(x, y):
     return int(round((x - X0) / GRID)), int(round((y - Y0) / GRID))
@@ -187,8 +195,9 @@ def main():
     # F.Cu penalty regions: [x0,y0,x1,y1,penalty] - corridors stay clear for
     # perpendicular escapes; east-west bus traffic prefers B.Cu there
     REGION = np.zeros((2, NX, NY), dtype=np.float32)
-    for rx0, ry0, rx1, ry1, pen in ((105, 60.5, 162, 69.0, 0.8),
-                                    (123.5, 69.0, 137, 96.0, 0.5)):
+    for rx0, ry0, rx1, ry1, pen in ((105, 60.5, 162, 71.5, 1.2),
+                                    (123.5, 71.5, 137, 96.0, 0.5),
+                                    (125, 83, 145, 90, 0.9)):
         i0, j0 = mm2c(rx0, ry0); i1, j1 = mm2c(rx1, ry1)
         REGION[F, max(i0,0):min(i1,NX), max(j0,0):min(j1,NY)] = pen
 
