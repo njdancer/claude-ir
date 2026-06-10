@@ -37,6 +37,10 @@ connects to the *opposite* input signal (Q1: base←DTR via 10kΩ, collector→E
 emitter→RTS; Q2: base←RTS via 10kΩ, collector→GPIO0, emitter→DTR). With both
 inputs asserted, neither transistor has a path to pull its output low.
 
-**Bypass jumpers (JP2/JP3):** in series with DTR and RTS, so auto-reset can be
-disconnected when debugging serial without spurious resets. Default: jumpers
-installed (auto-reset enabled).
+**Bypass links (R21/R26, 0Ω):** in series on the DTR and RTS lines (R21 on
+DTR→Q2 emitter, R26 on RTS→Q1 emitter), so auto-reset can be disconnected when
+debugging serial without spurious resets. Implemented as 0Ω SMD resistors
+rather than through-hole header+shunt jumpers so JLCPCB places them at assembly;
+desolder either to break auto-reset. Default: both populated (auto-reset
+enabled). *(Spec §Auto-Reset still describes the older JP2/JP3 header jumpers —
+queued for the spec reconciliation in ROADMAP H1.2.)*

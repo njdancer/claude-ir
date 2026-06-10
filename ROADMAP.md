@@ -11,11 +11,12 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 ## Now
 
 ➡️ **Active phase: H1 — Schematic verification.** H1.0 done (28 protocol
-fixtures preserved in `captures/reference/`). Next action: H1.1 — run
-`./scripts/hardware-check.sh` on the Mac for an ERC baseline and commit the
-regenerated netlist. F1.1–F1.3 are already done; F1.5 lists a ~10-minute
-breadboard check for whenever the ESP8266 is plugged in (no ESP board was on
-USB this session — only Bluetooth/Cricut serial ports present).
+fixtures preserved). H1.1 done: **ERC baseline = 9 violations (1 error, 8
+warnings), all expected** (see H1.1 below); netlist resynced to schematic.
+Next action: H1.2 — library hygiene + reconcile docs that lag the schematic
+(auto-reset jumpers→0Ω resistors). F1.1–F1.3 are already done; F1.5 lists a
+~10-minute breadboard check for whenever the ESP8266 is plugged in (no ESP
+board was on USB this session — only Bluetooth/Cricut serial ports present).
 
 ## Done (context for new sessions)
 
@@ -38,9 +39,21 @@ Make the schematic provably correct before any layout effort builds on it.
       modes 1–5, fan 1–6, power on/on-2/off/button, swing A/B, boost, LED).
       Gap recorded: no valid `temp-28` capture exists (both bench attempts
       failed to decode) — folded into the F1.5 bench checklist.
-- [ ] **H1.1 Baseline:** run `./scripts/hardware-check.sh`; fix any script
-      issues; commit regenerated netlist + ERC fixes. Record violation count
-      here even if zero.
+- [x] **H1.1 Baseline:** ERC = **9 violations (1 error, 8 warnings)**, all
+      expected, no schematic fixes needed yet:
+  - 1 error `pin_to_pin`: PWR_FLAG (#FLG03) on CH340C V3 output (U2.4), the
+    redundant-flag-on-power-output pattern → owned by H1.4 (CH340C V3/VCC).
+  - 8 warnings `multiple_net_names`: every MCU GPIO net is dual-labelled
+    `ESP_GPIOxx` + functional (`IR_TX/RX`, `TEMP_DATA`, `USER_LED1/2`,
+    `UART_TX/RX`, `ESP_VDD`/`+3.3V`). Deliberate; KiCad just picks one name.
+    Natural cleanup in the H1.3 hierarchical refactor.
+  - **Script fix:** `hardware-check.sh` now prefers the KiCad app-bundle CLI
+    over a Homebrew `kicad-cli` on PATH whose broken library path produced
+    ~146 bogus `lib_symbol_issues`/`footprint_link_issues` (153→9).
+  - **Netlist resynced:** committed `.net` was stale vs the schematic —
+    regenerating surfaced an already-committed design change (auto-reset
+    bypass JP2/JP3 header jumpers → R21/R26 0Ω SMD links) plus the LCSC
+    fields from e1f89f4. `usb-serial.md` updated to match; spec lags (H1.2).
 - [ ] **H1.2 Library hygiene:** resolve known smells found by symbol census:
   - [ ] Two ESP32 symbols present (`RF_Module:ESP32-WROOM-32E` AND custom
         `ESP32-WROOM-32E-Breakout`) — confirm one is orphaned and remove it
@@ -49,6 +62,13 @@ Make the schematic provably correct before any layout effort builds on it.
         with LCSC part numbers in fields
   - [ ] Verify every symbol has a footprint and LCSC field; cross-check
         against `hardware/esp32-ir-remote_bom.csv` and `hardware/BOM.md`
+  - [ ] **Spec reconciliation (schematic wins):** `specs/hardware-dev-board-v1.md`
+        §Auto-Reset + BOM still describe JP2/JP3 header bypass jumpers, but the
+        schematic uses R21/R26 0Ω SMD links (already fixed in
+        `hardware/notes/usb-serial.md`). Update the spec via the `spec-writing`
+        skill: §Auto-Reset diagram/table, BOM jumper row, and the
+        jumper-config summary. Also fix the stale "JP2/JP3" silkscreen note in
+        H2.4 below.
 - [ ] **H1.3 Hierarchical refactor (netlist-gated):** split the flat sheet
       into sub-sheets matching `hardware/notes/` (power, usb-serial, mcu,
       ir-tx, ir-rx, temp-sensor, status-leds). Gate: netlist diff before vs

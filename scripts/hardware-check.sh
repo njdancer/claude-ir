@@ -36,14 +36,18 @@ find_kicad_cli() {
         echo "$KICAD_CLI"
         return
     fi
-    if command -v kicad-cli >/dev/null 2>&1; then
-        command -v kicad-cli
-        return
-    fi
-    # macOS app bundle
+    # Prefer the macOS app-bundle install: it ships the standard symbol/
+    # footprint libraries with working library tables. A Homebrew kicad-cli
+    # on PATH can shadow it but resolve libraries to a nonexistent
+    # SharedSupport/symbols path, producing ~150 bogus lib_symbol_issues /
+    # footprint_link_issues that drown out real ERC violations.
     local mac_cli="/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
     if [ -x "$mac_cli" ]; then
         echo "$mac_cli"
+        return
+    fi
+    if command -v kicad-cli >/dev/null 2>&1; then
+        command -v kicad-cli
         return
     fi
 }
