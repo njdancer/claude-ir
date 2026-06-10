@@ -65,8 +65,47 @@ echo "Exporting BOM CSV..."
     --group-by 'Value,Footprint,LCSC' \
     "$SCH"
 
-# PCB renders (kicad-cli pcb render / pcb export svg) deliberately omitted
-# until H2 layout exists - 66 unplaced footprints render as noise.
+echo "Exporting PCB renders + 3D model..."
+PCB="$ROOT/hardware/esp32-ir-remote.kicad_pcb"
+mkdir -p "$OUT/hardware/pcb"
+"$KICAD_CLI_BIN" pcb render --side top -w 1600 -h 1200 \
+    -o "$OUT/hardware/pcb/board-top.png" "$PCB"
+"$KICAD_CLI_BIN" pcb render --side bottom -w 1600 -h 1200 \
+    -o "$OUT/hardware/pcb/board-bottom.png" "$PCB"
+"$KICAD_CLI_BIN" pcb render --perspective --rotate '-25,0,35' -w 1600 -h 1200 \
+    -o "$OUT/hardware/pcb/board-iso.png" "$PCB"
+"$KICAD_CLI_BIN" pcb export svg --layers F.Cu,B.Cu,Edge.Cuts,F.SilkS \
+    --page-size-mode 2 -o "$OUT/hardware/pcb/board-copper.svg" "$PCB"
+# GLB (binary glTF) for the interactive viewer; include components
+"$KICAD_CLI_BIN" pcb export glb --subst-models --include-tracks --include-zones \
+    -o "$OUT/hardware/pcb/board.glb" "$PCB" || echo "WARN: glb export failed"
+# interactive 3D viewer page (Google model-viewer web component)
+cat > "$OUT/hardware/pcb/viewer.html" <<'VIEWER'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>esp32-ir-remote - interactive 3D board viewer</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  body { margin:0; font-family: system-ui, sans-serif; background:#1c1f24; color:#eee; }
+  header { padding:.6rem 1rem; background:#14161a; display:flex; justify-content:space-between; }
+  header a { color:#8ecbff; text-decoration:none; }
+  model-viewer { width:100vw; height:calc(100vh - 3rem); background:#1c1f24; }
+</style>
+</head>
+<body>
+<header>
+  <span>esp32-ir-remote rev 1.2 - drag to orbit, scroll to zoom</span>
+  <a href="../../index.html">back to docs</a>
+</header>
+<model-viewer src="board.glb" camera-controls auto-rotate auto-rotate-delay="1500"
+  shadow-intensity="0.6" exposure="1.1" camera-orbit="30deg 65deg auto" min-camera-orbit="auto auto 5%">
+</model-viewer>
+</body>
+</html>
+VIEWER
 
 # --- Render markdown docs --------------------------------------------------
 # Mirror repo paths under docs/ so relative links between docs keep working
@@ -132,7 +171,15 @@ Source: <a href="https://github.com/njdancer/claude-ir">github.com/njdancer/clau
   <li><a href="hardware/bom.csv">BOM (CSV, grouped, with LCSC part numbers)</a></li>
   <li>Schematic sheets (SVG):<ul>$svg_links</ul></li>
 </ul>
-<p><em>PCB previews/renders will appear here once layout starts (phase H2).</em></p>
+<h2>PCB</h2>
+<p><a href="hardware/pcb/viewer.html"><strong>Interactive 3D board viewer</strong></a>
+ (drag/zoom, in-browser)</p>
+<ul>
+  <li><a href="hardware/pcb/board-iso.png">3D render - isometric</a></li>
+  <li><a href="hardware/pcb/board-top.png">3D render - top</a></li>
+  <li><a href="hardware/pcb/board-bottom.png">3D render - bottom</a></li>
+  <li><a href="hardware/pcb/board-copper.svg">Copper + silkscreen (SVG)</a></li>
+</ul>
 
 <h2>Key documents</h2>
 <ul>

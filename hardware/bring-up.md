@@ -1,0 +1,95 @@
+# Board bring-up procedure — esp32-ir-remote rev 1.2
+
+Per-subsystem power-on test sequence. Do these **in order**; each step gates
+the next. Bench kit: USB-C cable + current-limited supply or USB power meter,
+multimeter, the ESP8266 breadboard rig (known-good IR reference), a phone
+camera (sees 940nm as purple glow).
+
+## 0. Visual inspection (before any power)
+
+- [ ] No solder bridges around U1 (TSOT-23-6), U2 (SOIC-16), Q3-Q5 (SOT-23).
+- [ ] L1, C1-C3 orientation n/a (non-polarized); D1 TVS cathode band toward F1.
+- [ ] THT parts to hand-solder before first power: **none required for the
+      power-on test** (LEDs/TSOP/DHT22/headers can wait; the buck + USB +
+      MCU path is all SMD).
+- [ ] JP1 intact (not cut) — buck enabled.
+- [ ] Continuity: GND at J2 shell ↔ U3 GND pads ↔ mounting-hole-adjacent
+      pour. No continuity +5V↔GND, +3.3V↔GND (>1kΩ rising = caps charging).
+
+## 1. Bare power (no firmware)
+
+- [ ] Power from a current-limited supply via USB-C (limit 200mA first).
+      Expect idle draw < 60mA (WROOM unprogrammed boot loop is bursty;
+      brief 200-300mA spikes are normal on a non-limited supply).
+- [ ] **Probe TP order:** VBUS at F1 west pad ≈ 5.0V → D1 node ≈ 5.0V →
+      U1 VIN (pin 3) ≈ 5.0V → **+3.3V at C3 = 3.25-3.35V** (buck output).
+- [ ] D6 (5V red) and D7 (3V3 green) LEDs lit (if THT LEDs populated).
+- [ ] Nothing warm: U1 barely warm at no load; U3 cool.
+- [ ] If +3.3V missing: check JP1 not cut, L1 solder, U1 EN (pin 2 — JP1
+      pulls it up via R14/R15 divider per power-supply.md).
+
+## 2. USB enumeration
+
+- [ ] Plug into the Mac. `ls /dev/tty.*` → a `tty.usbserial-*` /
+      `tty.wchusbserial-*` appears (CH340C).
+- [ ] Both USB-C cable orientations enumerate (CC1/CC2 5.1k pulldowns OK).
+- [ ] If no enumeration: check CH340C V3 (pin 4) = 3.3V, crystal-less C
+      variant needs VCC=3.3V exactly; D+/D- continuity J2→U2 pins 5/6.
+
+## 3. Flash + serial
+
+- [ ] `pio run -e esp32dev -t upload` — auto-reset via DTR/RTS (Q1/Q2)
+      should enter bootloader without holding BOOT. If it fails, hold
+      BOOT (SW2) while tapping RESET (SW1) — then investigate Q1/Q2
+      (this rev fixed the BCE/BEC pinout swap; verify EN pulses low on
+      flash start with a scope if auto-reset still fails).
+- [ ] `./scripts/monitor.sh` at 115200: boot banner, no brownout resets.
+- [ ] D8/D9 (TX/RX ambers) flicker during flash/monitor traffic.
+
+## 4. GPIO smoke test (fw: blink + button echo)
+
+- [ ] User LEDs D11/D12 blink (GPIO16/17 → Q4/Q5 → blue LEDs from 5V rail).
+- [ ] D10 (IR-TX red indicator) flashes when sending IR (it parallels the
+      gate drive, visible even with no IR LEDs fitted).
+- [ ] SW1 resets; SW2 reads low on GPIO0 when pressed.
+
+## 5. Sensors
+
+- [ ] DHT22 (U5, hand-solder): TEMP_DATA on GPIO4, read temp+humidity;
+      sanity 15-35°C indoors. R22 10k pullup on the data line.
+- [ ] TSOP38238 (U4, hand-solder): point the ActronAir remote at it,
+      capture on GPIO19 (`python3 scripts/capture.py bench-rx-1`), decode
+      must match re-findings tables. Vs RC filter (R27/C9) means clean 3V3
+      at U4 pin 3.
+
+## 6. IR transmit (the mission)
+
+- [ ] Hand-solder D2-D5 bent 90° per silkscreen fan guides (lens over the
+      north edge, -67.5/-22.5/+22.5/+67.5).
+- [ ] Phone camera check: all four LEDs glow purple on send.
+- [ ] Current check: IR burst draw ≈ 360-400mA above idle during send
+      (4×~90-100mA). If one string is dark: that LED's 18Ω resistor or
+      orientation.
+- [ ] **AC test:** replay the breadboard regression set — POWER on/off,
+      TEMP sweep incl. half-degree (`TEMP:22.5`), MODE, FAN. AC must
+      respond from ≥3m, then from across the room (~8-10m, off-axis).
+- [ ] Ext-IR header J5 (if fitted): scope EXT_IR_A for the 38kHz burst.
+
+## 7. WiFi soak
+
+- [ ] Join network; `ping -c 100` packet loss <2% at usable distance.
+      The antenna overhangs the west edge with a copper keepout; if range
+      disappoints, check H1's screw (use **nylon** for H1 — it sits at the
+      edge of the antenna keepout wedge) and clearance to the enclosure.
+- [ ] 24h idle soak: no watchdog resets in the log; report RSSI drift.
+
+## Known rev-1.2 quirks to watch
+
+- H1 mounting hole encroaches the RF keepout corner — nylon screw there.
+- JP1 is a solder-bridge/test-point pair, not a header (no part fitted):
+  cut the bridge trace to disable the buck for external 3.3V injection.
+- J6 JTAG and J5 ext-IR and R28-R30 are DNP by design.
+- AM2302 (U5) was near stock-out at LCSC at design time — if unfitted,
+  all step-5 DHT checks are skipped; Qwiic (J3) carries I2C as the
+  sensor fallback path (R28/R29 pullups DNP — fit if the Qwiic device
+  doesn't have its own).
