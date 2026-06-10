@@ -64,10 +64,11 @@ Bytes 12-17: Section 3 (footer + checksums)
 | 5 | Checksum | Bitwise inverse of byte 4 |
 | 6-11 | Redundancy | Exact copy of bytes 0-5 |
 | 12 | Footer | Always 0xD5 |
-| 13 | Fan percentage | Direct percentage value or 0x66 for AUTO |
-| 14 | Half-degree flag | 0x00=whole, 0x20=+0.5°C |
-| 15-16 | Unknown | Usually 0x00 |
-| 17 | Checksum | Footer checksum |
+| 13 | Fan percentage | bit 0 = mode bit (ModeS3); bits 1-6 = fan, reads as percentage in decimal or 0x66 for AUTO |
+| 14 | Half-degree flag | bit 5: 0x00=whole, 0x20=+0.5°C; bit 7 = Quiet mode |
+| 15 | Temp detail | bit 4 = TempS3 (3rd temperature bit, e.g. distinguishes 16°C from 17°C); bit 0 = Fahrenheit flag |
+| 16 | Unknown | Always 0x00 |
+| 17 | Checksum | **SOLVED** (2026-06): low byte of sum(bytes 12..16), per IRremoteESP8266 `ir_Bosch.cpp` `sumBytes()` |
 
 ### Temperature Encoding (Non-Linear Lookup Table)
 
@@ -85,8 +86,16 @@ Bytes 12-17: Section 3 (footer + checksums)
 | 25 | 192 | 0xC0 | 1100 0000 |
 | 26 | 208 | 0xD0 | 1101 0000 |
 | 27 | 144 | 0x90 | 1001 0000 |
-| 28 | 144 | 0x90 | 1001 0000 |
+| 28 | 144 | 0x90 | 1001 0000 | ⚠️ |
 | 30 | 176 | 0xB0 | 1011 0000 |
+
+> **⚠️ 28°C discrepancy**: this table records 28°C = 0x90 (identical to 27°C,
+> which would make them indistinguishable). IRremoteESP8266's Celsius map says
+> 28°C = 0x80, and gives the temps missing above: 17°C = 0x00 (distinguished
+> from 16°C by byte 15 bit 4), 19°C = 0x30, 29°C = 0xA0. The 0x90 entry is
+> likely a capture mislabel — re-verify against `temp-28.txt` when the capture
+> corpus is committed (ROADMAP H1.0). The full encoding (incl. bytes 13-15
+> detail bits) is implemented and tested in `include/bosch144_protocol.h`.
 
 **Half-degree encoding** (byte 14):
 - 0x00 = whole degree (e.g., 20.0°C)
@@ -320,7 +329,7 @@ Simple 3-byte commands with no complex state encoding.
 2. **Timer functions**: Likely COOLIX48, not yet captured
 3. **Special functions**: SET/OK menu items not tested
 4. **Follow Me**: Temperature reporting mechanism unknown
-5. **Byte 17 checksum**: Algorithm not reverse-engineered
+5. ~~**Byte 17 checksum**: Algorithm not reverse-engineered~~ **SOLVED**: byte 17 = low byte of sum(bytes 12..16); see `include/bosch144_protocol.h` and its tests
 6. **Some mode-specific features**: May have conditional encoding
 
 ---
