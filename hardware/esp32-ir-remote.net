@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/Users/nickdancer/Documents/claude-ir/hardware/esp32-ir-remote.kicad_sch")
-    (date "2026-06-11T00:13:55+1000")
+    (date "2026-06-11T00:16:47+1000")
     (tool "Eeschema 9.0.6")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
