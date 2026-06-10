@@ -12,7 +12,7 @@ import pcbnew
 
 BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 X0, Y0, X1, Y1 = 100.0, 60.0, 180.0, 115.0
-ANTENNA_X = 104.6
+ANTENNA_X = 104.2
 ANTENNA_Y_MAX = 102.3   # WROOM courtyard wedge south extent
 VIA_PITCH = 4.0         # stitching grid
 VIA_D, VIA_DRILL = 0.6, 0.3

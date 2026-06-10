@@ -152,9 +152,28 @@ def main():
         for L in layers:
             occ[L, i0:i1 + 1, j0:j1 + 1] = True
             owner[L, i0:i1 + 1, j0:j1 + 1] = nc
-            for i in range(i0, i1 + 1):
-                for j in range(j0, j1 + 1):
-                    net_seed_cells.setdefault(nc, set()).add((L, i, j))
+        # seeds (connectivity) must be EXACT, not bbox: sample along segment
+        if isinstance(t, pcbnew.PCB_VIA):
+            for L in layers:
+                for i in range(i0, i1 + 1):
+                    for j in range(j0, j1 + 1):
+                        net_seed_cells.setdefault(nc, set()).add((L, i, j))
+        else:
+            sx, sy = pcbnew.ToMM(xs.x), pcbnew.ToMM(xs.y)
+            ex2, ey2 = pcbnew.ToMM(ys.x), pcbnew.ToMM(ys.y)
+            length = math.hypot(ex2 - sx, ey2 - sy)
+            steps = max(1, int(length / (GRID * 0.5)))
+            rc = int(math.ceil(r / GRID))
+            for sN in range(steps + 1):
+                cx = sx + (ex2 - sx) * sN / steps
+                cy = sy + (ey2 - sy) * sN / steps
+                ci, cj = mm2c(cx, cy)
+                for di in range(-rc, rc + 1):
+                    for dj in range(-rc, rc + 1):
+                        ii, jj = ci + di, cj + dj
+                        if 0 <= ii < NX and 0 <= jj < NY:
+                            for L in layers:
+                                net_seed_cells.setdefault(nc, set()).add((L, ii, jj))
 
     # --- route order ----------------------------------------------------
     code_by_name = {v: k for k, v in net_names.items()}
