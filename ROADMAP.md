@@ -21,6 +21,33 @@ hierarchical refactor and H1.5 human PDF review. These need the KiCad GUI =
 a Mac bench session. F1.1–F1.3 done; F1.4 firmware + F1.5 bench check pending
 (no ESP board was on USB this session — only Bluetooth/Cricut ports present).
 
+### Board v1.2 change set (one KiCad-GUI bench session)
+
+Everything below is a single batch of schematic edits. Spec v1.2
+(`specs/hardware-dev-board-v1.md`) is the authority; the schematic is the truth
+to be brought in line. After editing: `./scripts/hardware-check.sh` → review
+netlist diff → commit schematic+netlist.
+
+**Macro feature changes (decided 2026-06-10):**
+1. **Remove J1** (2×19 DevKitC debug breakout header).
+2. **Add I2C Qwiic** 4-pin JST-SH: GND/3V3/SDA=GPIO21/SCL=GPIO22 (+ 2×4.7k I2C
+   pull-up footprints).
+3. **Add spare-GPIO + power header** (2×5, 2.54mm): GPIO25/26/32/33/34/23 +
+   3V3 + 5V + GND.
+4. **Add external IR-emitter header** (2-pin) = extra IR branch on Q3 drain
+   with its own series-resistor footprint.
+5. **Add JTAG footprint** (2×5, DNP): GPIO12=TDI/13=TCK/14=TMS/15=TDO + 3V3/GND.
+6. Keep WROOM-32E (PCB antenna); no U.FL. Battery stays v2.
+
+**H1.4 circuit fixes:** R13 gate resistor 10k→~330Ω–1k; L1→4.7µH (Isat ≥2.7A,
+Basic part); add TSOP Vs RC filter (~100Ω + 100nF); D7 green 150Ω→470Ω–1k;
+remove redundant PWR_FLAG on CH340C V3 (clears the 1 ERC error).
+
+**H1.2 library/BOM:** standardize 8 `PCM_JLCPCB-*` symbols → generic `Device:*`;
+backfill LCSC fields on the 15 gap parts (table in H1.2); then regenerate the
+BOM from the schematic and demote `hardware/BOM.md`. Prefer JLCPCB **Basic**
+parts for all new/changed parts (verify on LCSC via Chrome).
+
 ## Done (context for new sessions)
 
 - [x] ESP8266 breadboard: capture + transmit firmware, verified against real AC
@@ -97,13 +124,12 @@ Make the schematic provably correct before any layout effort builds on it.
         `hardware/BOM.md` or demote it to rationale-only (it currently
         disagrees with the schematic on designators, R15 value, R21 identity,
         J1/J2, and JP2/JP3 — all already correct in the schematic).
-  - [ ] **Spec reconciliation (schematic wins):** `specs/hardware-dev-board-v1.md`
-        §Auto-Reset + BOM still describe JP2/JP3 header bypass jumpers, but the
-        schematic uses R21/R26 0Ω SMD links (already fixed in
-        `hardware/notes/usb-serial.md`). Update the spec via the `spec-writing`
-        skill: §Auto-Reset diagram/table, BOM jumper row, and the
-        jumper-config summary. Also fix the stale "JP2/JP3" silkscreen note in
-        H2.4 below.
+  - [x] **Spec reconciliation — DONE** (spec v1.2). `specs/hardware-dev-board-v1.md`
+        updated: auto-reset JP2/JP3→R21/R26 0Ω, L1→4.7µH, J1/J2, assembly model
+        now JLCPCB-PCBA/Basic-parts, H1.4 fixes (gate R, TSOP filter), and the
+        v1.2 macro feature set (see "Board v1.2 change set" below). BOM tables
+        flagged stale → regenerate from schematic. Index updated. Still TODO:
+        fix the stale "JP2/JP3" silkscreen note in H2.4 below.
 - [ ] **H1.3 Hierarchical refactor (netlist-gated):** split the flat sheet
       into sub-sheets matching `hardware/notes/` (power, usb-serial, mcu,
       ir-tx, ir-rx, temp-sensor, status-leds). Gate: netlist diff before vs
@@ -143,8 +169,10 @@ Make the schematic provably correct before any layout effort builds on it.
       screenshot before routing starts (cheap to move parts now).
 - [ ] **H2.3 Routing + ground pour;** power nets sized for 400mA IR + WiFi
       peaks.
-- [ ] **H2.4 DRC clean** with JLCPCB rules; silkscreen: labels for jumpers
-      (JP1 buck-disable, JP2/JP3 auto-reset), buttons, LED meanings, pin-1s.
+- [ ] **H2.4 DRC clean** with JLCPCB rules; silkscreen: label JP1 (buck-disable)
+      and R21/R26 (auto-reset links); every connection-point pin (Qwiic
+      SDA/SCL/3V3/GND, spare-GPIO header GPIOs + rails, IR-emitter, JTAG
+      TDI/TCK/TMS/TDO); buttons, LED meanings, pin-1s.
 - [ ] **H2.5 Review:** exported PDF plots + 3D render reviewed (subagent pass
       for common layout errors, then Nick).
 

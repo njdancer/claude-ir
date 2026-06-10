@@ -4,7 +4,7 @@ This directory contains technical specifications for the ActronAir IR Remote Con
 
 ## Hardware Specifications
 
-- [Development Board v1.0](./hardware-dev-board-v1.md) - ESP32-based development board for IR remote control testing and firmware development. Includes IR transmitter array, temperature sensor, USB-C power, and debugging features. Designed for through-hole assembly and JLCPCB manufacturing.
+- [Development Board v1.2](./hardware-dev-board-v1.md) - ESP32-WROOM-32E board for IR remote control: 4× IR emitter array, IR receiver, DHT22 temp/humidity, USB-C power (AP63203 buck), CH340C UART with cross-coupled auto-reset. Connection points: I2C Qwiic, spare-GPIO + power header, external IR-emitter header, unpopulated JTAG footprint (the large DevKitC breakout header was removed in v1.2). Targets JLCPCB assembly with LCSC Basic parts.
 
 The KiCad project in [`hardware/`](../hardware/) is the source of truth for the board design. Per-subsystem design rationale lives in [`hardware/notes/`](../hardware/notes/README.md), and `scripts/hardware-check.sh` runs ERC and regenerates the netlist after schematic changes.
 
@@ -14,4 +14,4 @@ See [re-findings.md](../re-findings.md) in the project root for comprehensive Ac
 
 ---
 
-**Last Updated**: 2025-12-29
+**Last Updated**: 2026-06-10

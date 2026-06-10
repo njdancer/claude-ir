@@ -1,8 +1,20 @@
-# ESP32 IR Remote Control Development Board - Hardware Specification v1.1
+# ESP32 IR Remote Control Development Board - Hardware Specification v1.2
 
 ## Overview
 
-This specification defines the hardware requirements for a development board that enables testing and development of an ESP32-based smart AC remote control system using infrared transmission. The board serves as a transition from the current ESP8266 breadboard proof-of-concept to a manufacturable design suitable for firmware development in Rust and eventual production refinement.
+This specification defines the hardware requirements for a development board that enables testing and development of an ESP32-based smart AC remote control system using infrared transmission. The board serves as a transition from the current ESP8266 breadboard proof-of-concept to a manufacturable design suitable for firmware development and eventual production refinement.
+
+> **Revision note (v1.2):** The board target shifted toward "get it fabricated." The
+> bulky 2×19 ESP32-DevKitC debug breakout header is **removed** and replaced with a
+> small set of purposeful connection points (I2C Qwiic, a compact spare-GPIO + power
+> header, an external IR-emitter header, and an unpopulated JTAG footprint) — see
+> [Connection Points and Expansion](#connection-points-and-expansion). The
+> WROOM-32E (PCB antenna) is retained; the U.FL external-antenna option is deferred.
+> This revision also reconciles the spec to the KiCad schematic (the source of
+> truth): auto-reset bypass jumpers JP2/JP3 are now R21/R26 0Ω SMD links, and the
+> buck inductor L1 is 4.7µH. Several H1.4 datasheet-review fixes are folded in (IR-TX
+> gate resistor, IR-RX supply filter). The Bill of Materials below lags the schematic
+> on reference designators and MUST be regenerated from it (see the BOM note).
 
 ### Design Philosophy
 
@@ -42,7 +54,7 @@ The power subsystem MUST implement overcurrent protection (trip at 2A) and overv
 
 Battery operation is **deferred to v2**. This development board is USB-powered only.
 
-The GPIO expansion header exposes 3.3V and 5V rails, enabling experimentation with external battery and power management circuits on a separate prototyping board. A jumper (JP1) on the buck converter's EN pin allows disabling the internal regulator when testing external power solutions (see Voltage Regulation section).
+The spare-GPIO + power header (see [Connection Points and Expansion](#connection-points-and-expansion)) exposes 3.3V and 5V rails, enabling experimentation with external battery and power management circuits on a separate prototyping board. A jumper (JP1) on the buck converter's EN pin allows disabling the internal regulator when testing external power solutions (see Voltage Regulation section).
 
 ## Component Specifications
 
@@ -220,8 +232,8 @@ GND ─────────────────────── CH340C
 GND ─────────────────────── CH340C R232 (pin 15)
 CH340C TXD ─────────────── ESP32 U0RXD (GPIO3)
 CH340C RXD ─────────────── ESP32 U0TXD (GPIO1)
-CH340C DTR# ────[JP2]───── Auto-reset circuit Q1 base
-CH340C RTS# ────[JP3]───── Auto-reset circuit Q2 base
+CH340C DTR# ────[R21 0Ω]── Auto-reset circuit (cross-coupled, DTR side)
+CH340C RTS# ────[R26 0Ω]── Auto-reset circuit (cross-coupled, RTS side)
 ```
 
 **Notes**:
@@ -265,7 +277,7 @@ The board MUST regulate the USB 5V input to stable 3.3V for powering the ESP32 m
 1. **Input capacitor (C1)**: 10µF ceramic, 10V or higher (placed close to VIN pin)
 2. **Output capacitors (C2, C3)**: 2× 22µF ceramic, 10V or higher (placed close to output)
 3. **Bootstrap capacitor (C4)**: 100nF ceramic (between BST and SW pins)
-4. **Inductor (L1)**: 3.9µH, ≥2.7A saturation current, low DCR
+4. **Inductor (L1)**: 4.7µH, ≥2.7A saturation current, low DCR (AP63203 datasheet typical; prefer a JLCPCB Basic part)
    - Package: SMD power inductor (hand-solderable)
    - Size: 4x4mm or 5x5mm typical
 
@@ -428,24 +440,56 @@ The board MUST include two momentary push buttons for ESP32 control:
 
 Normal firmware upload uses the auto-reset circuit automatically.
 
-### Development Headers
+### Connection Points and Expansion
 
-**ESP32 Breakout Header** (2×19 pins):
+The large 2×19 ESP32-DevKitC breakout header of earlier revisions is **removed**.
+In its place the board MUST provide a small set of purposeful connection points so
+that GPIO access, I2C expansion, and external-power prototyping survive without the
+bulky header. The intent is to design in headroom now — footprints are cheap before
+fabrication and impossible to add after — while keeping the populated board compact.
 
-The board includes a debug breakout header matching the ESP32-DevKitC V4 pinout. This 38-pin header (2 rows of 19) exposes all ESP32 GPIO pins plus power rails, enabling:
+GPIO budget: after removing the breakout, the following ESP32 GPIOs are free and
+safe to expose — GPIO5, 13, 14, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35. GPIO6–11 are
+the module's internal SPI-flash bus and MUST NOT be exposed or used as I/O. GPIO12 is
+a flash-voltage strapping pin and MUST NOT be pulled high; it MAY be wired only to the
+unpopulated JTAG footprint (see below), which presents no load unless a debugger is
+attached.
 
-- External serial console via UART0 (GPIO1/TXD, GPIO3/RXD)
-- I2C peripherals via GPIO21 (SDA) and GPIO22 (SCL)
-- Additional GPIO access for prototyping and expansion
-- Power rails: 3.3V (pin 1), 5V (pin 19), GND (pins 14, 20, 26)
+**I2C Qwiic/STEMMA-QT connector** (REQUIRED): A 4-pin JST-SH (1.0mm) Qwiic-standard
+connector on `GND, 3V3, SDA=GPIO21, SCL=GPIO22`. This is the primary expansion path —
+it gives plug-and-play access to the I2C sensor/display ecosystem (light level,
+pressure, air quality, an OLED status display, etc.) with no future board changes,
+satisfying the deferred "additional I2C sensors" provision. Onboard I2C pull-ups
+(see Optional Components) MUST have footprints; populate them if the attached module
+lacks its own.
 
-**Pin Numbering**: Column-first ordering matches DevKitC - left column pins 1-19, right column pins 20-38.
+**Spare-GPIO + power header** (REQUIRED): A compact 2.54mm header exposing a versatile
+subset of the free GPIOs plus power rails, replacing the breakout's "user GPIO" and
+"3V3/5V rails for external-power prototyping" roles. RECOMMENDED signal set, chosen for
+peripheral coverage: GPIO25 (DAC1), GPIO26 (DAC2), GPIO32 (ADC1/touch), GPIO33
+(ADC1/touch), GPIO34 (ADC1, input-only), GPIO23 (general). The header MUST also expose
+`3V3`, `5V`, and at least one `GND`. A 2×5 (10-pin) arrangement is suggested. The 3V3/5V
+pins together with the buck-disable jumper JP1 provide the external-battery prototyping
+hook referenced in [Battery Support](#battery-support).
 
-**Header Specifications**:
+**External IR-emitter header** (REQUIRED): A 2-pin 2.54mm header allowing an IR LED on
+a flying lead to be aimed at the AC unit when the enclosure lacks line-of-sight. It
+MUST tie an additional IR-LED branch (its own series current-limit resistor footprint)
+across the existing IR drive — anode side to the IR supply rail through the resistor,
+cathode to the IR MOSFET (Q3) drain — so the external emitter switches with the onboard
+array and no extra driver is needed. The series-resistor footprint MAY be left
+unpopulated until an external emitter is used.
 
-- Pitch: 2.54mm (0.1") for compatibility with standard jumper wires and breadboards
-- Gender: Female headers RECOMMENDED (accepts male pins from modules/jumpers)
-- Row spacing: 22.86mm (0.9") to match DevKitC module width
+**JTAG debug footprint** (OPTIONAL, unpopulated): A 2×5 2.54mm footprint on the ESP32
+JTAG pins (GPIO12=TDI, GPIO13=TCK, GPIO14=TMS, GPIO15=TDO) plus 3V3 and GND, for an
+ESP-PROG/OpenOCD hardware debugger. Left unpopulated (DNP); serial flashing over the
+CH340C is the default path. Because the footprint is unloaded when no debugger is
+attached, the GPIO12 flash-voltage strap and the GPIO15 default state are preserved.
+
+**Common requirements**: 2.54mm pitch where pin headers are used, for jumper-wire and
+ribbon compatibility. Every exposed pin MUST be silkscreen-labelled with its function
+(e.g. `GPIO21/SDA`, `5V`, `GND`, `TDI`). Connectors SHOULD be selected from JLCPCB
+**Basic** parts where a suitable one exists, to avoid assembly feeder fees.
 
 ## Circuit Design Requirements
 
@@ -489,11 +533,19 @@ LEDs are powered from the 3.3V regulated rail (not 5V) for improved efficiency:
 
 **Gate Drive Circuit**:
 
-- ESP32 GPIO18 (IR_TX) → 10kΩ resistor → MOSFET gate
+- ESP32 GPIO18 (IR_TX) → gate series resistor → MOSFET gate
 - 100kΩ pull-down resistor from gate to GND
 - MOSFET source → GND
-- Gate series resistor limits inrush current and provides ESD protection
+- Gate series resistor provides ESD protection and edge control, but MUST be small
+  enough to switch the MOSFET cleanly at the 38kHz carrier. The current schematic
+  value (10kΩ) is **too large**: with the IRLML6344 input capacitance it slows the
+  gate edges to several microseconds — a large fraction of the ~13µs carrier
+  half-period — leaving the FET in its linear region much of each cycle and degrading
+  IR output. The gate series resistor MUST be in the **~330Ω–1kΩ** range. (H1.4 review.)
 - Gate pull-down ensures MOSFET is OFF during boot/reset when GPIO is high-impedance
+
+The external IR-emitter header (see [Connection Points and Expansion](#connection-points-and-expansion))
+adds an optional fifth IR branch on this same drain node, switched by the same MOSFET.
 
 ### IR Receiver Interface
 
@@ -502,15 +554,20 @@ The IR receiver module connects directly to the 3.3V rail, ground, and an ESP32 
 **Connection Requirements**:
 
 - Power: 3.3V and GND from regulated supply
-- Signal: ESP32 GPIO pin with interrupt capability (e.g., GPIO4, GPIO5, or other interrupt-capable pins)
-- Decoupling: 100nF ceramic capacitor between VCC and GND, placed as close to receiver package as practical
-- Purpose: Suppresses power supply noise that could trigger false IR detections
+- Signal: GPIO19 (IR_RX), interrupt-capable, not a strapping pin
+- Supply filter: the TSOP datasheet RECOMMENDS a series resistor (~100Ω) from 3.3V to
+  the receiver Vs pin plus a ≥100nF capacitor from that local Vs node to GND. This RC
+  filter MUST be provided here: the high-current IR transmitter shares the same 3.3V
+  rail, so TX-induced supply spikes are exactly the disturbance the filter rejects.
+  Place the cap as close to the receiver package as practical. (H1.4 review.)
+- Output pull-up: NOT required. The TSOP382 output stage has an internal ~30kΩ
+  pull-up; no external pull-up should be added.
 
 **Signal Characteristics**:
 
 - Output type: Active-low demodulated pulses (receiver outputs LOW when 38kHz modulated IR detected)
 - Timing: Preserves pulse timing from original IR transmission after demodulation
-- Pull-up: May require weak pull-up if receiver output is open-drain (check receiver datasheet)
+- Pull-up: none required (TSOP382 has an internal ~30kΩ pull-up; see above)
 - **GPIO Assignment**: GPIO19 (IR_RX) - interrupt-capable, not a strapping pin
 
 The GPIO pin MUST support external interrupts to capture timing-accurate signal edges for protocol decoding.
@@ -613,24 +670,29 @@ RTS ───┬──────────│──────────�
 
 The BOOT and RESET buttons (see Control Switches section) remain functional and can override the auto-reset circuit for manual bootloader entry when needed.
 
-**Auto-Reset Bypass Jumpers (JP2, JP3)**:
+**Auto-Reset Bypass Links (R21, R26 — 0Ω)**:
 
-Two inline shunt jumpers allow disabling the auto-reset circuit for debugging:
+Two inline 0Ω links allow disabling the auto-reset circuit for debugging. Earlier
+revisions used through-hole header+shunt jumpers (JP2/JP3); these are now **0Ω SMD
+resistors** so JLCPCB places them at assembly and the populated board stays low-profile.
 
 ```
-CH340C DTR# ────[JP2]──── Auto-reset circuit (Q1 base)
-CH340C RTS# ────[JP3]──── Auto-reset circuit (Q2 base)
+CH340C DTR# ────[R21 0Ω]──── Auto-reset circuit (DTR side)
+CH340C RTS# ────[R26 0Ω]──── Auto-reset circuit (RTS side)
 ```
 
-| Jumper | Installed (default) | Removed |
-|--------|---------------------|---------|
-| JP2 | DTR connected, auto-reset enabled | DTR disconnected |
-| JP3 | RTS connected, auto-reset enabled | RTS disconnected |
+| Link | Populated (default) | Removed |
+|------|---------------------|---------|
+| R21 | DTR connected, auto-reset enabled | DTR disconnected |
+| R26 | RTS connected, auto-reset enabled | RTS disconnected |
 
-- **Default configuration**: Both jumpers installed. Auto-reset works normally for programming.
-- **Debug configuration**: Remove one or both jumpers to use serial communication without triggering resets.
+- **Default configuration**: Both links populated. Auto-reset works normally for programming.
+- **Debug configuration**: Desolder one or both links to use serial communication without triggering resets.
 
-The board ships with JP2 and JP3 installed.
+The board ships with R21 and R26 populated. (Note: the cross-coupled circuit ties each
+transistor's emitter to the *opposite* DTR/RTS signal rather than to ground — verified
+correctly wired in the H1.4 netlist review, but it is a finicky topology worth
+confirming during bring-up.)
 
 ## Power Budget Analysis
 
@@ -760,44 +822,52 @@ Order the PCB with the following JLCPCB standard options:
 
 ### Assembly Considerations
 
-This board is designed for manual assembly, not JLCPCB's SMT service. Order PCB only. All components will be hand-soldered.
+The board targets **JLCPCB PCB assembly** with parts sourced from **LCSC** (no longer
+PCB-only/hand-assembly). SMD components are machine-placed; the remaining through-hole
+parts (the IR LEDs, BOOT/RESET buttons, USB-C receptacle, DHT22 module, TSOP receiver,
+and the 2.54mm headers) are hand-soldered or ordered with JLCPCB's THT assembly option.
 
-However, the design SHOULD consider potential future migration to JLCPCB assembly by:
-
-- Avoiding exotic through-hole parts not in JLCPCB's component library
-- Using standard footprints where SMD alternatives exist
-- Documenting through-hole to SMD migration paths in future revisions
+To minimize assembly cost, part selection MUST prefer JLCPCB **"Basic"** parts (kept
+permanently loaded on the pick-and-place, no per-part feeder fee) over **"Extended"**
+parts wherever a suitable Basic part exists. Where a choice forces an Extended part,
+that SHOULD be noted with the reason. Every SMD component MUST carry an LCSC part number
+and footprint in the schematic so the BOM and CPL export cleanly to JLCPCB.
 
 ### Component Sourcing
 
-Prefer components available from LCSC (JLCPCB's component supplier) to enable potential future assembly service use. Where through-hole components are unavailable from LCSC, specify Digikey/Mouser part numbers as alternatives.
+All components SHOULD be sourced from LCSC. Prefer JLCPCB Basic parts (see above). Where
+a required through-hole component is unavailable from LCSC, specify a Digikey/Mouser
+alternative.
 
 ## Expansion and Future Provisions
 
 ### Deferred Features
 
-The following capabilities are NOT implemented in this revision but MUST have physical provisions enabling future addition:
+Several previously-deferred provisions are now **implemented as on-board connection
+points** (see [Connection Points and Expansion](#connection-points-and-expansion)):
+the I2C Qwiic connector covers "additional I2C sensors", and the unpopulated JTAG
+footprint covers hardware debug. The following remain genuinely deferred:
 
 **Battery Charging Circuit** (deferred to v2):
 
-Battery operation requires power path management beyond simple charging. The GPIO expansion header exposes 3.3V and 5V rails, and JP1 allows disabling the internal buck converter, enabling external battery circuit prototyping before integrating into v2.
+Battery operation requires power-path management beyond simple charging (charger IC,
+load-sharing, protection, reverse-polarity). It is more than a footprint and stays out
+of v1. The spare-GPIO + power header exposes 3.3V and 5V rails, and JP1 disables the
+internal buck converter, enabling external battery-circuit prototyping before
+integrating into a future battery-capable board.
 
-**External Antenna**:
+**External Antenna** (deferred):
 
-- Unpopulated U.FL connector footprint
-- Trace to ESP32 antenna switching pin
-- Enables replacement of PCB trace antenna with external antenna for extended WiFi range
+The board retains the WROOM-32**E** module with its built-in PCB trace antenna — the
+simplest, lowest-cost path, adequate for an in-room AC remote. Adding a U.FL external
+antenna would require switching to the WROOM-32**UE** variant plus a U.FL footprint;
+this is deferred unless WiFi range proves inadequate during bring-up.
 
-**Additional I2C Sensors**:
+**Additional I2C Sensors** — *now provided* via the Qwiic connector; no separate
+per-sensor footprints are designed in (any I2C light/pressure/air-quality sensor or
+OLED display attaches over Qwiic).
 
-- Spare I2C header pins
-- Footprints for common sensor packages (e.g., pressure, light level)
-
-**JTAG Debug**:
-
-- 10-pin 2.54mm header footprint for JTAG
-- Connected to GPIO12, GPIO13, GPIO14, GPIO15 per ESP32 JTAG standard
-- Allows use of hardware debugger (OpenOCD, ESP-PROG)
+**JTAG Debug** — *now provided* as an unpopulated 2×5 footprint on GPIO12–15.
 
 ### Future Board Revisions
 
@@ -813,6 +883,17 @@ Subsequent board revisions MAY:
 This development board intentionally over-provisions debugging and expansion features. Production boards will optimize for cost and size based on lessons learned during development.
 
 ## Bill of Materials
+
+> **⚠️ This BOM lags the schematic and MUST be regenerated from it.** The KiCad
+> schematic is the source of truth for reference designators and parts. The tables
+> below were authored earlier and use stale designators (e.g. they list `J2` as the
+> breakout header, whereas in the schematic `J2` is the USB-C receptacle; LED and
+> resistor numbers also differ). Once the schematic carries an LCSC field on every
+> symbol, regenerate the BOM with `kicad-cli sch export bom` (or the kicad MCP) and
+> treat that export — plus `hardware/BOM.md`'s curated LCSC numbers, matched **by
+> function, not by designator** — as the live BOM. The tables here are retained only
+> for requirement intent (values, ratings, suggested parts), not designators. See
+> ROADMAP H1.2.
 
 This BOM specifies exact parts only where necessary for compatibility (e.g., ESP32 module pinout, USB-C connector footprint). For other components, requirements are listed with suggested parts.
 
@@ -855,7 +936,7 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 
 | Qty | Reference | Part/Requirement            | Description                           | Package/Notes        |
 | --- | --------- | --------------------------- | ------------------------------------- | -------------------- |
-| 1   | L1        | 3.9µH, ≥2.7A, low DCR       | Power inductor for AP63203            | SMD 4x4mm or 5x5mm   |
+| 1   | L1        | 4.7µH, Isat ≥2.7A, DCR <100mΩ | Power inductor for AP63203 (datasheet typical; better JLCPCB Basic stock than 3.9µH) | SMD 4x4mm or 5x5mm   |
 | 1   | C1        | 10µF ceramic, ≥10V          | Buck input capacitor                  | 0805 or 1206 SMD     |
 | 2   | C2-C3     | 22µF ceramic, ≥10V          | Buck output capacitors                | 0805 or 1206 SMD     |
 | 1   | C4        | 100nF ceramic               | Bootstrap capacitor (BST to SW)       | 0603 or 0805 SMD     |
@@ -885,9 +966,14 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 2   | SW1-SW2   | Tactile Switch, NO     | RESET and BOOT buttons       | Through-hole, 6×6mm typical |
 | 2   | R17-R18   | 10kΩ 1/4W              | Pull-up resistors (EN, GPIO0) | Axial or 1206 SMD           |
 | 1   | C10       | 1µF ceramic            | EN pin RC delay capacitor    | 0805 or 1206 SMD            |
-| 1   | J2        | 2×19 Female Header     | ESP32 breakout header        | 2.54mm, 22.86mm row spacing |
-| 1   | JP1       | 2-pin Header           | Buck converter disable jumper| 2.54mm, no jumper installed |
-| 2   | JP2-JP3   | 2-pin Header + Shunt   | Auto-reset bypass jumpers    | 2.54mm, jumpers installed   |
+| 1   | —         | 4-pin JST-SH (Qwiic)   | I2C Qwiic/STEMMA-QT connector (GPIO21/22 + 3V3/GND) | 1.0mm SH; prefer JLCPCB Basic |
+| 1   | —         | 2×5 2.54mm header      | Spare-GPIO + power header (GPIO25/26/32/33/34/23 + 3V3/5V/GND) | 2.54mm |
+| 1   | —         | 2-pin 2.54mm header    | External IR-emitter header (+ series-resistor footprint) | 2.54mm |
+| 1   | JP1       | 2-pad solder jumper    | Buck converter disable (EN→GND) | SMD, open by default |
+| 2   | R21, R26  | 0Ω SMD resistor        | Auto-reset bypass links (DTR/RTS), populated by default | 0603 SMD |
+
+*(Designators marked "—" are assigned in the schematic; the 2×19 breakout header of
+earlier revisions is removed.)*
 
 ### Optional Components (Unpopulated)
 
@@ -895,30 +981,35 @@ These components have PCB footprints but are not populated in initial builds:
 
 | Qty | Reference | Part/Requirement       | Description                      | Purpose/Notes                    |
 | --- | --------- | ---------------------- | -------------------------------- | -------------------------------- |
-| 2   | R21-R22   | 4.7kΩ 1/4W             | I2C pull-up resistors (optional) | If not present on sensor breakout |
-| 1   | J7        | U.FL connector         | External antenna connector       | Future WiFi range extension      |
+| 2   | —         | 4.7kΩ SMD              | I2C pull-ups for the Qwiic bus   | Populate if attached module lacks its own |
+| 1   | —         | 2×5 2.54mm header      | JTAG debug footprint (GPIO12–15 + 3V3/GND) | DNP; for ESP-PROG/OpenOCD |
+| 1   | —         | series resistor (IR)   | External IR-emitter current limit | Populate when an external emitter is used |
+
+*(U.FL external-antenna footprint is **not** designed in — the board keeps the
+WROOM-32E PCB antenna; adding U.FL would require the WROOM-32UE variant. See Deferred
+Features.)*
 
 ---
 
-**Document Version**: 1.6
-**Date**: 2026-01-03
+**Document Version**: 1.2
+**Date**: 2026-06-10
 **Author**: Development Team
-**Status**: In Implementation - Schematic Review Complete
+**Status**: In Implementation - H1.4 datasheet review complete; macro feature set revised
 
 **Design Decisions Made**:
-- ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module
+- ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module (PCB antenna retained; U.FL/-32UE deferred)
 - USB-to-UART Bridge: CH340C selected for hand-solderability (SOP-16), built-in oscillator, and low cost
-- Auto-Reset Circuit: Discrete NPN transistor approach (cross-coupled) with bypass jumpers (JP2, JP3) for debugging
-- Voltage Regulation: AP63203 synchronous buck converter with disable jumper (JP1) for external power experimentation
+- Auto-Reset Circuit: Discrete NPN transistor approach (cross-coupled) with R21/R26 0Ω bypass links for debugging
+- Voltage Regulation: AP63203 synchronous buck converter (L1 = 4.7µH) with disable jumper (JP1) for external power experimentation
 - Protection: PTC fuse + TVS diode; USB D+/D- ESD protection omitted (adequate for dev board use)
-- IR LED Driver: Single IRLML6344 logic-level MOSFET (SOT-23) with gate pull-down; LEDs powered from 3.3V rail
+- IR LED Driver: Single IRLML6344 logic-level MOSFET (SOT-23) with gate pull-down (gate series resistor ~330Ω–1kΩ, not 10kΩ); LEDs powered from 3.3V rail
 - IR GPIO Assignment: GPIO18 (IR_TX), GPIO19 (IR_RX) - adjacent pins, avoids strapping pins
 - Temperature Sensor GPIO: GPIO4 (TEMP_DATA)
 - User LEDs: GPIO16 (USER_LED1), GPIO17 (USER_LED2)
 - Temperature Sensor: DHT22 (AM2302) single-wire module replacing BME280
-- Breakout Header: DevKitC V4-compatible 2×19 header exposes all GPIO, power rails, UART, and I2C
-- Jumper Configuration: JP1 ships open (buck enabled), JP2/JP3 ship with shunts installed (auto-reset enabled)
-- Hand Assembly: Through-hole and large SMD components; TSOT26, SOP-16, SOT-23, 0805/1206 passives; BGA excluded
+- Connection Points: 2×19 DevKitC breakout header REMOVED; replaced by I2C Qwiic (GPIO21/22), spare-GPIO + power header, external IR-emitter header, and an unpopulated JTAG footprint (GPIO12–15)
+- Jumper Configuration: JP1 ships open (buck enabled); R21/R26 0Ω auto-reset links ship populated
+- Assembly: JLCPCB PCBA from LCSC parts, preferring JLCPCB "Basic" parts; through-hole parts hand-soldered or via JLCPCB THT option; BGA excluded
 
 **Remaining Implementation Tasks**:
 - Footprint assignment for all schematic components
