@@ -28,9 +28,11 @@ ENV/
 *.elf
 *.bin
 
-# Logs and captures (keep directory but not files)
+# Logs and captures: scratch captures stay local, but the curated
+# reference set (protocol ground truth / test fixtures) is tracked
 captures/*.txt
 !captures/.gitkeep
+!captures/reference/
 
 # Analysis outputs
 analysis/*.json
