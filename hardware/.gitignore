@@ -8,3 +8,5 @@ fp-info-cache
 # Generated files that can be recreated
 *.bak
 *~
+
+erc-report.txt

@@ -6,6 +6,8 @@ This directory contains technical specifications for the ActronAir IR Remote Con
 
 - [Development Board v1.0](./hardware-dev-board-v1.md) - ESP32-based development board for IR remote control testing and firmware development. Includes IR transmitter array, temperature sensor, USB-C power, and debugging features. Designed for through-hole assembly and JLCPCB manufacturing.
 
+The KiCad project in [`hardware/`](../hardware/) is the source of truth for the board design. Per-subsystem design rationale lives in [`hardware/notes/`](../hardware/notes/README.md), and `scripts/hardware-check.sh` runs ERC and regenerates the netlist after schematic changes.
+
 ## Protocol Documentation
 
 See [re-findings.md](../re-findings.md) in the project root for comprehensive ActronAir IR protocol reverse engineering documentation including BOSCH144 and COOLIX protocol specifications.
