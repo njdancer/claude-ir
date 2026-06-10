@@ -3,4 +3,5 @@
   (lib (name "MP1584EN")(type "KiCad")(uri "${KIPRJMOD}/lib/MP1584EN.kicad_sym")(options "")(descr ""))
   (lib (name "ESP32-WROOM-32E-Breakout")(type "KiCad")(uri "${KIPRJMOD}/lib/ESP32-WROOM-32E-Breakout.kicad_sym")(options "")(descr ""))
   (lib (name "CH340C_3V3")(type "KiCad")(uri "${KIPRJMOD}/lib/CH340C_3V3.kicad_sym")(options "")(descr ""))
+  (lib (name "JLC-MCP")(type "KiCad")(uri "${KIPRJMOD}/libraries/symbols/JLC-MCP-ICs.kicad_sym")(options "")(descr "JLC-MCP Component Library (LCSC/EasyEDA)"))
 )

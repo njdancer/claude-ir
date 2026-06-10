@@ -241,7 +241,7 @@ for fp in board.GetFootprints():
         if p.GetNetCode() > 0:
             names[p.GetNetCode()] = p.GetNetname()
 
-MAX_ROUNDS = 10
+MAX_ROUNDS = 40
 rip_history = set()
 for rnd in range(MAX_ROUNDS):
     occ, owner, net_cells, hop_cells, net_pads = build_model()
@@ -260,7 +260,9 @@ for rnd in range(MAX_ROUNDS):
         break
     print(f"round {rnd}: {len(split)} split nets: {[names[nc] for nc, _ in split]}")
     progress = False
+    restart = False
     for nc, comps in split:
+        if restart: break
         name = names[nc]
         hwd, via_d, via_drill = widths(name)
         blocked, viabad, hw = masks_for(nc, name, occ, owner, net_pads)
@@ -314,6 +316,7 @@ for rnd in range(MAX_ROUNDS):
                     rip_history.add((nc, x))
                     print(f"  [{name}] healed via rip of {names.get(x,'?')} ({len(ripped)} segs)")
                     progress = True; done = True
+                    restart = True
                     break
                 if not done:
                     print(f"  [{name}] STILL SPLIT (no single-net rip works)")
@@ -324,6 +327,8 @@ for rnd in range(MAX_ROUNDS):
             emit_path(path, nc, used_hw, via_d, via_drill)
             print(f"  [{name}] joined ({len(path)} cells, hw {used_hw})")
             progress = True
+            restart = True
+            break
     pcbnew.SaveBoard(BOARD_PATH, board)
     print(f"  (round {rnd} state saved)")
     if not progress:

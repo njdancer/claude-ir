@@ -14,7 +14,7 @@ BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 X0, Y0, X1, Y1 = 100.0, 60.0, 180.0, 115.0
 ANTENNA_X = 104.6
 ANTENNA_Y_MAX = 102.3   # WROOM courtyard wedge south extent
-VIA_PITCH = 6.0         # stitching grid
+VIA_PITCH = 4.0         # stitching grid
 VIA_D, VIA_DRILL = 0.6, 0.3
 CLEAR = 0.35            # via-to-foreign-copper margin for stitching
 
@@ -48,7 +48,7 @@ def main():
     ls.AddLayer(pcbnew.F_Cu)
     ls.AddLayer(pcbnew.B_Cu)
     ko.SetLayerSet(ls)
-    ko.Outline().AddOutline(rect_chain(X0 - 1, Y0 - 1, ANTENNA_X, ANTENNA_Y_MAX))
+    ko.AddPolygon(rect_chain(X0 - 1, Y0 - 1, ANTENNA_X, ANTENNA_Y_MAX))
     ko.SetZoneName("antenna_keepout")
     board.Add(ko)
 
@@ -57,7 +57,7 @@ def main():
         z = pcbnew.ZONE(board)
         z.SetLayer(layer)
         z.SetNetCode(gnd.GetNetCode())
-        z.Outline().AddOutline(rect_chain(X0 + 0.3, Y0 + 0.3, X1 - 0.3, Y1 - 0.3))
+        z.AddPolygon(rect_chain(X0 + 0.3, Y0 + 0.3, X1 - 0.3, Y1 - 0.3))
         z.SetLocalClearance(pcbnew.FromMM(0.3))
         z.SetMinThickness(pcbnew.FromMM(0.2))
         z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
@@ -69,18 +69,28 @@ def main():
 
     # --- stitching vias ---------------------------------------------------
     # occupancy check against pads/tracks/vias of non-GND nets
-    items = []  # (x, y, halfsize, netcode)
+    pads_l = []   # (x, y, halfsize, netcode)
+    segs_l = []   # (x0, y0, x1, y1, halfwidth, netcode)
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             bb = pad.GetBoundingBox()
-            items.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
-                          max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2,
-                          pad.GetNetCode()))
+            pads_l.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
+                           max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2,
+                           pad.GetNetCode()))
     for t in board.GetTracks():
-        bb = t.GetBoundingBox()
-        items.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
-                      max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2,
-                      t.GetNetCode()))
+        if isinstance(t, pcbnew.PCB_VIA):
+            pads_l.append((pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
+                           pcbnew.ToMM(t.GetWidth()) / 2, t.GetNetCode()))
+        else:
+            s, e = t.GetStart(), t.GetEnd()
+            segs_l.append((pcbnew.ToMM(s.x), pcbnew.ToMM(s.y), pcbnew.ToMM(e.x), pcbnew.ToMM(e.y),
+                           pcbnew.ToMM(t.GetWidth()) / 2, t.GetNetCode()))
+
+    def seg_dist(px, py, x0, y0, x1, y1):
+        dx, dy = x1 - x0, y1 - y0
+        L2 = dx*dx + dy*dy
+        t_ = 0 if L2 == 0 else max(0, min(1, ((px-x0)*dx + (py-y0)*dy) / L2))
+        return math.hypot(x0 + t_*dx - px, y0 + t_*dy - py)
 
     gnd_code = gnd.GetNetCode()
     placed = 0
@@ -91,12 +101,19 @@ def main():
             ok = not (x < ANTENNA_X + 1 and y < ANTENNA_Y_MAX + 1)
             if ok:
                 r = VIA_D / 2 + CLEAR
-                for (ix, iy, ihs, inc) in items:
+                for (ix, iy, ihs, inc) in pads_l:
                     if inc == gnd_code:
                         continue
                     if abs(ix - x) < ihs + r and abs(iy - y) < ihs + r:
                         ok = False
                         break
+                if ok:
+                    for (x0s, y0s, x1s, y1s, hw, inc) in segs_l:
+                        if inc == gnd_code:
+                            continue
+                        if seg_dist(x, y, x0s, y0s, x1s, y1s) < hw + r:
+                            ok = False
+                            break
             if ok:
                 v = pcbnew.PCB_VIA(board)
                 v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
