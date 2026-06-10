@@ -10,17 +10,19 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-🔁 **Restart pending:** a third MCP server was added to `.mcp.json` this
-session — **`jlcpcb`** (`@jlcpcb/mcp` via npx, from Anthropic's `ai-eda` repo;
-smoke-tested: handshake OK, v0.3.2). It provides JLCPCB part search with
-Basic/Extended status, live stock/pricing, and KiCad symbol/footprint/3D
-fetch — use it instead of web searches for part sourcing (the kicad-edit
-local JLCPCB DB is empty). **Restart to load it.**
+✅ **H2.0 PCB sync + H2.1 design rules DONE (2026-06-11).** The `.kicad_pcb`
+now electrically matches the v1.2 schematic (machine-verified: net-partition
+diff netlist↔PCB = identical, 56 multi-node nets; 72/72 components match on
+footprint+value). JLCPCB 2-layer rules + Power/IR_Drive net classes set;
+constraints documented in `hardware/notes/layout.md`. The `jlcpcb` MCP is
+loaded and smoke-tested live (validated L1 = C78804, 16k stock).
 
-**Next session picks from:** H1.5 (Nick eyeballs the schematic PDF on the
-Pages site — the human gate), optional H1.3 hierarchical refactor, or H2.1
-layout constraints. F1.4/F1.5 firmware+bench also open. Optional good
-citizenship: file the unreported kicad-edit bugs upstream (see Tooling).
+**Next:** H2.2 placement — draw the board outline (Edge.Cuts is empty; see
+layout.md "Board outline" for drivers), place per constraints, then a render
+goes to Nick **before any routing**. Also still open: H1.5 (Nick eyeballs
+the schematic PDF — can happen in parallel), optional H1.3 hierarchical
+refactor, F1.4/F1.5 firmware+bench. Optional good citizenship: file the
+kicad-edit bugs upstream (see Tooling — now several more).
 
 ✅ **Board v1.2 change set COMPLETE (2026-06-11, headless via kicad-edit MCP +
 scripted s-expr surgery, every step netlist-verified).** ERC is now **0 errors**
@@ -97,6 +99,23 @@ field-dropping-replace bugs appear unreported — worth filing):**
   H1.3.
 - KiCad 9's own netlister drops/renames **label-less 2-pin nets** (false
   `wire_dangling` ERC + net missing from netlist). Name the net with a label.
+- **PCB-side bugs found during H2.0 (2026-06-11):** `sync_schematic_to_board`
+  only *adds* — it does not remove deleted components (J1 stayed), update
+  changed footprints/values, and it **splits dual-labelled nets** (U3 pads
+  landed on `ESP_GPIOxx` nets while peripherals stayed on functional names —
+  7 broken connections, repaired via pcbnew pad-net reassignment).
+  `edit_component` changes the footprint *name* but not the pad geometry.
+  `assign_net_to_class` is advertised but unimplemented ("Unknown command");
+  `create_netclass` doesn't persist — net classes were written into
+  `.kicad_pro` `net_settings` JSON directly (eeschema needs `*`-prefixed
+  patterns for local nets: `/IR_DRAIN`). Its auto-save also refuses after its
+  *own* writes ("disk changed externally") — reload via `open_project`.
+- **Headless pcbnew (KiCad 9.0.6) quirks** (not kicad-edit): only the FIRST
+  `FootprintLoad` per process returns a typed object — do one swap per
+  process. `PCB_FIELD(fp, 0, name)` clobbers the Reference field (id 0).
+  `LoadBoard` returns None if any item sits on a `Rescue` layer (the
+  EasyEDA-converted `IND-SMD_L6.7-W6.7.kicad_mod` had `(layer "")` ×4 — fixed
+  to F.Fab in `hardware/lib/`).
 It exposes schematic/PCB
 *editing* (add_schematic_component/wire, place_component, route, autoroute),
 *rendering* (`get_board_2d_view`, `kicad://board/preview.png`), and *export*
@@ -233,13 +252,20 @@ Make the schematic provably correct before any layout effort builds on it.
 
 ## Phase H2 — PCB layout *(needs: Mac)*
 
-66 footprints are imported; 0 tracks routed. Layout is greenfield.
+72 footprints imported & synced to the v1.2 schematic (H2.0, 2026-06-11);
+0 tracks routed; Edge.Cuts empty. Layout is greenfield.
 
-- [ ] **H2.1 Constraints first:** set up JLCPCB 2-layer design rules in the
-      board; document placement constraints in `hardware/notes/layout.md`:
-      IR LEDs on board edge at 0/45/90/135°, WROOM antenna keepout
-      (no copper under antenna, module at board edge), AP63203 switching loop
-      tight, USB-C/CH340C short data traces, DHT22 away from heat sources.
+- [x] **H2.0 Schematic→PCB sync (2026-06-11):** J1 deleted; J3–J6 + R27–R30
+      added; L1/Q4/Q5/R20/R21/R23–R26 footprints swapped to match schematic
+      (pcbnew scripting — kicad-edit's sync couldn't); R13/R16/L1 values
+      fixed; 7 split dual-label nets repaired; EXT_IR_A/IR_RX_VS/C7/C8 pad
+      nets corrected. **Verified: net-partition diff netlist↔PCB identical.**
+- [x] **H2.1 Constraints first (2026-06-11):** JLCPCB 2-layer rules in the
+      project (clearance/track 0.15, via 0.5/0.3, drill 0.3, edge 0.3) +
+      net classes Power 0.6mm / IR_Drive 0.5mm (11 nets). Constraints doc:
+      `hardware/notes/layout.md` — antenna keepout, IR LED edge fan
+      0/45/90/135°, buck loop, USB order J2→F1→D1→U1, DHT22 placement,
+      B.Cu GND pour plan, outline drivers, H2.2 exit criteria.
 - [ ] **H2.2 Placement** per constraints; Nick sanity-checks a 3D render /
       screenshot before routing starts (cheap to move parts now).
 - [ ] **H2.3 Routing + ground pour;** power nets sized for 400mA IR + WiFi

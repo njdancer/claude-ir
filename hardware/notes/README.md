@@ -32,6 +32,7 @@ what changed electrically, since `.kicad_sch` diffs are dominated by graphics.
 | [ir-receiver.md](./ir-receiver.md) | TSOP38238 development receiver |
 | [temp-sensor.md](./temp-sensor.md) | DHT22/AM2302 for Follow Me |
 | [status-leds.md](./status-leds.md) | Serial activity and user LEDs |
+| [layout.md](./layout.md) | PCB layout constraints: placement, routing, stackup (H2) |
 
 ## GPIO pin assignments
 
