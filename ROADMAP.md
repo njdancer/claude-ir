@@ -10,6 +10,12 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔁 **Restart pending:** a second KiCad MCP (`kicad-edit`, 155 tools incl. board
+rendering + editing) was installed and added to `.mcp.json` this session —
+**restart to load it** (see "Tooling" below). Next-session threads: GitHub Pages
+publishing (plan below) and/or the Board v1.2 change set via `kicad-edit` or the
+KiCad GUI.
+
 ➡️ **Active phase: H1 — Schematic verification.** Done this session: H1.0
 (28 protocol fixtures preserved), H1.1 (ERC baseline = 9 violations, all
 expected; netlist resynced), H1.2 census (no orphan; LCSC backfill mapped),
@@ -47,6 +53,41 @@ remove redundant PWR_FLAG on CH340C V3 (clears the 1 ERC error).
 backfill LCSC fields on the 15 gap parts (table in H1.2); then regenerate the
 BOM from the schematic and demote `hardware/BOM.md`. Prefer JLCPCB **Basic**
 parts for all new/changed parts (verify on LCSC via Chrome).
+
+### Tooling: second KiCad MCP (`kicad-edit`) — **needs a session restart**
+
+Installed and configured `mixelpixx/KiCAD-MCP-Server` at
+`tools/kicad-mcp-server/` (gitignored): `npm install && npm run build` done, a
+`--system-site-packages` venv (`.venv`, KiCad py3.9 + pcbnew 9.0.6 + cairosvg
+etc.) created, smoke-tested (MCP handshake returns **155 tools**, "SERVER
+READY"). Added to `.mcp.json` as **`kicad-edit`** (alongside the existing
+read-only `kicad`). **Restart the session to load it.** It exposes schematic/PCB
+*editing* (add_schematic_component/wire, place_component, route, autoroute),
+*rendering* (`get_board_2d_view`, `kicad://board/preview.png`), and *export*
+(svg/pdf/3d/bom/gerber/CPL). Two potential uses: (a) do some of the **Board v1.2
+change set** edits headlessly instead of the GUI bench session (evaluate
+carefully — MCP edits on a hand-drawn schematic are unproven; verify every
+change with `hardware-check.sh` + netlist diff); (b) generate board preview
+PNGs for the Pages docs below.
+
+### Publishing: GitHub Pages artifacts *(any environment; next session)*
+
+Goal: auto-publish board + project artifacts to GitHub Pages on every push so the
+design is browsable. Plan:
+- **Artifacts:** schematic PDF/SVG (`kicad-cli sch export pdf|svg` — robust, no
+  MCP needed), BOM (`kicad-cli sch export bom`), board 2D preview + 3D render
+  (after H2 layout: `kicad-cli pcb render` / `pcb export svg`), and rendered
+  project docs (ROADMAP, `re-findings.md`, spec).
+- **Mechanism:** a GitHub Actions workflow (`.github/workflows/pages.yml`) that
+  installs `kicad-cli` (KiCad's CI image or apt), runs the exports, assembles a
+  simple static site (an `index.html` linking the artifacts + the rendered
+  markdown), and deploys via `actions/upload-pages-artifact` + `deploy-pages`.
+- **Enable Pages** for `njdancer/claude-ir` (source = GitHub Actions) via
+  `gh api` or the repo settings once.
+- The `kicad-edit` MCP can supplement with `get_board_2d_view` PNGs for richer
+  in-page previews.
+- The empty `viewer/` dir is just stray `node_modules` (gitignored) — not a
+  started scaffold; build fresh.
 
 ## Done (context for new sessions)
 

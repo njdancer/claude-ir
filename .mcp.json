@@ -9,6 +9,16 @@
         "KICAD_USER_DIR": "/Users/nickdancer/Documents/KiCad",
         "KICAD_APP_PATH": "/Applications/KiCad/KiCad.app"
       }
+    },
+    "kicad-edit": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/Users/nickdancer/Documents/claude-ir/tools/kicad-mcp-server/dist/index.js"],
+      "env": {
+        "KICAD_PYTHON": "/Users/nickdancer/Documents/claude-ir/tools/kicad-mcp-server/.venv/bin/python",
+        "LOG_LEVEL": "error",
+        "KICAD_AUTO_LAUNCH": "false"
+      }
     }
   }
 }

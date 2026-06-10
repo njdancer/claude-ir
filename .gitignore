@@ -59,6 +59,7 @@ app/test-results/
 app/playwright-report/
 *.lock
 tools/kicad-mcp/
+tools/kicad-mcp-server/
 
 # Stray local node_modules (no source tracked here)
 viewer/
