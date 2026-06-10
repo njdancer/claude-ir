@@ -2,6 +2,13 @@
 
 Unit tests for the ActronAir IR Controller firmware using PlatformIO's native testing framework.
 
+## Test Suites
+
+- `test_parsing/` - serial command parsing and validation logic
+- `test_bosch144_protocol/` - BOSCH144 frame construction
+  (`include/bosch144_protocol.h`) asserted byte-for-byte against the captured
+  protocol tables in `re-findings.md` and IRremoteESP8266's bit layout
+
 ## Running Tests
 
 ### Run all tests
@@ -88,7 +95,7 @@ OK
 
 To add new tests:
 
-1. Create a new test file in `/test` directory (e.g., `test_newfeature.cpp`)
+1. Create a new test directory under `/test` (e.g., `test_newfeature/test_newfeature.cpp`)
 2. Include `<unity.h>` header
 3. Write test functions with `TEST_ASSERT_*` macros
 4. Add tests to `main()` with `RUN_TEST()`

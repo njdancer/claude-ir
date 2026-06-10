@@ -12,7 +12,9 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ➡️ **Active phase: H1 — Schematic verification.** Next actions: H1.0 (commit
 reference captures — data-loss risk) then H1.1 (run
-`./scripts/hardware-check.sh` on the Mac for an ERC baseline).
+`./scripts/hardware-check.sh` on the Mac for an ERC baseline). F1.1–F1.3 are
+already done; F1.5 lists a ~10-minute breadboard check for whenever the
+ESP8266 is plugged in.
 
 ## Done (context for new sessions)
 
@@ -101,20 +103,28 @@ Make the schematic provably correct before any layout effort builds on it.
 
 ## Phase F1 — ESP32 bring-up firmware *(parallel with H2/H3, any environment)*
 
-- [ ] **F1.1** Add `[env:esp32]` to `platformio.ini` (espressif32, WROOM-32E,
-      pins per `hardware/notes/README.md`: IR TX 18, IR RX 19, DHT22 4,
-      user LEDs 16/17).
-- [ ] **F1.2** Port `src/main.cpp` to build for both envs (pin/board
-      abstraction, keep serial protocol identical so the web app works
-      unchanged). IRremoteESP8266 supports ESP32.
-- [ ] **F1.3** Host-side protocol codec tests: encode (temp, mode, fan) →
-      bytes, assert byte-for-byte against `re-findings.md` byte maps; round
-      trip decode. Runs in `pio test -e native`, using `captures/reference/`
-      (populated by H1.0) plus the byte maps in `re-findings.md` as fixtures.
+- [x] **F1.1** `[env:esp32dev]` added to `platformio.ini` (espressif32, pins
+      via build_flags: IR TX 18, IR RX 19, user LEDs 16/17). Builds clean.
+- [x] **F1.2** `src/main.cpp` builds for both envs (pins from build_flags,
+      serial protocol unchanged). Not yet flashed to real hardware.
+- [x] **F1.3** Protocol frame builder (`include/bosch144_protocol.h`, pure
+      C++) + 18 native tests (`test/test_bosch144_protocol/`) asserting
+      byte-for-byte against re-findings tables and IRremoteESP8266 layout.
+      Discoveries: byte-17 checksum = sum(bytes 12..16) (was "unknown");
+      re-findings 28°C entry likely mislabeled (0x90 vs library 0x80).
+      Also fixed: TEMP:x.5 silently truncated to whole degrees — half-degree
+      flag (byte 14 bit 5) now patched into the frame before send.
 - [ ] **F1.4** Fix the state-model weakness: per-payload (BOSCH144 vs COOLIX)
       freshness tracking instead of blind toggles for swing/boost.
+- [ ] **F1.5 Bench verification (Nick, breadboard, ~10 min):**
+  - [ ] Flash `pio run -e nodemcuv2 -t upload`; smoke-test POWER/TEMP/MODE
+        against the AC (regression check after refactor)
+  - [ ] `TEMP:22.5` — AC display should show 22.5 (half-degree fix)
+  - [ ] `TEMP:28` — verify AC shows 28 not 27 (resolves the 0x80/0x90
+        question; also check `temp-28.txt` when committing captures in H1.0)
 
-**Gate:** ESP32 env builds; native tests pass; serial protocol unchanged.
+**Gate:** ESP32 env builds ✓; native tests pass ✓ (35/35); serial protocol
+unchanged ✓; bench regression check pending (F1.5).
 
 ## Phase F2 — Production firmware & integration *(after bring-up)*
 

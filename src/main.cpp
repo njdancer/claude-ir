@@ -1,10 +1,11 @@
 /*
- * ESP8266 IR Controller - ActronAir AC Control
+ * IR Controller - ActronAir AC Control
  *
- * Hardware:
- *   - ESP8266 NodeMCU
- *   - CHQ1838 IR Receiver on GPIO14 (D5) - for debugging
- *   - IR LED transmitter on GPIO4 (D2) via 2N2222 transistor
+ * Hardware (pins set per-board via build_flags in platformio.ini):
+ *   - nodemcuv2: ESP8266 NodeMCU breadboard - IR RX GPIO14 (D5),
+ *     IR TX GPIO4 (D2) via 2N2222 transistor
+ *   - esp32dev: ESP32-WROOM-32E custom dev board - IR TX GPIO18 (MOSFET
+ *     driver, 4x TSAL6200), IR RX GPIO19 (TSOP38238)
  *
  * Purpose:
  *   Full-duplex IR control for ActronAir AC unit
@@ -24,9 +25,17 @@
 #include <ir_Bosch.h>
 #include <ir_Coolix.h>
 
-// Pin Configuration
-const uint16_t kIrLedPin = 4;    // GPIO4 (D2) - IR TX
-const uint16_t kIrRecvPin = 14;  // GPIO14 (D5) - IR RX (debugging)
+#include "bosch144_protocol.h"
+
+// Pin Configuration (from build_flags; defaults match the ESP8266 breadboard)
+#ifndef IR_LED_PIN
+#define IR_LED_PIN 4
+#endif
+#ifndef IR_RECV_PIN
+#define IR_RECV_PIN 14
+#endif
+const uint16_t kIrLedPin = IR_LED_PIN;
+const uint16_t kIrRecvPin = IR_RECV_PIN;
 
 // Serial Configuration
 const uint32_t kBaudRate = 115200;
@@ -80,6 +89,7 @@ void setup() {
   Serial.println();
 
   // Initialize IR transmitter
+  irsend.begin();
   acBosch.begin();
   acCoolix.begin();
   Serial.println(F("✓ IR Transmitter initialized on GPIO4 (D2)"));
@@ -337,12 +347,23 @@ void handleSerialCommand() {
 void sendBosch144Command() {
   // Configure BOSCH144 AC with current state
   acBosch.setPower(acState.power);
-  acBosch.setTemp(acState.temperature);
+  const uint8_t wholeDegrees = (uint8_t)acState.temperature;
+  const bool halfDegree = (acState.temperature - wholeDegrees) >= 0.25;
+  acBosch.setTemp(wholeDegrees);
   acBosch.setMode(acState.mode);
   acBosch.setFan(acState.fanSpeed);
 
-  // Send IR command
-  acBosch.send();
+  if (halfDegree) {
+    // The library's setTemp() is whole-degrees only; the +0.5C flag lives in
+    // byte 14 bit 5 (re-findings.md). Patch the raw frame and resend the
+    // checksum (getRaw() has already applied inverts + checksum).
+    uint8_t* raw = acBosch.getRaw();
+    raw[14] |= 0x20;
+    bosch144::updateChecksum(raw);
+    irsend.sendBosch144(raw);
+  } else {
+    acBosch.send();
+  }
 
   #ifdef DEBUG_IR
   // Print raw state for debugging
