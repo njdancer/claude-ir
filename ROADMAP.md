@@ -10,11 +10,12 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-➡️ **Active phase: H1 — Schematic verification.** Next actions: H1.0 (commit
-reference captures — data-loss risk) then H1.1 (run
-`./scripts/hardware-check.sh` on the Mac for an ERC baseline). F1.1–F1.3 are
-already done; F1.5 lists a ~10-minute breadboard check for whenever the
-ESP8266 is plugged in.
+➡️ **Active phase: H1 — Schematic verification.** H1.0 done (28 protocol
+fixtures preserved in `captures/reference/`). Next action: H1.1 — run
+`./scripts/hardware-check.sh` on the Mac for an ERC baseline and commit the
+regenerated netlist. F1.1–F1.3 are already done; F1.5 lists a ~10-minute
+breadboard check for whenever the ESP8266 is plugged in (no ESP board was on
+USB this session — only Bluetooth/Cricut serial ports present).
 
 ## Done (context for new sessions)
 
@@ -31,11 +32,12 @@ ESP8266 is plugged in.
 
 Make the schematic provably correct before any layout effort builds on it.
 
-- [ ] **H1.0 Preserve the ground truth (first Mac session, 5 min):** the 60+
-      IR captures are gitignored and exist ONLY on Nick's Mac. Copy the key
-      reference set (per `re-findings.md` §Capture Files Summary: temp range,
-      modes, fan speeds, power, swing, boost, LED) into `captures/reference/`
-      (now tracked) and commit. These are irreplaceable protocol fixtures.
+- [x] **H1.0 Preserve the ground truth:** 28 curated, valid-decode fixtures
+      copied into tracked `captures/reference/` with clean names + a
+      provenance/decode `README.md` (temp sweep 16–26 incl. half-degrees,
+      modes 1–5, fan 1–6, power on/on-2/off/button, swing A/B, boost, LED).
+      Gap recorded: no valid `temp-28` capture exists (both bench attempts
+      failed to decode) — folded into the F1.5 bench checklist.
 - [ ] **H1.1 Baseline:** run `./scripts/hardware-check.sh`; fix any script
       issues; commit regenerated netlist + ERC fixes. Record violation count
       here even if zero.
