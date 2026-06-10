@@ -19,6 +19,11 @@
         "LOG_LEVEL": "error",
         "KICAD_AUTO_LAUNCH": "false"
       }
+    },
+    "jlcpcb": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@jlcpcb/mcp@latest"]
     }
   }
 }

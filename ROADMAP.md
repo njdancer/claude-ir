@@ -10,6 +10,18 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔁 **Restart pending:** a third MCP server was added to `.mcp.json` this
+session — **`jlcpcb`** (`@jlcpcb/mcp` via npx, from Anthropic's `ai-eda` repo;
+smoke-tested: handshake OK, v0.3.2). It provides JLCPCB part search with
+Basic/Extended status, live stock/pricing, and KiCad symbol/footprint/3D
+fetch — use it instead of web searches for part sourcing (the kicad-edit
+local JLCPCB DB is empty). **Restart to load it.**
+
+**Next session picks from:** H1.5 (Nick eyeballs the schematic PDF on the
+Pages site — the human gate), optional H1.3 hierarchical refactor, updating
+`tools/kicad-mcp-server` to upstream v2.2.3 (several bugs we hit are fixed
+there), or H2.1 layout constraints. F1.4/F1.5 firmware+bench also open.
+
 ✅ **Board v1.2 change set COMPLETE (2026-06-11, headless via kicad-edit MCP +
 scripted s-expr surgery, every step netlist-verified).** ERC is now **0 errors**
 (8 deliberate dual-label warnings). J1 removed; Qwiic/spare-GPIO/ext-IR/JTAG
