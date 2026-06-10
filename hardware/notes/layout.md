@@ -26,10 +26,15 @@ constraints that rules can't express.
    under the antenna** (the section past the module's shield can), and keep
    other components ≥5 mm from the antenna zone. KiCad's footprint shows the
    keepout outline — respect it on both layers and in the GND pour.
-2. **IR LEDs (D2–D5, THT, 5 mm) on the board edge** pointing outward at
-   0°/45°/90°/135° fan-out so the array covers a wide arc toward the AC
-   unit. They are hand-soldered THT — leave finger room. D2/D3 and D4/D5
-   are series pairs; keep each pair's anode-cathode chain short.
+2. **IR LEDs (D2–D5, THT, 5 mm) on the board edge**, each bent 90° at
+   solder time to lie horizontal and fire outward over the edge, fanned at
+   −67.5°/−22.5°/+22.5°/+67.5° from the edge normal (TSAL6200 half-intensity
+   beam is ±17°, so 45° splay covers a ~170° arc — the spec's 180°
+   requirement leans on wall reflections at the extremes, per
+   ir-transmitter.md). Footprints sit ≥4 mm behind the edge for the bend
+   radius, rotated to their fan angle, with silkscreen aim guides. Each LED
+   is an independent string (own 18Ω resistor from +3.3V, all cathodes to
+   `IR_DRAIN`) — they are NOT series pairs. Hand-soldered; leave finger room.
 3. **AP63203 buck (U1) switching loop tight:** C1/C2 (input caps) hard
    against VIN/GND pins; L1 adjacent to SW; C3 (output) close to L1 return
    with short GND back to U1. Keep the SW node (`Net-(U1-SW)`) copper area
