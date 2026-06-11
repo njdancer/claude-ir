@@ -10,6 +10,21 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **Board v1.3: auto-reset Q1/Q2 → 2N7002 MOSFETs (2026-06-11, Nick's request).**
+S8050 NPN BJTs (C2146) swapped for 2N7002 N-FETs (C8545, already on the
+board as Q4/Q5). SOT-23 pinouts map 1:1 (B→G, E→S, C→D) so the layout is
+untouched — verified headlessly (kicad/kicad:9.0.6 container): ERC delta is
+−2 warnings / no new violations, netlist diff electrically empty (same pads,
+same partitions; nets renamed Net-(Q1-B)→(Q1-G) etc. and renamed in the PCB
+to match), DRC unchanged vs accepted baseline, netlist↔PCB partition check
+identical, schematic parity 0. BOM consolidates 35→34 unique lines (one
+Basic part fewer). **Bonus fix found during regen: the committed BOM CSV +
+fab BOM still ordered C10 as 100nF C14663 — stale vs the M-4 remediation
+(10µF C19702); both now corrected.** Fab outputs in `hardware/fab/` updated
+(BOM + raw CPL; gerbers/CPL positions unaffected — no copper changed).
+Trade-off note (body diode) recorded in `hardware/notes/usb-serial.md` and
+spec v1.3 §Auto-Reset.
+
 🎉 **BOARD LAYOUT COMPLETE — FAB-READY (2026-06-11, unattended session).**
 H2.0–H2.4 + H3.1 all done. The 80×55 mm 2-layer board is placed, fully
 routed (freerouting via podman + custom heal pipeline), poured, stitched,

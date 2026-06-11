@@ -58,7 +58,7 @@
 | Ref           | Description    | Value              | LCSC Part | Stock   | Datasheet | Verified | Notes                  |
 | ------------- | -------------- | ------------------ | --------- | ------- | --------- | -------- | ---------------------- |
 | U1            | ESP32 Module   | ESP32-WROOM-32E-N4 | C701341   | 1001    | local     | ✓        | ESPRESSIF, 4MB flash   |
-| Q1,Q2         | NPN Transistor | S8050              | C916390   | 860800  |           | ✓        | JSMSEMI, SOT-23, qty 2 |
+| Q1,Q2         | N-MOSFET       | 2N7002             | C8545     | 779450  |           | ✓        | CJ, SOT-23, qty 2 (v1.3: was S8050 NPN; shares line with Q4,Q5) |
 | C6            | EN Delay Cap   | 1µF 16V X5R        | C52923    | 1182500 |           | ✓        | Samsung, 0805 MLCC     |
 | R4,R5,R17,R18 | Pull-ups/Base  | 10kΩ 1%            | C17902    | 896900  |           | ✓        | UNI-ROYAL, 1206, qty 4 |
 | SW1,SW2       | Tactile Switch | TS-1088R-02026     | C455280   | 52750   |           | ✓        | XUNPU, 6x6mm TH, qty 2 |

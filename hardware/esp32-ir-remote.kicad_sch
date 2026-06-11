@@ -6065,7 +6065,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_BJT:Q_NPN_BEC")
+		(lib_id "Transistor_FET:Q_NMOS_GSD")
 		(at 176.53 144.78 0)
 		(mirror x)
 		(unit 1)
@@ -6078,7 +6078,7 @@
 			(at 181.61 146.0501 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "Q_NPN_BEC"
+		(property "Value" "2N7002"
 			(at 181.61 143.5101 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -6086,15 +6086,15 @@
 			(at 181.61 147.32 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
 			(at 176.53 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "NPN transistor, base/collector/emitter"
+		(property "Description" "N-MOSFET transistor, gate/source/drain"
 			(at 176.53 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C2146"
+		(property "LCSC" "C8545"
 			(at 176.53 144.78 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8639,7 +8639,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_BJT:Q_NPN_BEC")
+		(lib_id "Transistor_FET:Q_NMOS_GSD")
 		(at 176.53 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -8652,7 +8652,7 @@
 			(at 181.61 130.8099 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "Q_NPN_BEC"
+		(property "Value" "2N7002"
 			(at 181.61 133.3499 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -8660,15 +8660,15 @@
 			(at 181.61 129.54 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
 			(at 176.53 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "NPN transistor, base/collector/emitter"
+		(property "Description" "N-MOSFET transistor, gate/source/drain"
 			(at 176.53 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C2146"
+		(property "LCSC" "C8545"
 			(at 176.53 132.08 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
