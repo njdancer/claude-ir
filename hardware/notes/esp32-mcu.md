@@ -25,14 +25,19 @@ spec budget allows ≤100mV droop at the module pins.
 - **BOOT (SW2):** pulls GPIO0 low. Hold BOOT, press RESET, release both to
   force download mode if auto-reset fails.
 
-## Breakout header
+## Expansion connectors
 
-2×19 female header exposes all GPIO plus 3.3V, 5V, and GND rails. The pinout
-deliberately matches the ESP32-DevKitC V4 so jumper-wire setups and pin
-references from the DevKitC ecosystem transfer directly. The exposed power
-rails are also the hook for v2 battery/power experiments on an external board
-(with JP1 disabling the onboard buck).
+The original 2×19 DevKitC-style breakout header (J1) was removed in the v1.2
+change set — it dominated routing for little benefit and exposed the module's
+internal flash pins (GPIO6–11). Expansion is now:
 
-Note: GPIO6–11 (CLK/SD0–SD3/CMD on the header) are connected to the module's
-internal SPI flash. They're broken out for completeness but must not be used
-as general I/O.
+- **J4 spare-GPIO header (2×5):** 3V3, 5V, GPIO23/32/33/34, 2× GND.
+  GPIO25/26 were sacrificed to routing congestion during layout (pins NC'd at
+  the module). Note **GPIO34 is input-only** (no output driver, no internal
+  pulls) — don't try to drive it.
+- **J3 Qwiic (JST-SH):** I2C on GPIO21 (SDA) / GPIO22 (SCL) with DNP 4.7k
+  pull-up footprints (R28/R29) for non-Qwiic devices.
+- **J6 JTAG (2×5, DNP):** ARM 10-pin layout, EN wired as nRESET.
+
+The exposed power rails on J4 are the hook for v2 battery/power experiments
+on an external board (with JP1 disabling the onboard buck).

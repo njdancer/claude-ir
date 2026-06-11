@@ -26,7 +26,8 @@ Fixed 3.3V output, so no feedback divider is needed — FB ties directly to the
 output rail. 1.1MHz switching frequency keeps the passives small.
 
 - **Bootstrap:** 100nF between BST and SW for high-side gate drive.
-- **Inductor:** 3.9µH, ≥2.7A saturation current, low DCR.
+- **Inductor:** 4.7µH (datasheet typical; chosen in H1.4 over the original
+  3.9µH for availability), ≥2.7A saturation current, low DCR.
 - **Input cap:** 10µF ceramic for load-transient stability.
 - **Output caps:** 2× 22µF ceramic in parallel for low ESR and ripple.
 
@@ -38,8 +39,8 @@ to v2).
 
 ## Power indicators
 
-- **Red LED on VBUS** (USB power present, before the buck).
-  Vf ≈ 1.9V; at 150Ω the current is ~20mA — brighter than the 5mA design
-  target, chosen deliberately for visibility.
-- **Green LED on 3.3V** (regulated rail up, after the buck).
-  Vf ≈ 2.0V; 150Ω gives ~9mA, again brighter than the 3mA target.
+- **Red LED on VBUS** (D6, USB power present, before the buck).
+  Vf ≈ 2.0V; R15 1kΩ from 5V gives ~3mA — indicator-dim by design.
+- **Green LED on 3.3V** (D7, regulated rail up, after the buck).
+  Vf ≈ 2.0V; R16 470Ω gives ~2.8mA (was 150Ω/~9mA; reduced in the H1.4
+  review to match the other indicators).
