@@ -10,6 +10,23 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **Board v1.3 follow-up: R21/R26 0Ω→470Ω + hygiene (2026-06-11, Nick OK'd
+larger changes for correctness).** The FET swap's one real regression — a held
+RESET/BOOT with the port idle shorted a CH340 pin through the 2N7002 body
+diode at ~25mA (the BJTs leaked 0.27mA) — is fixed by making the bypass links
+470Ω (C23179, Basic): diode current capped ~5mA, EN/GPIO0 lows ~0.15V (5×
+margin to V_IL), desolder-to-disable preserved, BOM line count unchanged.
+R3/R4 gate resistors deliberately KEPT (electrically invisible to FET gates,
+free ESD protection; removal = copper churn for zero gain). Hygiene: 5 unused
+embedded lib symbols purged from the schematic (4 PCM_JLCPCB leftovers — one
+with cross-contaminated 0Ω/2N7002 metadata — + orphaned Q_NPN_BEC); netlist
+byte-identical after purge. Silk label now "auto-rst 470R"; gerbers + renders
+regenerated via kicad-cli (copper geometry verified identical to the frozen
+package modulo net-name attributes; B-silk no longer carries pcbnew's
+plot-pads-on-silk noise). Same verification battery as the FET swap: ERC 9
+(2 pre-existing J4 errors + 7 dual-label warnings), DRC 3 accepted / 7 pour
+notices / parity 0, partition check identical.
+
 ✅ **Board v1.3: auto-reset Q1/Q2 → 2N7002 MOSFETs (2026-06-11, Nick's request).**
 S8050 NPN BJTs (C2146) swapped for 2N7002 N-FETs (C8545, already on the
 board as Q4/Q5). SOT-23 pinouts map 1:1 (B→G, E→S, C→D) so the layout is

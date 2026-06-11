@@ -8,7 +8,10 @@ This specification defines the hardware requirements for a development board tha
 > (S8050) to 2N7002 N-channel MOSFETs. The SOT-23 pinouts map 1:1 (B→G, E→S,
 > C→D), so the change is layout-neutral; it consolidates Q1/Q2 onto the same
 > BOM line as Q4/Q5 (JLCPCB Basic part C8545). Circuit topology and truth
-> table are unchanged. See [Auto-Reset Circuit](#auto-reset-circuit).
+> table are unchanged. The R21/R26 bypass links changed from 0Ω to **470Ω**
+> to limit FET body-diode current into the CH340C while RESET/BOOT is held
+> (restores BJT-grade benignity); they remain desolder-to-disable. See
+> [Auto-Reset Circuit](#auto-reset-circuit).
 >
 > **Revision note (v1.2):** The board target shifted toward "get it fabricated." The
 > bulky 2×19 ESP32-DevKitC debug breakout header is **removed** and replaced with a
@@ -238,8 +241,8 @@ GND ─────────────────────── CH340C
 GND ─────────────────────── CH340C R232 (pin 15)
 CH340C TXD ─────────────── ESP32 U0RXD (GPIO3)
 CH340C RXD ─────────────── ESP32 U0TXD (GPIO1)
-CH340C DTR# ────[R21 0Ω]── Auto-reset circuit (cross-coupled, DTR side)
-CH340C RTS# ────[R26 0Ω]── Auto-reset circuit (cross-coupled, RTS side)
+CH340C DTR# ────[R21 470Ω]── Auto-reset circuit (cross-coupled, DTR side)
+CH340C RTS# ────[R26 470Ω]── Auto-reset circuit (cross-coupled, RTS side)
 ```
 
 **Notes**:
@@ -661,7 +664,7 @@ RTS ───┬──────────│──────────�
 
 **Key insight**: The sources are NOT grounded - each transistor's source connects to the opposite input signal (DTR to Q2 source, RTS to Q1 source). This cross-coupling creates the XOR behavior: with both inputs asserted, neither FET sees a gate-source voltage, so neither can pull its output low.
 
-**MOSFET body diodes**: Each 2N7002's body diode (source→drain) creates a path from its input line into its output node (RTS→EN via Q1, DTR→GPIO0 via Q2) that conducts only when the output is pulled ~0.6V below the source line — in practice only while RESET or BOOT is held pressed with the serial port idle (lines high). The current is limited by the CH340C's output driver and is momentary; the buttons still dominate the node. Desoldering the R21/R26 bypass links breaks these paths entirely.
+**MOSFET body diodes**: Each 2N7002's body diode (source→drain) creates a path from its input line into its output node (RTS→EN via Q1, DTR→GPIO0 via Q2) that conducts only when the output is pulled ~0.6V below the source line — in practice only while RESET or BOOT is held pressed with the serial port idle (lines high). The 470Ω R21/R26 links (v1.3) limit this current to ~5mA; the buttons still dominate the node, and desoldering R21/R26 breaks the paths entirely.
 
 **Component Requirements**:
 
@@ -678,15 +681,19 @@ RTS ───┬──────────│──────────�
 
 The BOOT and RESET buttons (see Control Switches section) remain functional and can override the auto-reset circuit for manual bootloader entry when needed.
 
-**Auto-Reset Bypass Links (R21, R26 — 0Ω)**:
+**Auto-Reset Bypass Links (R21, R26 — 470Ω)**:
 
-Two inline 0Ω links allow disabling the auto-reset circuit for debugging. Earlier
-revisions used through-hole header+shunt jumpers (JP2/JP3); these are now **0Ω SMD
-resistors** so JLCPCB places them at assembly and the populated board stays low-profile.
+Two inline links allow disabling the auto-reset circuit for debugging. Earlier
+revisions used through-hole header+shunt jumpers (JP2/JP3), then 0Ω SMD links;
+since v1.3 they are **470Ω** so they also limit the 2N7002 body-diode current
+into the CH340C during button presses (see MOSFET body diodes above). 470Ω is
+electrically transparent to auto-reset: EN/GPIO0 still reach ~0.15V against
+their 10kΩ pull-ups, well below the 0.825V V_IL. JLCPCB places them at assembly
+and the populated board stays low-profile.
 
 ```
-CH340C DTR# ────[R21 0Ω]──── Auto-reset circuit (DTR side)
-CH340C RTS# ────[R26 0Ω]──── Auto-reset circuit (RTS side)
+CH340C DTR# ────[R21 470Ω]──── Auto-reset circuit (DTR side)
+CH340C RTS# ────[R26 470Ω]──── Auto-reset circuit (RTS side)
 ```
 
 | Link | Populated (default) | Removed |
@@ -978,7 +985,7 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 1   | —         | 2×5 2.54mm header      | Spare-GPIO + power header (GPIO25/26/32/33/34/23 + 3V3/5V/GND) | 2.54mm |
 | 1   | —         | 2-pin 2.54mm header    | External IR-emitter header (+ series-resistor footprint) | 2.54mm |
 | 1   | JP1       | 2-pad solder jumper    | Buck converter disable (EN→GND) | SMD, open by default |
-| 2   | R21, R26  | 0Ω SMD resistor        | Auto-reset bypass links (DTR/RTS), populated by default | 0603 SMD |
+| 2   | R21, R26  | 470Ω SMD resistor      | Auto-reset bypass links (DTR/RTS) + body-diode current limit, populated by default | 0603 SMD |
 
 *(Designators marked "—" are assigned in the schematic; the 2×19 breakout header of
 earlier revisions is removed.)*
@@ -1007,7 +1014,7 @@ Features.)*
 **Design Decisions Made**:
 - ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module (PCB antenna retained; U.FL/-32UE deferred)
 - USB-to-UART Bridge: CH340C selected for hand-solderability (SOP-16), built-in oscillator, and low cost
-- Auto-Reset Circuit: Cross-coupled 2N7002 N-channel MOSFETs (v1.3; pin-compatible swap from S8050 NPN BJTs, BOM-consolidated with Q4/Q5) with R21/R26 0Ω bypass links for debugging
+- Auto-Reset Circuit: Cross-coupled 2N7002 N-channel MOSFETs (v1.3; pin-compatible swap from S8050 NPN BJTs, BOM-consolidated with Q4/Q5) with R21/R26 470Ω bypass links (debug disconnect + body-diode current limit)
 - Voltage Regulation: AP63203 synchronous buck converter (L1 = 4.7µH) with disable jumper (JP1) for external power experimentation
 - Protection: PTC fuse + TVS diode; USB D+/D- ESD protection omitted (adequate for dev board use)
 - IR LED Driver: Single IRLML6344 logic-level MOSFET (SOT-23) with gate pull-down (gate series resistor ~330Ω–1kΩ, not 10kΩ); LEDs powered from 3.3V rail
@@ -1016,7 +1023,7 @@ Features.)*
 - User LEDs: GPIO16 (USER_LED1), GPIO17 (USER_LED2)
 - Temperature Sensor: DHT22 (AM2302) single-wire module replacing BME280
 - Connection Points: 2×19 DevKitC breakout header REMOVED; replaced by I2C Qwiic (GPIO21/22), spare-GPIO + power header, external IR-emitter header, and an unpopulated JTAG footprint (GPIO12–15)
-- Jumper Configuration: JP1 ships open (buck enabled); R21/R26 0Ω auto-reset links ship populated
+- Jumper Configuration: JP1 ships open (buck enabled); R21/R26 470Ω auto-reset links ship populated
 - Assembly: JLCPCB PCBA from LCSC parts, preferring JLCPCB "Basic" parts; through-hole parts hand-soldered or via JLCPCB THT option; BGA excluded
 
 **Remaining Implementation Tasks**:
