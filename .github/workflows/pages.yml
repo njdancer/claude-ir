@@ -32,7 +32,10 @@ jobs:
       - name: Install pandoc + git + node
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends pandoc git nodejs npm
+          apt-get install -y --no-install-recommends pandoc git curl ca-certificates
+          # gltf-transform CLI needs node >= 20; bookworm ships 18
+          curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+          apt-get install -y --no-install-recommends nodejs
       - uses: actions/checkout@v4
       - name: Build site
         # safe.directory: the workspace mount is owned by the runner uid but

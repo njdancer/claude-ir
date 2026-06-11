@@ -91,7 +91,7 @@ done
 python3 scripts/fix_glb_materials.py "$OUT/hardware/pcb/board.glb"
 # join primitives + draco-compress: 19 MB / 20k draw calls -> ~0.7 MB / ~200
 # (--palette false keeps plain colored materials, verifiable without a GPU)
-npx -y @gltf-transform/cli optimize "$OUT/hardware/pcb/board.glb"     "$OUT/hardware/pcb/board.glb" --compress draco --texture-compress false     --palette false
+npx -y @gltf-transform/cli@4.2.1 optimize "$OUT/hardware/pcb/board.glb"     "$OUT/hardware/pcb/board.glb" --compress draco --texture-compress false     --palette false
 # interactive viewer page: 3D (model-viewer) + toggleable 2D layer stack.
 # Asset URLs carry ?v=<commit> so browsers re-fetch after every deploy
 # (board.glb is large and otherwise cache-sticky).
