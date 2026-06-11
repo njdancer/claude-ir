@@ -66,7 +66,7 @@ echo "Exporting BOM CSV..."
     "$SCH"
 
 echo "Exporting PCB renders + 3D model..."
-PCB="$ROOT/hardware/esp32-ir-remote.kicad_pcb"
+PCB="hardware/esp32-ir-remote.kicad_pcb"
 mkdir -p "$OUT/hardware/pcb"
 "$KICAD_CLI_BIN" pcb render --side top -w 1600 -h 1200 \
     -o "$OUT/hardware/pcb/board-top.png" "$PCB"
