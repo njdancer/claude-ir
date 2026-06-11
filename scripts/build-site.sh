@@ -72,7 +72,7 @@ mkdir -p "$OUT/hardware/pcb"
     -o "$OUT/hardware/pcb/board-top.png" "$PCB"
 "$KICAD_CLI_BIN" pcb render --side bottom -w 1600 -h 1200 \
     -o "$OUT/hardware/pcb/board-bottom.png" "$PCB"
-"$KICAD_CLI_BIN" pcb render --perspective --rotate '-25,0,35' -w 1600 -h 1200 \
+"$KICAD_CLI_BIN" pcb render --perspective --rotate ' -25,0,35' -w 1600 -h 1200 \
     -o "$OUT/hardware/pcb/board-iso.png" "$PCB"
 "$KICAD_CLI_BIN" pcb export svg --layers F.Cu,B.Cu,Edge.Cuts,F.SilkS \
     --page-size-mode 2 -o "$OUT/hardware/pcb/board-copper.svg" "$PCB"
