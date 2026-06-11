@@ -92,6 +92,17 @@ separately:
    (`esp32-ir-remote_bom.csv`, with DNP column); `BOM.md` demoted to
    rationale-only.
 
+### Tooling: 3D models are vendored (2026-06-11)
+
+All 21 STEP models the board uses live in `hardware/lib/3dshapes/` and every
+footprint's model path is `${KIPRJMOD}`-relative. Reason: the `kicad/kicad:9.0`
+CI container ships **no** 3D library, so `${KICAD9_3DMODEL_DIR}` paths silently
+drop from Pages-built GLB/renders (the "only the inductor rendered" bug).
+If a footprint changes, re-vendor its model the same way (copy STEP, rewrite
+path) or the deployed viewer regresses. The Pages pipeline builds everything
+in `_site/` from source on every push — never commit site artifacts;
+`hardware/fab/` stays committed deliberately as the frozen order package.
+
 ### Tooling: second KiCad MCP (`kicad-edit`) — **needs a session restart**
 
 Installed and configured `mixelpixx/KiCAD-MCP-Server` at
