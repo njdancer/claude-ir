@@ -29,10 +29,10 @@ jobs:
     steps:
       # git must exist before checkout so it does a real clone (build-site.sh
       # needs `git ls-files` / `rev-parse`, which the tarball fallback breaks)
-      - name: Install pandoc + git
+      - name: Install pandoc + git + node
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends pandoc git
+          apt-get install -y --no-install-recommends pandoc git nodejs npm
       - uses: actions/checkout@v4
       - name: Build site
         # safe.directory: the workspace mount is owned by the runner uid but
