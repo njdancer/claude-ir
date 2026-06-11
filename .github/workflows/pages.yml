@@ -23,7 +23,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: kicad/kicad:9.0
+      image: kicad/kicad:9.0.6
       # The image's default user (kicad) can't write to the workspace mount
       options: --user root
     steps:
