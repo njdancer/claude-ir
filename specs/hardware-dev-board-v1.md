@@ -1,9 +1,15 @@
-# ESP32 IR Remote Control Development Board - Hardware Specification v1.2
+# ESP32 IR Remote Control Development Board - Hardware Specification v1.3
 
 ## Overview
 
 This specification defines the hardware requirements for a development board that enables testing and development of an ESP32-based smart AC remote control system using infrared transmission. The board serves as a transition from the current ESP8266 breadboard proof-of-concept to a manufacturable design suitable for firmware development and eventual production refinement.
 
+> **Revision note (v1.3):** Auto-reset transistors Q1/Q2 changed from NPN BJTs
+> (S8050) to 2N7002 N-channel MOSFETs. The SOT-23 pinouts map 1:1 (B→G, E→S,
+> C→D), so the change is layout-neutral; it consolidates Q1/Q2 onto the same
+> BOM line as Q4/Q5 (JLCPCB Basic part C8545). Circuit topology and truth
+> table are unchanged. See [Auto-Reset Circuit](#auto-reset-circuit).
+>
 > **Revision note (v1.2):** The board target shifted toward "get it fabricated." The
 > bulky 2×19 ESP32-DevKitC debug breakout header is **removed** and replaced with a
 > small set of purposeful connection points (I2C Qwiic, a compact spare-GPIO + power
@@ -610,7 +616,7 @@ The ESP32 enters bootloader mode when:
 - EN (enable) pin is pulsed LOW (reset)
 - GPIO0 is held LOW during reset release
 
-The auto-reset circuit uses two cross-coupled NPN transistors that form an XOR-like gate. This prevents the chip from being held in reset when both DTR and RTS are asserted together (which happens when opening a serial port).
+The auto-reset circuit uses two cross-coupled N-channel MOSFETs (2N7002) that form an XOR-like gate. This prevents the chip from being held in reset when both DTR and RTS are asserted together (which happens when opening a serial port).
 
 **Truth Table**:
 
@@ -626,11 +632,11 @@ The auto-reset circuit uses two cross-coupled NPN transistors that form an XOR-l
 ```
                     ┌────────────────────────────────────────┐
                     │                                        │
-DTR ───┬───[10kΩ]───┴──┤Base                                 │
-       │               │     Q1 (NPN)                        │
-       │          ┌────┤Collector ────┬──[10kΩ]── 3.3V       │
+DTR ───┬───[10kΩ]───┴──┤Gate                                 │
+       │               │     Q1 (2N7002)                     │
+       │          ┌────┤Drain ────────┬──[10kΩ]── 3.3V       │
        │          │    │              │                      │
-       │          │    └Emitter───────│────┐                 │
+       │          │    └Source────────│────┐                 │
        │          │                   │    │                 │
        │          │                   EN   │                 │
        │          │                   │    │                 │
@@ -642,29 +648,31 @@ DTR ───┬───[10kΩ]───┴──┤Base                       
                   │                        │
 RTS ───┬──────────│────────────────────────┘
        │          │
-       └──[10kΩ]──┴──┤Base
-                     │     Q2 (NPN)
-                ┌────┤Collector ────┬──[10kΩ]── 3.3V
+       └──[10kΩ]──┴──┤Gate
+                     │     Q2 (2N7002)
+                ┌────┤Drain ────────┬──[10kΩ]── 3.3V
                 │    │              │
-                │    └Emitter───────│──── DTR (cross-coupled)
+                │    └Source────────│──── DTR (cross-coupled)
                 │                   │
                 │                 GPIO0
                 │
-                └──── RTS (to Q1 emitter, cross-coupled)
+                └──── RTS (to Q1 source, cross-coupled)
 ```
 
-**Key insight**: The emitters are NOT grounded - each transistor's emitter connects to the opposite input signal (DTR to Q2 emitter, RTS to Q1 emitter). This cross-coupling creates the XOR behavior.
+**Key insight**: The sources are NOT grounded - each transistor's source connects to the opposite input signal (DTR to Q2 source, RTS to Q1 source). This cross-coupling creates the XOR behavior: with both inputs asserted, neither FET sees a gate-source voltage, so neither can pull its output low.
+
+**MOSFET body diodes**: Each 2N7002's body diode (source→drain) creates a path from its input line into its output node (RTS→EN via Q1, DTR→GPIO0 via Q2) that conducts only when the output is pulled ~0.6V below the source line — in practice only while RESET or BOOT is held pressed with the serial port idle (lines high). The current is limited by the CH340C's output driver and is momentary; the buttons still dominate the node. Desoldering the R21/R26 bypass links breaks these paths entirely.
 
 **Component Requirements**:
 
 | Ref | Value | Purpose |
 |-----|-------|---------|
-| Q1, Q2 | NPN (S8050, 2N2222A, BC337) | Cross-coupled signal translation |
-| R (×2) | 10kΩ | Base current limiting |
+| Q1, Q2 | 2N7002 N-channel MOSFET | Cross-coupled signal translation (shared BOM line with Q4/Q5) |
+| R (×2) | 10kΩ | Gate series resistors (carried over from the BJT design; not required for FETs but layout-neutral) |
 | R (×2) | 10kΩ | Pull-ups for EN and GPIO0 |
 | C | 1µF ceramic | EN pin RC delay (power-on reset) |
 
-**Reference**: This circuit matches the ESP32-S2-SAOLA-1 schematic from Espressif. See also: [Espressif's Automatic Reset](https://qsantos.fr/2025/05/09/espressifs-automatic-reset/) for detailed explanation.
+**Reference**: This circuit matches the ESP32-S2-SAOLA-1 topology from Espressif (which uses NPN BJTs; this board substitutes pin-compatible 2N7002 MOSFETs on the same SOT-23 pads). See also: [Espressif's Automatic Reset](https://qsantos.fr/2025/05/09/espressifs-automatic-reset/) for detailed explanation.
 
 **Manual Override**:
 
@@ -911,7 +919,7 @@ This BOM specifies exact parts only where necessary for compatibility (e.g., ESP
 | 1   | U2        | **CH340C**                  | USB-to-UART Bridge IC                    | SOP-16 (1.27mm pitch)     |
 | 4   | LED1-LED4 | 940nm IR LED, ≥100mA        | Suggested: TSAL6200 (Vishay)             | 5mm through-hole          |
 | 1   | Q1        | **IRLML6344**               | IR LED driver MOSFET (logic-level N-ch)  | SOT-23                    |
-| 2   | Q5-Q6     | NPN, general purpose        | Auto-reset circuit. Suggested: 2N2222A   | TO-92 or equivalent       |
+| 2   | Q5-Q6     | **2N7002** N-channel MOSFET | Auto-reset circuit (schematic refs Q1/Q2) | SOT-23                    |
 | 1   | U3        | 38kHz IR Receiver           | Suggested: TSOP1838, TSOP4838 (Vishay)   | 3-pin through-hole module |
 | 1   | U4        | DHT22 (AM2302)              | Temperature/humidity sensor module       | 3-pin through-hole module |
 | 1   | J1        | USB-C Receptacle            | Through-hole preferred for hand assembly | Through-hole              |
@@ -991,15 +999,15 @@ Features.)*
 
 ---
 
-**Document Version**: 1.2
-**Date**: 2026-06-10
+**Document Version**: 1.3
+**Date**: 2026-06-11
 **Author**: Development Team
-**Status**: In Implementation - H1.4 datasheet review complete; macro feature set revised
+**Status**: In Implementation - layout complete, fab outputs ready; auto-reset Q1/Q2 moved to 2N7002 MOSFETs (v1.3)
 
 **Design Decisions Made**:
 - ESP32 Module: ESP32-WROOM-32E-N4 selected for full control over support circuitry while using certified RF module (PCB antenna retained; U.FL/-32UE deferred)
 - USB-to-UART Bridge: CH340C selected for hand-solderability (SOP-16), built-in oscillator, and low cost
-- Auto-Reset Circuit: Discrete NPN transistor approach (cross-coupled) with R21/R26 0Ω bypass links for debugging
+- Auto-Reset Circuit: Cross-coupled 2N7002 N-channel MOSFETs (v1.3; pin-compatible swap from S8050 NPN BJTs, BOM-consolidated with Q4/Q5) with R21/R26 0Ω bypass links for debugging
 - Voltage Regulation: AP63203 synchronous buck converter (L1 = 4.7µH) with disable jumper (JP1) for external power experimentation
 - Protection: PTC fuse + TVS diode; USB D+/D- ESD protection omitted (adequate for dev board use)
 - IR LED Driver: Single IRLML6344 logic-level MOSFET (SOT-23) with gate pull-down (gate series resistor ~330Ω–1kΩ, not 10kΩ); LEDs powered from 3.3V rail
