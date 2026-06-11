@@ -86,6 +86,9 @@ done
 "$KICAD_CLI_BIN" pcb export glb --subst-models --include-tracks --include-zones \
     --include-pads --include-silkscreen --include-soldermask \
     -o "$OUT/hardware/pcb/board.glb" "$PCB" || echo "WARN: glb export failed"
+# kicad-cli omits PBR factors (spec default = full metal -> washed-out white
+# in model-viewer); rewrite them
+python3 scripts/fix_glb_materials.py "$OUT/hardware/pcb/board.glb"
 # interactive viewer page: 3D (model-viewer) + toggleable 2D layer stack.
 # Asset URLs carry ?v=<commit> so browsers re-fetch after every deploy
 # (board.glb is large and otherwise cache-sticky).

@@ -15493,7 +15493,7 @@
 		(embedded_fonts no)
 		(model "${KIPRJMOD}/lib/3dshapes/AM2302.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 3.81 -0.7 9.2)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -19182,6 +19182,102 @@
 			)
 		)
 	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 128.35 101.3) (xy 126.9 101) (xy 128.35 100.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "277a818e-67d4-490a-8b5d-a994aa5d7061")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 128.6 100.45) (xy 128.9 99) (xy 129.2 100.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "43b10706-0929-4f90-8a27-0a9b7dc48609")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 129.50104 101.176776) (xy 129.925304 102.025304) (xy 129.076776 101.60104)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "4850599b-cf70-4ff3-b946-d90cc8bad582")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 129.076776 100.398959) (xy 129.925304 99.974695) (xy 129.50104 100.823223)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "69211c2e-cee9-403a-8d03-c1b726084d8f")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 128.298959 100.823223) (xy 127.874695 99.974695) (xy 128.723223 100.398959)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "7c82585b-99d7-4d4e-80a8-45d6620bc80c")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 128.723223 101.60104) (xy 127.874695 102.025304) (xy 128.298959 101.176776)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "82128870-bd9c-43da-a959-a0c889e8c0c3")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 129.2 101.55) (xy 128.9 103) (xy 128.6 101.55)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "cfb3a600-aee5-4335-a9d4-c11d9a58ecbd")
+	)
+	(gr_poly
+		(pts
+			(xy 128.9 101) (xy 129.45 100.7) (xy 130.9 101) (xy 129.45 101.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "e297b25c-a1c8-4599-9109-c3d2583f4830")
+	)
 	(gr_line
 		(start 180 60)
 		(end 180 115)
@@ -19264,6 +19360,18 @@
 				(size 0.8 0.8)
 				(thickness 0.133333)
 			)
+		)
+	)
+	(gr_text "Claude"
+		(at 131.6 101.65 0)
+		(layer "F.SilkS")
+		(uuid "0d24a3ad-e9ce-4a00-940f-5b4bb199a4df")
+		(effects
+			(font
+				(size 0.85 0.85)
+				(thickness 0.15)
+			)
+			(justify left)
 		)
 	)
 	(gr_text "TX"
@@ -19473,6 +19581,18 @@
 				(size 0.8 0.8)
 				(thickness 0.13)
 			)
+		)
+	)
+	(gr_text "designed by"
+		(at 131.6 100.35 0)
+		(layer "F.SilkS")
+		(uuid "f78bae0c-0db1-4a37-89be-9fb564136a2d")
+		(effects
+			(font
+				(size 0.85 0.85)
+				(thickness 0.15)
+			)
+			(justify left)
 		)
 	)
 	(segment
