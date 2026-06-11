@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 """Fix PBR factors in a kicad-cli GLB export.
 
-kicad-cli omits metallicFactor/roughnessFactor, and the glTF spec defaults
-both to 1.0 — every part renders as rough bare metal and washes out to
-white under model-viewer's neutral lighting. Set sane dielectric defaults,
-keeping gold/copper-coloured materials metallic so pads and pins still
-look like metal.
+kicad-cli omits metallicFactor/roughnessFactor on component materials, and
+the glTF spec defaults both to 1.0 — every part renders as rough bare metal
+and washes out to white under model-viewer's neutral lighting. Classify each
+material by colour (gold/copper and silver/grey -> metal, everything else
+dielectric) and write explicit factors.
+
+Translucent board materials (soldermask, silkscreen, board body) render
+milky in model-viewer; force them opaque, deepening the green of the
+strongly-translucent soldermask so it reads as mask rather than mint.
+
+KiCad 9 Linux builds additionally fail to read STEP colours entirely:
+component primitives arrive with NO material (renderer default = white).
+KiCad 10 (the CI image) reads them fine, so the recolor-by-mesh-name table
+below is only a fallback for older exports (e.g. a local KiCad 9 build).
 
 Usage: python3 scripts/fix_glb_materials.py <file.glb>
 Validates by re-parsing the output and asserting every material has
-explicit factors.
+explicit factors and in-range colours.
 """
 import json
 import struct
@@ -41,14 +50,20 @@ def write_glb(path, chunks):
         f.write(struct.pack("<4sII", b"glTF", 2, 12 + len(body)) + body)
 
 
-def looks_metallic(color):
+def classify(color):
+    """(metallicFactor, roughnessFactor) for a base colour."""
     r, g, b = color[:3]
-    return r > 0.5 and g > 0.3 and b < 0.5 and r > b  # gold / copper tones
+    mx, mn = max(r, g, b), min(r, g, b)
+    if r > 0.5 and g > 0.3 and b < 0.55 and r - b > 0.1:
+        return 0.9, 0.35  # gold / copper / brass (pads, pins, contacts)
+    if 0.5 <= mx < 0.9 and mx - mn < 0.12:
+        return 0.9, 0.35  # silver / grey (end caps, shields, leads)
+    return 0.05, 0.65  # dielectric (plastic, ceramic, FR4, mask, silk)
 
 
-# Linux KiCad builds fail to read STEP colors: component primitives arrive
-# with NO material (renderer default = white). Recolor them by mesh name
-# (= the 3D model filename). (color RGB, metallic, roughness)
+# Fallback for KiCad 9 Linux exports, which drop STEP colours: component
+# primitives arrive with NO material. Recolor them by mesh name (= the 3D
+# model filename). (color RGB, metallic, roughness)
 COMPONENT_COLORS = {
     "LED_D3.0mm": ((0.55, 0.03, 0.03), 0.0, 0.4),
     "LED_D5.0mm": ((0.55, 0.03, 0.03), 0.0, 0.4),
@@ -111,29 +126,35 @@ def main(path):
     for m in gltf.get("materials", []):
         pbr = m.setdefault("pbrMetallicRoughness", {})
         color = pbr.get("baseColorFactor", [1, 1, 1, 1])
-        if looks_metallic(color):
-            pbr["metallicFactor"] = 0.9
-            pbr["roughnessFactor"] = 0.35
+        metal, rough = classify(color)
+        pbr["metallicFactor"] = metal
+        pbr["roughnessFactor"] = rough
+        if metal > 0.5:
             n_metal += 1
         else:
-            pbr["metallicFactor"] = 0.05
-            pbr["roughnessFactor"] = 0.65
             n_diel += 1
-        # translucent soldermask renders milky in model-viewer; make it a
-        # solid, slightly deeper green
+        # translucent board materials render milky in model-viewer; force
+        # opaque. Strongly-translucent green = soldermask: deepen it so it
+        # reads as mask, not mint. (Clamp — the old unclamped 1.1 green
+        # multiplier pushed white silkscreen out of spec and tinted it.)
         if len(color) > 3 and color[3] < 0.99:
-            pbr["baseColorFactor"] = [color[0] * 0.7, color[1] * 1.1,
-                                      color[2] * 0.7, 1.0]
+            r, g, b = color[:3]
+            if color[3] < 0.9 and g > r and g > b:
+                r, g, b = r * 0.7, min(g * 1.1, 1.0), b * 0.7
+            pbr["baseColorFactor"] = [r, g, b, 1.0]
             m["alphaMode"] = "OPAQUE"
     n_recolored = recolor_missing(gltf)
     chunks[0] = (b"JSON", json.dumps(gltf, separators=(",", ":")).encode())
     write_glb(path, chunks)
     # validate round-trip
     check = json.loads(read_glb(path)[0][1])
-    assert all(
-        "metallicFactor" in m.get("pbrMetallicRoughness", {})
-        for m in check.get("materials", [])
-    ), "validation failed: material missing explicit factors"
+    for m in check.get("materials", []):
+        pbr = m.get("pbrMetallicRoughness", {})
+        assert "metallicFactor" in pbr and "roughnessFactor" in pbr, \
+            "validation failed: material missing explicit factors"
+        assert all(0.0 <= c <= 1.0
+                   for c in pbr.get("baseColorFactor", [0, 0, 0, 0])), \
+            "validation failed: baseColorFactor out of [0,1]"
     assert not any(
         "material" not in p
         for mesh in check.get("meshes", [])

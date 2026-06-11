@@ -1,8 +1,8 @@
 # Publish board artifacts + rendered docs to GitHub Pages on every push to
-# main. The build job runs inside the official KiCad image so kicad-cli
-# matches the version used on the bench (KiCad 9); scripts/build-site.sh is
-# the single source of truth for what gets published and runs identically
-# locally and here.
+# main. The build job runs inside the official KiCad image (KiCad 10 — see
+# the container note below; the bench runs KiCad 9, which kicad-cli 10 reads
+# without migration); scripts/build-site.sh is the single source of truth
+# for what gets published and runs identically locally and here.
 name: pages
 
 on:
@@ -23,7 +23,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: kicad/kicad:9.0.6
+      # 10.0.2: KiCad 9 Linux builds drop STEP model colors in GLB export
+      # (every component rendered as one flat color); 10 reads them fine.
+      # kicad-cli 10 reads the v9 board/schematic files without migration.
+      image: kicad/kicad:10.0.2
       # The image's default user (kicad) can't write to the workspace mount
       options: --user root
     steps:
@@ -32,10 +35,9 @@ jobs:
       - name: Install pandoc + git + node
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends pandoc git curl ca-certificates
-          # gltf-transform CLI needs node >= 20; bookworm ships 18
-          curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-          apt-get install -y --no-install-recommends nodejs
+          # gltf-transform CLI needs node >= 20; the kicad:10 image is
+          # Debian 13 (trixie), whose distro nodejs is 20 — no nodesource
+          apt-get install -y --no-install-recommends pandoc git nodejs npm
       - uses: actions/checkout@v4
       - name: Build site
         # safe.directory: the workspace mount is owned by the runner uid but
