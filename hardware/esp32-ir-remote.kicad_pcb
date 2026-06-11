@@ -5956,7 +5956,7 @@
 			(uuid "c2b99e2b-7dad-4f0d-bd61-76f578cd46f1")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+		(model "${KICAD9_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1812_4532Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13745,7 +13745,7 @@
 			(uuid "cb67f21d-f42f-420c-8059-25903a7f00d9")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Connector_JST.3dshapes/JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal.step"
+		(model "${KICAD9_3RD_PARTY}/jlc_mcp/3dmodels/JLC-MCP.3dshapes/SM04B-SRSS-TB__LF__SN_.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14910,7 +14910,7 @@
 			)
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/RF_Module.3dshapes/ESP32-WROOM-32D.step"
+		(model "${KICAD9_3DMODEL_DIR}/RF_Module.3dshapes/ESP32-WROOM-32.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -15491,7 +15491,7 @@
 			(uuid "9a28e9c5-595a-4be7-a340-f7e1c0ca5816")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/Sensor.3dshapes/ASAIR_AM2302_P2.54mm_Vertical.step"
+		(model "${KICAD9_3RD_PARTY}/jlc_mcp/3dmodels/JLC-MCP.3dshapes/AM2302.step"
 			(offset
 				(xyz 0 0 0)
 			)

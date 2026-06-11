@@ -76,23 +76,40 @@ mkdir -p "$OUT/hardware/pcb"
     -o "$OUT/hardware/pcb/board-iso.png" "$PCB"
 "$KICAD_CLI_BIN" pcb export svg --layers F.Cu,B.Cu,Edge.Cuts,F.SilkS \
     --page-size-mode 2 -o "$OUT/hardware/pcb/board-copper.svg" "$PCB"
-# GLB (binary glTF) for the interactive viewer; include components
+# Per-layer SVGs for the toggleable 2D stack viewer. --page-size-mode 2 crops
+# every export to the same board area, so the stacked overlays align.
+for LAYER in F.Cu B.Cu F.Silkscreen B.Silkscreen F.Mask B.Mask Edge.Cuts; do
+    "$KICAD_CLI_BIN" pcb export svg --layers "$LAYER" --page-size-mode 2 \
+        -o "$OUT/hardware/pcb/layer-${LAYER//./_}.svg" "$PCB"
+done
+# GLB (binary glTF) for the interactive viewer; full board detail
 "$KICAD_CLI_BIN" pcb export glb --subst-models --include-tracks --include-zones \
+    --include-pads --include-silkscreen --include-soldermask \
     -o "$OUT/hardware/pcb/board.glb" "$PCB" || echo "WARN: glb export failed"
-# interactive 3D viewer page (Google model-viewer web component)
+# interactive viewer page: 3D (model-viewer) + toggleable 2D layer stack
 cat > "$OUT/hardware/pcb/viewer.html" <<'VIEWER'
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>esp32-ir-remote - interactive 3D board viewer</title>
+<title>esp32-ir-remote - interactive board viewer</title>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <style>
   body { margin:0; font-family: system-ui, sans-serif; background:#1c1f24; color:#eee; }
   header { padding:.6rem 1rem; background:#14161a; display:flex; justify-content:space-between; }
   header a { color:#8ecbff; text-decoration:none; }
   model-viewer { width:100vw; height:calc(100vh - 3rem); background:#1c1f24; }
+  #layers2d { padding:1rem; }
+  #layers2d .controls { margin-bottom:.8rem; display:flex; flex-wrap:wrap; gap:.9rem; }
+  #layers2d label { cursor:pointer; user-select:none; }
+  #layers2d label span { padding-left:.3rem; }
+  #stack { position:relative; width:100%; max-width:1100px; background:#000;
+           border:1px solid #333; }
+  #stack img { position:absolute; inset:0; width:100%; height:auto;
+               mix-blend-mode:screen; pointer-events:none; }
+  #stack img:first-child { position:relative; }
+  h2 { font-size:1.05rem; }
 </style>
 </head>
 <body>
@@ -103,6 +120,40 @@ cat > "$OUT/hardware/pcb/viewer.html" <<'VIEWER'
 <model-viewer src="board.glb" camera-controls auto-rotate auto-rotate-delay="1500"
   shadow-intensity="0.6" exposure="1.1" camera-orbit="30deg 65deg auto" min-camera-orbit="auto auto 5%">
 </model-viewer>
+<section id="layers2d">
+  <h2>2D layer stack (top view; toggle layers)</h2>
+  <div class="controls" id="layerControls"></div>
+  <div id="stack"></div>
+</section>
+<script>
+const LAYERS = [
+  ["Edge_Cuts",     "Edge.Cuts",     true],
+  ["F_Cu",          "F.Cu",          true],
+  ["B_Cu",          "B.Cu",          false],
+  ["F_Silkscreen",  "F.Silkscreen",  true],
+  ["B_Silkscreen",  "B.Silkscreen",  false],
+  ["F_Mask",        "F.Mask",        false],
+  ["B_Mask",        "B.Mask",        false],
+];
+const stack = document.getElementById("stack");
+const controls = document.getElementById("layerControls");
+for (const [file, name, on] of LAYERS) {
+  const img = document.createElement("img");
+  img.src = `layer-${file}.svg`;
+  img.dataset.layer = file;
+  img.style.visibility = on ? "" : "hidden";
+  stack.appendChild(img);
+  const label = document.createElement("label");
+  const cb = document.createElement("input");
+  cb.type = "checkbox"; cb.checked = on;
+  cb.addEventListener("change", () =>
+    { img.style.visibility = cb.checked ? "" : "hidden"; });
+  const span = document.createElement("span");
+  span.textContent = name;
+  label.append(cb, span);
+  controls.appendChild(label);
+}
+</script>
 </body>
 </html>
 VIEWER
