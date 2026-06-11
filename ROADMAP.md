@@ -31,10 +31,15 @@ silkscreened, and verified:
 2. USB D+/D− are routed on **split corridors, not length-matched** —
    acceptable for USB full-speed (12 Mbps) on a dev board.
 3. Board minimums relaxed to JLCPCB documented floor (clearance 0.127,
-   via 0.45/0.2, hole 0.2, edge 0.2).
+   track 0.127; all via/through-hole drills kept ≥0.3 — the 0.2 floor is
+   multilayer-only).
 4. H1 mounting hole sits in the antenna-keepout corner (nylon screw).
 
-**Next:** Nick reviews the renders/3D viewer + subagent review findings,
+All layout-review findings (H-1/H-2/M-1/M-3/M-4) are remediated and
+re-verified (2026-06-11 second pass); M-2 (IR_RX trace passes near the IR
+TX array) is accepted for rev 1 — see H2.5 below.
+
+**Next:** Nick reviews the renders/3D viewer + the deviations above,
 then H3.2 order (Nick only). H1.5 (schematic PDF eyeball) still open.
 F1.4/F1.5 firmware+bench unchanged. The fab files are submission-ready
 pending Nick's go.
@@ -296,9 +301,19 @@ Make the schematic provably correct before any layout effort builds on it.
       antenna keepout - nylon screw), 7 pour-island notices, silk warnings;
       refs tidied 0.8mm + 23 functional labels (JP1, R21/R26, header pinouts,
       LED meanings, board name + docs URL).
-- [~] **H2.5 Review:** adversarial subagent review of renders + fab files
-      ran at session end (findings in the session log); **Nick's eyeball of
-      the 3D viewer/renders still required before ordering.**
+- [x] **H2.5 Review DONE (2026-06-11):** adversarial subagent reviews (BOM,
+      fab files, layout) all ran and ALL findings remediated: H-1 SW-node
+      direct fat route, H-2 power/IR width upgrade (0.2→0.5 where lanes
+      allow, DRC-driven selective neckdowns), M-1 buck B-keepout rule area
+      ((104.3,93.5)–(117.5,103.7); see layout.md for why the south edge is
+      y=103.7 — BST bootstrap B-jog), M-3 J5 moved clear (121.3,63.9),
+      M-4 C10→10µF C19702. M-2 (IR_RX runs along the TX array edge) is a
+      documented judgment call — TSOP has its Vs RC filter and 38 kHz AGC;
+      acceptable on rev 1. The remediation broke + re-healed several nets
+      (BST/JP1-B corridor war, J5-area GPIO22/33, USER_LED2, +5V@J4 missing
+      via, 2 undersized healer vias) — final state re-verified from scratch:
+      **DRC = 3 accepted errors / 7 pour notices, zero real unconnected,
+      schematic parity 0.**
 
 **Gate:** DRC clean, placement/routing reviewed, Nick approves the render.
 

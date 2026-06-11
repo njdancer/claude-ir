@@ -35,8 +35,8 @@ constraints that rules can't express.
    radius, rotated to their fan angle, with silkscreen aim guides. Each LED
    is an independent string (own 18Ω resistor from +3.3V, all cathodes to
    `IR_DRAIN`) — they are NOT series pairs. Hand-soldered; leave finger room.
-3. **AP63203 buck (U1) switching loop tight:** C1/C2 (input caps) hard
-   against VIN/GND pins; L1 adjacent to SW; C3 (output) close to L1 return
+3. **AP63203 buck (U1) switching loop tight:** C1 (input cap) hard
+   against VIN/GND pins; L1 adjacent to SW; C2/C3 (output) close to L1 return
    with short GND back to U1. Keep the SW node (`Net-(U1-SW)`) copper area
    minimal — it's the noisy node. No signal traces under the buck loop.
 4. **USB-C (J2) + CH340C (U2) short data traces:** J2 on board edge;
@@ -72,6 +72,13 @@ constraints that rules can't express.
 - 2-layer plan: **B.Cu as continuous GND pour**, F.Cu for signals + power;
   stitch vias liberally, especially around the buck and under U3's GND pad
   (U3 pad 39 thermal vias to the back pour).
+- **Buck B-layer keepout** (`buck_b_keepout` rule area, no-tracks on B.Cu):
+  (104.3,93.5)–(117.5,103.7), covering the switching loop (U1/L1/C1–C4/SW).
+  South edge is y=103.7 (not further) because the BST bootstrap net needs a
+  short B.Cu jog at y≈103.9–104.2 under D6's neighborhood — BST and JP1-B
+  both must exit U1 through the same south lane and provably cross on F.Cu
+  alone. When re-running `scripts/pcb_finish.py`, pass
+  `BLOCK="B:104.0,93.2,117.8,103.7"` so the healer respects it.
 - The IR drive loop (3V3 → R9-R12 → LED strings → Q3 → GND) pulses 400 mA
   at 38 kHz: keep the loop area small and its GND return short to the pour;
   don't share its return path under the TSOP receiver or DHT22 traces.

@@ -1,12 +1,12 @@
 %TF.GenerationSoftware,KiCad,Pcbnew,9.0.6*%
-%TF.CreationDate,2026-06-11T10:18:39+10:00*%
+%TF.CreationDate,2026-06-11T11:24:37+10:00*%
 %TF.ProjectId,esp32-ir-remote,65737033-322d-4697-922d-72656d6f7465,rev?*%
 %TF.SameCoordinates,Original*%
 %TF.FileFunction,Soldermask,Top*%
 %TF.FilePolarity,Negative*%
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 9.0.6) date 2026-06-11 10:18:39*
+G04 Created by KiCad (PCBNEW 9.0.6) date 2026-06-11 11:24:37*
 %MOMM*%
 %LPD*%
 G01*
@@ -513,9 +513,9 @@ X142500000Y-70427500D03*
 %TD*%
 D30*
 %TO.C,J5*%
-X124500000Y-63900000D03*
+X121300000Y-63900000D03*
 D31*
-X124500000Y-66440000D03*
+X121300000Y-66440000D03*
 %TD*%
 D21*
 %TO.C,R22*%

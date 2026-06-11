@@ -60,6 +60,16 @@ static[:, :, :em] = True; static[:, :, NY-em:] = True
 ax = int(math.ceil((ANTENNA_X - X0) / GRID)); ay = int(math.ceil((ANTENNA_Y - Y0) / GRID))
 static[:, :ax, :ay] = True
 
+# BLOCK="F|B:x0,y0,x1,y1;..." extra rect keepouts (e.g. buck B-layer rule area)
+import os as _os
+for _spec in _os.environ.get("BLOCK", "").split(";"):
+    if not _spec.strip(): continue
+    _lay, _coords = _spec.split(":")
+    _x0, _y0, _x1, _y1 = (float(v) for v in _coords.split(","))
+    _i0, _j0 = mm2c(_x0, _y0); _i1, _j1 = mm2c(_x1, _y1)
+    _L = F if _lay.strip().upper() == "F" else B
+    static[_L, max(_i0,0):min(_i1,NX)+1, max(_j0,0):min(_j1,NY)+1] = True
+
 def seg_cells(x0, y0, x1, y1, r):
     """cells covered by a segment of half-width r (proper sampling)."""
     length = math.hypot(x1-x0, y1-y0)

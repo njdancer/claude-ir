@@ -6777,7 +6777,7 @@
 			(at 109.22 120.6499 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "100nF"
+		(property "Value" "10µF"
 			(at 109.22 123.1899 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -6793,7 +6793,7 @@
 			(at 105.41 121.92 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C19702"
 			(at 105.41 121.92 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
