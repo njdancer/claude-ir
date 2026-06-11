@@ -86,8 +86,9 @@ done
 "$KICAD_CLI_BIN" pcb export glb --subst-models --include-tracks --include-zones \
     --include-pads --include-silkscreen --include-soldermask \
     -o "$OUT/hardware/pcb/board.glb" "$PCB" || echo "WARN: glb export failed"
-# kicad-cli omits PBR factors (spec default = full metal -> washed-out white
-# in model-viewer); rewrite them
+# kicad-cli omits PBR factors on component materials (spec default = full
+# metal -> washed-out white in model-viewer); rewrite them. Needs KiCad 10:
+# KiCad 9 Linux builds drop STEP colors entirely (flat one-color parts).
 python3 scripts/fix_glb_materials.py "$OUT/hardware/pcb/board.glb"
 # join primitives + draco-compress: 19 MB / 20k draw calls -> ~0.7 MB / ~200
 # (--palette false keeps plain colored materials, verifiable without a GPU)

@@ -92,6 +92,24 @@ separately:
    (`esp32-ir-remote_bom.csv`, with DNP column); `BOM.md` demoted to
    rationale-only.
 
+### Tooling: 3D viewer now shows real STEP colors (2026-06-11)
+
+The flat one-color-per-component look of the Pages 3D viewer was a KiCad 9
+Linux bug: `kicad-cli pcb export glb` dropped all STEP model colors, so
+`scripts/fix_glb_materials.py` painted each part a single hand-picked color.
+Verified in containers that **KiCad 10.0.2 exports per-face STEP colors
+correctly** (resistor end caps, gold pins, WROOM shield/PCB, etc.), so the
+Pages CI image is bumped `kicad/kicad:9.0.6 → 10.0.2` (kicad-cli 10 reads
+the v9 files without migration; full `build-site.sh` verified in the image).
+The fixer script now only adds the metallic/roughness factors kicad-cli
+still omits (color-classified: gold/silver → metal) and forces translucent
+mask/silk opaque — this also fixed a live bug where white silkscreen was
+tinted green by an unclamped 1.1 multiplier. The recolor-by-name table
+remains as a fallback for KiCad 9 exports (e.g. local Mac builds until the
+bench moves to 10). Note: real *texture maps* (IC markings, FR4 weave) don't
+exist in STEP/GLB sources at all — that would need a Blender-style bake
+pipeline, deliberately out of scope.
+
 ### Tooling: 3D models are vendored (2026-06-11)
 
 All 21 STEP models the board uses live in `hardware/lib/3dshapes/` and every
