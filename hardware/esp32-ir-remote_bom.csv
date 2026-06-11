@@ -27,7 +27,7 @@
 "R14","100kΩ","Resistor_SMD:R_1206_3216Metric","C17900","1",""
 "R15","1kΩ","Resistor_SMD:R_1206_3216Metric","C4410","1",""
 "R20,R25","1kΩ","Resistor_SMD:R_0805_2012Metric","C17513","2",""
-"R21,R26","0Ω","Resistor_SMD:R_0603_1608Metric","C21189","2",""
+"R21,R26","470Ω","Resistor_SMD:R_0603_1608Metric","C23179","2",""
 "R22","10kΩ","Resistor_SMD:R_1206_3216Metric","C17902","1",""
 "R23,R24","100kΩ","Resistor_SMD:R_0603_1608Metric","C25803","2",""
 "R27","100Ω","Resistor_SMD:R_1206_3216Metric","C17901","1",""

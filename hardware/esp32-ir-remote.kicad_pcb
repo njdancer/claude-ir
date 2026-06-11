@@ -994,7 +994,7 @@
 				)
 			)
 		)
-		(property "Value" "0Ω"
+		(property "Value" "470Ω"
 			(at 0 1.43 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -10911,7 +10911,7 @@
 				)
 			)
 		)
-		(property "Value" "0Ω"
+		(property "Value" "470Ω"
 			(at 0 1.43 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -19461,7 +19461,7 @@
 			)
 		)
 	)
-	(gr_text "R21/R26: auto-rst 0R"
+	(gr_text "R21/R26: auto-rst 470R"
 		(at 145 86.5 0)
 		(layer "F.SilkS")
 		(uuid "30effacc-9461-42c0-9c35-ee833609a24e")
