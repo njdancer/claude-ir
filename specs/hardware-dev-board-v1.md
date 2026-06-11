@@ -1,9 +1,20 @@
-# ESP32 IR Remote Control Development Board - Hardware Specification v1.3
+# ESP32 IR Remote Control Development Board - Hardware Specification v1.4
 
 ## Overview
 
 This specification defines the hardware requirements for a development board that enables testing and development of an ESP32-based smart AC remote control system using infrared transmission. The board serves as a transition from the current ESP8266 breadboard proof-of-concept to a manufacturable design suitable for firmware development and eventual production refinement.
 
+> **Revision note (v1.4):** Pre-order cost/availability pass. The assembly
+> model is now explicitly **SMT-only machine assembly plus a hand-solder
+> kit** (see [Assembly Considerations](#assembly-considerations)): JLCPCB
+> places only top-side SMD parts, and every through-hole part plus the easy
+> two-terminal SMD Extended parts ship loose. Two Basic-part substitutions:
+> the IR driver MOSFET Q3 (IRLML6344 → AO3400A, same SOT-23/pinout, meets
+> all stated requirements) and the BOOT/RESET switches (TS-1088R → XKB
+> TS-1187A-B-A-B, SMD 5.1×5.1mm 4-pad — same-row terminals internally
+> common). Only three Extended parts remain machine-placed: the buck
+> regulator, the CH340C, and the WROOM module.
+>
 > **Revision note (v1.3):** Auto-reset transistors Q1/Q2 changed from NPN BJTs
 > (S8050) to 2N7002 N-channel MOSFETs. The SOT-23 pinouts map 1:1 (B→G, E→S,
 > C→D), so the change is layout-neutral; it consolidates Q1/Q2 onto the same
@@ -437,10 +448,14 @@ The board MUST include two momentary push buttons for ESP32 control:
 **Switch Requirements**:
 
 - Type: Tactile momentary switch, normally-open (NO)
-- Package: Through-hole or equivalent hand-solderable mounting
-- Size: 6mm×6mm typical (other sizes acceptable)
+- Package: SMD or through-hole, hand-rework-friendly
 - Actuation force: 100-300gf (comfortable for frequent development use)
 - Positioning: Accessible while USB cable is connected
+- **Specified Part (v1.4)**: XKB TS-1187A-B-A-B (LCSC C318884, JLCPCB Basic),
+  SMD 5.1×5.1mm, 4 gull-wing terminals. Terminals on the same row are
+  internally common, so the part behaves as SPST between the two rows; the
+  footprint numbers the rows 1/1 and 2/2 and bridge tracks under the body
+  join each pair. (Replaces the Extended TS-1088R from v1.2/v1.3.)
 
 **Note**: With the auto-reset circuit in place, manual button presses are typically only needed for:
 - Recovery from crashed firmware
@@ -517,7 +532,10 @@ All four IR LEDs are driven through a single N-channel MOSFET configured as a lo
 - Gate threshold: <2V (must be fully enhanced at Vgs = 3.3V)
 - Rds(on): <50mΩ at Vgs = 2.5V (minimizes power loss)
 - Package: SOT-23 (hand-solderable with fine-tip iron)
-- **Specified Part**: IRLML6344 (Infineon) - Vgs_th = 0.5-1.1V, Rds_on = 27mΩ @ Vgs = 2.5V
+- **Specified Part (v1.4)**: AO3400A (Alpha & Omega, LCSC C20917, JLCPCB
+  Basic) - Vgs_th ≤ 1.45V, Rds_on = 48mΩ @ Vgs = 2.5V, Id = 5.7A. Meets
+  every requirement above; replaces the Extended IRLML6344 (~19mV / ~8mW
+  difference at the 0.42A burst — immaterial).
 
 **LED Power Supply**:
 
@@ -546,11 +564,10 @@ LEDs are powered from the 3.3V regulated rail (not 5V) for improved efficiency:
 - 100kΩ pull-down resistor from gate to GND
 - MOSFET source → GND
 - Gate series resistor provides ESD protection and edge control, but MUST be small
-  enough to switch the MOSFET cleanly at the 38kHz carrier. The current schematic
-  value (10kΩ) is **too large**: with the IRLML6344 input capacitance it slows the
-  gate edges to several microseconds — a large fraction of the ~13µs carrier
-  half-period — leaving the FET in its linear region much of each cycle and degrading
-  IR output. The gate series resistor MUST be in the **~330Ω–1kΩ** range. (H1.4 review.)
+  enough to switch the MOSFET cleanly at the 38kHz carrier: a 10kΩ value against
+  the MOSFET input capacitance slows the gate edges to several microseconds — a
+  large fraction of the ~13µs carrier half-period. The gate series resistor MUST
+  be in the **~330Ω–1kΩ** range (H1.4 review; the schematic fits 470Ω).
 - Gate pull-down ensures MOSFET is OFF during boot/reset when GPIO is high-impedance
 
 The external IR-emitter header (see [Connection Points and Expansion](#connection-points-and-expansion))
@@ -837,16 +854,27 @@ Order the PCB with the following JLCPCB standard options:
 
 ### Assembly Considerations
 
-The board targets **JLCPCB PCB assembly** with parts sourced from **LCSC** (no longer
-PCB-only/hand-assembly). SMD components are machine-placed; the remaining through-hole
-parts (the IR LEDs, BOOT/RESET buttons, USB-C receptacle, DHT22 module, TSOP receiver,
-and the 2.54mm headers) are hand-soldered or ordered with JLCPCB's THT assembly option.
+The board targets **JLCPCB SMT-only machine assembly** (top side only) with parts
+sourced from **LCSC**, plus a **hand-solder kit** of loose parts ordered alongside.
+The split is definitive and lives in one place — the `HAND_SOLDER` table in
+`scripts/fab-outputs.py`, which generates the assembly BOM/CPL and the kit list
+(`hardware/fab/esp32-ir-remote-hand-solder-kit.csv`) so they cannot drift apart.
+
+The kit MUST contain every through-hole part (machine assembly cannot bend the IR
+LEDs over the board edge at their fan angles, and THT lines carry both Extended
+loading and per-joint fees) and SHOULD contain easy two-terminal SMD Extended parts
+(TVS, polyfuse, power inductor) and optional connectors (Qwiic). Parts in the
+series power path (USB-C receptacle, polyfuse, inductor, TVS) MUST be flagged
+fit-before-first-power in the kit notes and in `hardware/bring-up.md`.
 
 To minimize assembly cost, part selection MUST prefer JLCPCB **"Basic"** parts (kept
 permanently loaded on the pick-and-place, no per-part feeder fee) over **"Extended"**
 parts wherever a suitable Basic part exists. Where a choice forces an Extended part,
-that SHOULD be noted with the reason. Every SMD component MUST carry an LCSC part number
-and footprint in the schematic so the BOM and CPL export cleanly to JLCPCB.
+that SHOULD be noted with the reason — as of v1.4 the machine-placed Extended lines
+are exactly three: the AP63203 buck regulator, the CH340C bridge, and the
+ESP32-WROOM-32E module (no Basic equivalents exist). Every SMD component MUST carry
+an LCSC part number and footprint in the schematic so the BOM and CPL export cleanly
+to JLCPCB.
 
 ### Component Sourcing
 

@@ -22,6 +22,8 @@ rail rather than directly from GPIO, because:
 - Gate current is ~nA, so the GPIO load is negligible.
 - The FET isolates the GPIO from LED faults.
 
-Series resistor: R = (5 − 3.2) / 0.005 = 360Ω for 5mA; fitted 150Ω (~12mA)
-for brighter indication. Each gate has a 10kΩ pull-down for a clean off-state
-while GPIOs float during boot.
+Series resistors (R20/R25): fitted 1kΩ → (5 − 3.4) / 1k ≈ 1.6mA. Dimmer
+than the original 150Ω/~12mA plan, but the water-clear 800mcd blues are
+clearly visible at this current and it keeps the 5V rail load trivial; bump
+toward 360Ω (~5mA) at rework if they look faint. Each gate has a 100kΩ
+pull-down (R23/R24) for a clean off-state while GPIOs float during boot.

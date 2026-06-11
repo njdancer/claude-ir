@@ -1,17 +1,23 @@
-# Board bring-up procedure — esp32-ir-remote rev 1.2
+# Board bring-up procedure — esp32-ir-remote rev 1.4
 
 Per-subsystem power-on test sequence. Do these **in order**; each step gates
 the next. Bench kit: USB-C cable + current-limited supply or USB power meter,
 multimeter, the ESP8266 breadboard rig (known-good IR reference), a phone
 camera (sees 940nm as purple glow).
 
-## 0. Visual inspection (before any power)
+**Boards arrive SMT-only** (rev 1.4 fab package): JLCPCB places the 47 SMD
+parts; everything else is in the hand-solder kit
+(`fab/esp32-ir-remote-hand-solder-kit.csv`, with per-part polarity notes).
 
-- [ ] No solder bridges around U1 (TSOT-23-6), U2 (SOIC-16), Q3-Q5 (SOT-23).
-- [ ] L1, C1-C3 orientation n/a (non-polarized); D1 TVS cathode band toward F1.
-- [ ] THT parts to hand-solder before first power: **none required for the
-      power-on test** (LEDs/TSOP/DHT22/headers can wait; the buck + USB +
-      MCU path is all SMD).
+## 0. Hand-solder the power path, then inspect (before any power)
+
+- [ ] **Solder the fit-before-first-power kit parts:** J2 (USB-C, THT),
+      F1 (polyfuse 1812 — VBUS is open-circuit without it), L1 (4.7µH —
+      no 3.3V without it), D1 (TVS, **cathode band toward F1**).
+      Optionally D6/D7 power LEDs now for visible rails.
+- [ ] No solder bridges around U1 (TSOT-23-6), U2 (SOIC-16), Q3-Q5 (SOT-23),
+      and your own J2/F1/L1/D1 joints.
+- [ ] L1, C1-C3 orientation n/a (non-polarized).
 - [ ] JP1 intact (not cut) — buck enabled.
 - [ ] Continuity: GND at J2 shell ↔ U3 GND pads ↔ mounting-hole-adjacent
       pour. No continuity +5V↔GND, +3.3V↔GND (>1kΩ rising = caps charging).
@@ -83,13 +89,17 @@ camera (sees 940nm as purple glow).
       edge of the antenna keepout wedge) and clearance to the enclosure.
 - [ ] 24h idle soak: no watchdog resets in the log; report RSSI drift.
 
-## Known rev-1.2 quirks to watch
+## Known rev-1.4 quirks to watch
 
 - H1 mounting hole encroaches the RF keepout corner — nylon screw there.
 - JP1 is a solder-bridge/test-point pair, not a header (no part fitted):
   cut the bridge trace to disable the buck for external 3.3V injection.
-- J6 JTAG and J5 ext-IR and R28-R30 are DNP by design.
-- AM2302 (U5) was near stock-out at LCSC at design time — if unfitted,
-  all step-5 DHT checks are skipped; Qwiic (J3) carries I2C as the
-  sensor fallback path (R28/R29 pullups DNP — fit if the Qwiic device
-  doesn't have its own).
+- J6 JTAG and R28-R30 are DNP by design; J5 ext-IR header is in the kit
+  but optional.
+- SW1/SW2 are 4-pad TS-1187A (rev 1.4, Basic part swap): same-row pads are
+  internally common; bridge tracks under the body join the pad pairs.
+- Q3 is an AO3400A (rev 1.4, was IRLML6344 — electrically equivalent here).
+- AM2302 (U5, hand-solder) was near stock-out at LCSC at design time — if
+  unfitted, all step-5 DHT checks are skipped; Qwiic (J3, also in the kit)
+  carries I2C as the sensor fallback path (R28/R29 pullups DNP — fit if the
+  Qwiic device doesn't have its own).

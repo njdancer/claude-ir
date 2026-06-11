@@ -10,6 +10,52 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **Board v1.4: pre-order review pass — SMT-only assembly + Basic-part swaps
+(2026-06-11, remote session, Nick approved scope).** Full design review before
+H3.2 ordering (electrical re-verify came back clean — third independent pass).
+Changes, all verified with the standard battery (ERC **0 errors**/7 dual-label
+warnings — the 2 "J4 errors" were orphan IO25/26 label+wire stubs, now real
+no_connects; DRC = 3 accepted errors + 7 pour notices, zero real unconnected;
+netlist↔PCB partition IDENTICAL, 235 pads):
+1. **Assembly model: SMT-only + hand-solder kit.** The old fab BOM/CPL told
+   JLC to place 13 THT parts that bring-up.md said are hand-soldered — incl.
+   the IR LEDs, which a P&P line can't bend over the edge (they'd arrive
+   vertical), and even the J4/J5 headers in the CPL. New
+   `scripts/fab-outputs.py` regenerates the whole `hardware/fab/` package
+   with the split defined in ONE table; kit list =
+   `fab/esp32-ir-remote-hand-solder-kit.csv` (LCSC codes, polarity notes,
+   fit-before-first-power flags for F1/J2/L1/D1).
+2. **Basic-part swaps (fee/stock):** Q3 IRLML6344→**AO3400A** (C20917,
+   field-only, SOT-23 identical); SW1/SW2 TS-1088R→**TS-1187A** (C318884,
+   new 4-pad footprint `lib:SW-SMD_TS-1187A-5.1x5.1`, same-row pads common
+   → numbered 1/1+2/2 so the 2-pin symbol maps unchanged). PCB: footprints
+   swapped in place; the 0.6mm +5V feed under SW1's new bottom pads rerouted
+   south (y=111.5 corridor); bridge tracks join pad pairs; pours refilled.
+3. **Result: 23 assembled BOM lines / 47 placements, only 3 Extended**
+   (U1/U2/U3) vs ~17-18 before → ~$42/order less in loading fees + no THT
+   assembly fees. Q3's stale PCB-side LCSC (C8545! the H1.2 bug, never
+   synced) fixed to C20917.
+4. **Docs reconciled:** power-supply.md (4.7µH, real LED currents),
+   status-leds.md (1k/100k actuals), esp32-mcu.md (J1 section → J3/J4/J6
+   reality, GPIO34 input-only note), ir-transmitter.md (AO3400A),
+   bring-up.md (rev 1.4: solder F1/J2/L1/D1 before first power), spec →
+   **v1.4** + index. Headless toolchain: ghcr.io/inti-cmnb/kicad9_auto
+   (KiCad 9.0.7; docker hub was rate-limited), baseline reproduced exactly
+   before any edit.
+   ⚠️ Cosmetic debts: SW1/SW2 have no vendored STEP (render as bare
+   footprints — re-vendor for the Pages viewer when convenient);
+   lib_footprint_issues DRC warnings 63→73 (re-serialization noise);
+   PCB still carries single-pad nets named ESP_GPIO25/26 on U3 (harmless).
+
+⚠️ **AM2302 stock at LCSC: 35 units ($6.82)** — order the kit parts early or
+substitute a generic DHT22.
+
+**Next: H3.2 — Nick orders.** Suggested: 5 PCBs / 2 assembled (economic SMT,
+top side), kit parts on the same LCSC cart (see kit CSV; add spares, esp.
+2-3× AM2302). At upload, eyeball polarized parts (U1/U2/D1/Q1-Q5) in JLC's
+placement preview — kicad-cli rotations vs JLC conventions is the classic
+dead-board cause. H1.5 (schematic PDF eyeball) still open.
+
 ✅ **Board v1.3 follow-up: R21/R26 0Ω→470Ω + hygiene (2026-06-11, Nick OK'd
 larger changes for correctness).** The FET swap's one real regression — a held
 RESET/BOOT with the port idle shorted a CH340 pin through the 2N7002 body
@@ -380,16 +426,26 @@ Make the schematic provably correct before any layout effort builds on it.
 
 ## Phase H3 — Fabrication *(needs: Mac, Nick, 💰)*
 
-- [x] **H3.1 Outputs DONE (2026-06-11):** `hardware/fab/` has gerbers.zip,
-      JLCPCB BOM (35 lines; DNP J6/R28/R29/R30 excluded) + CPL (67
-      placements). All 35 LCSC codes validated live (subagent): in stock,
-      package-matched; ~17 Basic/18 Extended; ≈$16.20/board parts.
-      Hand-solder THT: J4/J5 headers + JP1 (no code). **AM2302 stock was 37
-      units** - order soon or substitute. BOM blockers fixed pre-layout
-      (Q1/Q2 BCE→BEC, SW1/SW2 → TS-1088R SMD footprint, 18Ω C17922, 10k
-      C17902, 0805 swaps).
-- [ ] **H3.2 Order checklist for Nick:** board qty, assembly option, expected
-      cost. **Nick places the order** — never order anything autonomously.
+- [x] **H3.1 Outputs DONE (2026-06-11, regenerated for v1.4):**
+      `hardware/fab/` has gerbers.zip, JLCPCB BOM (**23 assembled lines,
+      only 3 Extended: U1/U2/U3**) + CPL (47 placements, top only) +
+      **hand-solder kit CSV** (12 LCSC lines + 2 generic headers; all THT,
+      L1/F1/D1/J3, polarity + fit-before-power notes). Regenerate any time
+      with `scripts/fab-outputs.py` (the HAND_SOLDER table there is the
+      assembly-split source of truth). LCSC codes validated live this
+      session via the jlcpcb MCP; **AM2302 stock now 35 units** — order
+      soon or substitute.
+- [ ] **H3.2 Order checklist for Nick** — **Nick places the order, never
+      autonomous.** Suggested package:
+  1. JLCPCB: 5× PCB (80×55, 2-layer) + economic SMT assembly ×2, top side,
+     upload `fab/esp32-ir-remote-gerbers.zip` + `-jlcpcb-bom.csv` +
+     `-jlcpcb-cpl.csv`. Expect 3 Extended loading fees ($9) + setup/stencil.
+  2. **In the placement preview, check every polarized part** (U1, U2, D1,
+     Q1-Q5, SW orientation) — rotation-convention mismatches are the #1
+     cause of dead assembled boards.
+  3. Same cart: kit parts from `fab/esp32-ir-remote-hand-solder-kit.csv`
+     (add spares; 2-3× AM2302 C83988 while stock lasts; generic 2.54mm
+     headers for J4/J5).
 - [x] **H3.3 DONE early (2026-06-11):** `hardware/bring-up.md` written —
       per-subsystem power-on procedure incl. the rev-1.2 quirks (nylon screw
       at H1, JP1 solder-bridge, J4 6-GPIO note).

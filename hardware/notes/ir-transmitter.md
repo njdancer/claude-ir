@@ -18,8 +18,11 @@ whole array and all LEDs emit simultaneously.
 
 ## MOSFET driver
 
-IRLML6344 logic-level N-FET sinks the combined 4 × 100mA = 400mA. Threshold
-~1.0V, fully enhanced at 3.3V gate drive, Rds(on) ≈ 27mΩ at Vgs = 2.5V.
+AO3400A logic-level N-FET sinks the combined 4 × 100mA = 400mA. Threshold
+~1.45V, fully enhanced at 3.3V gate drive, Rds(on) ≈ 48mΩ at Vgs = 2.5V
+(~19mV drop / ~8mW at the full burst — immaterial). Swapped from the
+IRLML6344 in v1.4: electrically equivalent here, but the AO3400A is a
+JLCPCB Basic part (no Extended loading fee, deeper stock).
 
 Gate network: 470Ω series resistor into the gate (was 10kΩ; reduced in the
 H1.4 datasheet review — 10kΩ against Ciss made the switching edges too slow
