@@ -86,7 +86,10 @@ done
 "$KICAD_CLI_BIN" pcb export glb --subst-models --include-tracks --include-zones \
     --include-pads --include-silkscreen --include-soldermask \
     -o "$OUT/hardware/pcb/board.glb" "$PCB" || echo "WARN: glb export failed"
-# interactive viewer page: 3D (model-viewer) + toggleable 2D layer stack
+# interactive viewer page: 3D (model-viewer) + toggleable 2D layer stack.
+# Asset URLs carry ?v=<commit> so browsers re-fetch after every deploy
+# (board.glb is large and otherwise cache-sticky).
+REV="$(git rev-parse --short HEAD)"
 cat > "$OUT/hardware/pcb/viewer.html" <<'VIEWER'
 <!DOCTYPE html>
 <html lang="en">
@@ -114,10 +117,24 @@ cat > "$OUT/hardware/pcb/viewer.html" <<'VIEWER'
 </head>
 <body>
 <header>
-  <span>esp32-ir-remote rev 1.2 - drag to orbit, scroll to zoom</span>
+  <span>esp32-ir-remote rev 1.2 - drag to orbit, scroll to zoom
+    <svg viewBox="-12 -12 24 24" width="15" height="15" style="vertical-align:-2px;margin-left:.6rem">
+      <g fill="#D97757">
+        <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(45)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(90)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(135)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(180)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(225)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(270)"/>
+        <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(315)"/>
+      </g>
+    </svg>
+    <span style="color:#D97757">designed by Claude</span>
+  </span>
   <a href="../../index.html">back to docs</a>
 </header>
-<model-viewer src="board.glb" camera-controls auto-rotate auto-rotate-delay="1500"
+<model-viewer src="board.glb?v=__REV__" camera-controls auto-rotate auto-rotate-delay="1500"
   shadow-intensity="0.6" exposure="1.1" camera-orbit="30deg 65deg auto" min-camera-orbit="auto auto 5%">
 </model-viewer>
 <section id="layers2d">
@@ -139,7 +156,7 @@ const stack = document.getElementById("stack");
 const controls = document.getElementById("layerControls");
 for (const [file, name, on] of LAYERS) {
   const img = document.createElement("img");
-  img.src = `layer-${file}.svg`;
+  img.src = `layer-${file}.svg?v=__REV__`;
   img.dataset.layer = file;
   img.style.visibility = on ? "" : "hidden";
   stack.appendChild(img);
@@ -157,6 +174,9 @@ for (const [file, name, on] of LAYERS) {
 </body>
 </html>
 VIEWER
+# stamp the commit into the cache-busting asset URLs
+sed -i.bak "s/__REV__/$REV/g" "$OUT/hardware/pcb/viewer.html"
+rm -f "$OUT/hardware/pcb/viewer.html.bak"
 
 # --- Render markdown docs --------------------------------------------------
 # Mirror repo paths under docs/ so relative links between docs keep working
@@ -208,10 +228,29 @@ cat > "$OUT/index.html" <<EOF
   footer { margin-top: 3rem; color: #777; font-size: .85rem;
            border-top: 1px solid #ddd; padding-top: .5rem; }
   code { background: #f2f2f2; padding: 0 .25em; border-radius: 3px; }
+  .claude-badge { display: inline-flex; align-items: center; gap: .45rem;
+           background: #faf3ee; border: 1px solid #ecd9cc; border-radius: 999px;
+           padding: .25rem .8rem; font-size: .9rem; color: #b05730;
+           margin: .2rem 0 .6rem; }
 </style>
 </head>
 <body>
 <h1>claude-ir</h1>
+<p class="claude-badge">
+  <svg viewBox="-12 -12 24 24" width="16" height="16" aria-hidden="true">
+    <g fill="#D97757">
+      <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(45)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(90)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(135)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(180)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(225)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -11 L1.5 -2.6 Z" transform="rotate(270)"/>
+      <path d="M0 0 L-1.5 -2.6 L0 -8 L1.5 -2.6 Z" transform="rotate(315)"/>
+    </g>
+  </svg>
+  designed end-to-end by <a href="https://claude.ai" style="color:inherit"><strong>Claude</strong></a>
+</p>
 <p>ESP32 smart controller for an ActronAir (Midea) air conditioner. The IR
 protocol is fully reverse-engineered; the custom dev board is in design.
 Source: <a href="https://github.com/njdancer/claude-ir">github.com/njdancer/claude-ir</a></p>
@@ -244,7 +283,11 @@ Source: <a href="https://github.com/njdancer/claude-ir">github.com/njdancer/clau
 <h2>All documents</h2>
 <ul>$doc_links</ul>
 
-<footer>Built from <code>$commit</code> on $built by GitHub Actions.</footer>
+<footer>Built from <code>$commit</code> on $built by GitHub Actions.<br>
+Reverse engineering, schematic, PCB layout, firmware and these docs were
+produced autonomously by <a href="https://claude.ai" style="color:#b05730">Claude</a>
+(Anthropic), directed by Nick Dancer. Non-commercial hobby project; the spark
+mark is an original homage to Claude's logo.</footer>
 </body>
 </html>
 EOF
