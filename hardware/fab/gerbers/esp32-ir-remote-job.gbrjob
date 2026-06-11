@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "9.0.6"
     },
-    "CreationDate": "2026-06-11T10:05:23+10:00"
+    "CreationDate": "2026-06-11T10:18:39+10:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -34,47 +34,47 @@
   ],
   "FilesAttributes": [
     {
-      "Path": "esp32-ir-remote-F_Cu.gbr",
+      "Path": "esp32-ir-remote-F_Cu.gtl",
       "FileFunction": "Copper,L1,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-B_Cu.gbr",
+      "Path": "esp32-ir-remote-B_Cu.gbl",
       "FileFunction": "Copper,L2,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-F_Paste.gbr",
+      "Path": "esp32-ir-remote-F_Paste.gtp",
       "FileFunction": "SolderPaste,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-B_Paste.gbr",
+      "Path": "esp32-ir-remote-B_Paste.gbp",
       "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-F_Silkscreen.gbr",
+      "Path": "esp32-ir-remote-F_Silkscreen.gto",
       "FileFunction": "Legend,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-B_Silkscreen.gbr",
+      "Path": "esp32-ir-remote-B_Silkscreen.gbo",
       "FileFunction": "Legend,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "esp32-ir-remote-F_Mask.gbr",
+      "Path": "esp32-ir-remote-F_Mask.gts",
       "FileFunction": "SolderMask,Top",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "esp32-ir-remote-B_Mask.gbr",
+      "Path": "esp32-ir-remote-B_Mask.gbs",
       "FileFunction": "SolderMask,Bot",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "esp32-ir-remote-Edge_Cuts.gbr",
+      "Path": "esp32-ir-remote-Edge_Cuts.gm1",
       "FileFunction": "Profile",
       "FilePolarity": "Positive"
     }
