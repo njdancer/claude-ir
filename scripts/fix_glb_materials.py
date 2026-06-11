@@ -119,6 +119,12 @@ def main(path):
             pbr["metallicFactor"] = 0.05
             pbr["roughnessFactor"] = 0.65
             n_diel += 1
+        # translucent soldermask renders milky in model-viewer; make it a
+        # solid, slightly deeper green
+        if len(color) > 3 and color[3] < 0.99:
+            pbr["baseColorFactor"] = [color[0] * 0.7, color[1] * 1.1,
+                                      color[2] * 0.7, 1.0]
+            m["alphaMode"] = "OPAQUE"
     n_recolored = recolor_missing(gltf)
     chunks[0] = (b"JSON", json.dumps(gltf, separators=(",", ":")).encode())
     write_glb(path, chunks)
