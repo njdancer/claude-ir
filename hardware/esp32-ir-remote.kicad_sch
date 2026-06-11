@@ -2715,6 +2715,14 @@
 		(uuid "f9ad6cf1-ee8d-4b9b-884f-8fd685960512")
 	)
 	(no_connect
+		(at 50.8 78.74)
+		(uuid "93f06b7a-df7a-4273-b2ce-16630d468394")
+	)
+	(no_connect
+		(at 50.8 81.28)
+		(uuid "959202c1-f517-4f30-a485-932e7c55722b")
+	)
+	(no_connect
 		(at 133.35 134.62)
 		(uuid "54510e60-471b-4901-88d4-b9f0ef57759a")
 	)
@@ -5060,7 +5068,7 @@
 			(at 218.44 86.3599 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
-		(property "Value" "IRLML6344"
+		(property "Value" "AO3400A"
 			(at 218.44 88.8999 0)
 			(effects (font (size 1.27 1.27)) (justify left))
 		)
@@ -5076,7 +5084,7 @@
 			(at 212.09 87.63 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C53550"
+		(property "LCSC" "C20917"
 			(at 212.09 87.63 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5276,7 +5284,7 @@
 			(at 259.08 148.59 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "JLC-MCP:SW-SMD_L3.9-W3.0-P4.45"
+		(property "Footprint" "lib:SW-SMD_TS-1187A-5.1x5.1"
 			(at 259.08 148.59 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5288,7 +5296,7 @@
 			(at 259.08 153.67 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C455280"
+		(property "LCSC" "C318884"
 			(at 259.08 153.67 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5884,7 +5892,7 @@
 			(at 259.08 137.16 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "JLC-MCP:SW-SMD_L3.9-W3.0-P4.45"
+		(property "Footprint" "lib:SW-SMD_TS-1187A-5.1x5.1"
 			(at 259.08 137.16 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -5896,7 +5904,7 @@
 			(at 259.08 142.24 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C455280"
+		(property "LCSC" "C318884"
 			(at 259.08 142.24 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -8803,16 +8811,6 @@
 		(uuid "0913c663-3862-4fc2-a59d-ffa42494b279")
 	)
 	(wire
-		(pts (xy 50.8 78.74) (xy 54.61 78.74))
-		(stroke (width 0) (type default))
-		(uuid "50a24db1-022f-4bab-87c0-2901b84c255f")
-	)
-	(wire
-		(pts (xy 50.8 81.28) (xy 54.61 81.28))
-		(stroke (width 0) (type default))
-		(uuid "bf2503b9-f4e7-4e11-a127-b58904e38c38")
-	)
-	(wire
 		(pts (xy 50.8 86.36) (xy 54.61 86.36))
 		(stroke (width 0) (type default))
 		(uuid "9388ed6e-cdda-4bcf-a7cf-a66e209bc77d")
@@ -8988,16 +8986,6 @@
 		(at 54.61 76.2 0)
 		(effects (font (size 1.27 1.27)) (justify left bottom))
 		(uuid "03d352a5-d9e8-42c8-8586-a163a326212e")
-	)
-	(label "ESP_GPIO25"
-		(at 54.61 78.74 0)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "8a4d1bd6-bd03-470e-8128-a0d0c8dfbf0e")
-	)
-	(label "ESP_GPIO26"
-		(at 54.61 81.28 0)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "11d7ad90-fdb2-49c6-89ef-599e03124db7")
 	)
 	(label "ESP_GPIO32"
 		(at 54.61 86.36 0)
