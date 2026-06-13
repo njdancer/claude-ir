@@ -44,10 +44,12 @@ LEDs, Qwiic + small 4-pin spare header):**
 7. **IR LED resistors 18Ω → 22Ω Basic** (R9-R12, C17958): ~86 mA/LED vs
    ~108 mA (negligible IR-range loss), and it dodges a feeder fee (no Basic
    18Ω exists, but 22Ω is Basic). Still machine-placed, no hand-soldering.
-8. **Keep:** AP63203 buck (Nick's call — robustness; no Basic power inductor
-   exists so L1 stays an Extended **hand-solder kit** part, no feeder),
-   rest of IR TX array (Q3/AO3400A + 4× TSAL6200), TSOP38238 RX, blue user
-   LEDs via Q4/Q5 low-side from 5V, USB-C protection (F1 + D1 + R1/R2 CC).
+8. **Power: AP63203 buck → AMS1117-3.3 LDO** (C6186, Basic — no feeder).
+   Removes the buck + L1 inductor + bootstrap cap (kit loses the inductor).
+   LDO verified for the load (pt3 below). **User LEDs: yellow 0805** (low-Vf),
+   direct-driven from GPIO → **delete Q4/Q5 + R23/R24**; system LEDs (5V/3V3
+   power, IR-TX) red 0805. **Keep:** IR TX array (Q3/AO3400A + 4× TSAL6200),
+   TSOP38238 RX, USB-C protection (F1 + D1 + R1/R2 CC).
 
 **Refinements (2026-06-13 pt 2, Nick's BOM audit):**
 - **Drop J3 Qwiic** — a 1mm-pitch SMD that's miserable to hand-solder and
@@ -58,22 +60,35 @@ LEDs, Qwiic + small 4-pin spare header):**
   GPIO0, GPIO1**: covers I2C expansion (post-Qwiic), 2 spare ADC GPIO, and
   **external power injection** — a future battery+boost module can feed 5V
   here (the AP63203 buck can't run off a 1-cell LiPo directly: dropout needs
-  Vin ≳ 3.8V, so true onboard battery is a v2 power section, not a DNP). JP1
-  buck-disable also allows direct 3V3 injection. Buck kept (Nick: validation
-  + keeps the door open).
+  Vin ≳ 3.8V — which is exactly why we dropped it, see below). **JP1
+  repurposed as an LDO-disconnect series jumper on the 3V3 output**: open it
+  to isolate the LDO and run the rail from an external buck/boost/battery
+  prototype fed through the header.
+- **Power: buck → AMS1117-3.3 LDO** (Nick, 2026-06-13): the buck can't run off
+  a 1S LiPo anyway, and on USB power the LDO's ~0.8W of heat is fine. Basic
+  part (no feeder), drops the inductor + bootstrap cap, simpler layout.
+- **LDO load check (Nick: "make sure it can manage our load"):** 3V3 rail
+  worst case = C3 WiFi-TX peak ~345mA + IR array (4×86mA=344mA, but 38kHz-
+  pulsed ~⅓ duty → ~115mA avg, bulk-cap filtered) + misc ~30mA ≈ **~490mA
+  sustained** (~720mA transient). AMS1117 (1A): ~2× current margin; dropout
+  ~0.8V@0.5A vs ~1.4V headroom (USB 4.7V min post-fuse − 3.3V) → regulates
+  even through the WiFi peak at low USB volts. Dissipation (5−3.3)×0.49 ≈
+  **0.83W** → SOT-223 + copper pour (θ_JA ~40°C/W) → ΔT ~35°C, Tj <85°C ≪
+  125°C. **Layout requirement: copper thermal pour under the SOT-223 tab.**
+  Output cap ≥22µF for stability (have C2).
 - **All status LEDs → Basic 0805** (blue dropped — not in JLC Basic in any
   package). User-LED color TBD from the Basic palette (red/yellow/green/
   white); a low-Vf pick (red/yellow) also lets us **delete Q4/Q5 + R23/R24**
   and direct-drive from GPIO (the FETs only existed for blue's 3.4V Vf).
   3V3 power LED → yellow (green barely lights on 3.3V).
 
-**Assembly split → 4 feeder fees** (~$12/order, one-time not per-board):
-C3 + AHT20 + AP63203 buck + SMD USB-C stay machine-placed (Extended); the
-22Ω swap dodges the 5th feeder (no Basic 18Ω, but 22Ω is Basic). At the
+**Assembly split → 3 feeder fees** (~$9/order, one-time not per-board):
+only C3 + AHT20 + SMD USB-C stay machine-placed as Extended; the buck→LDO
+and 18→22Ω swaps each dropped a feeder (AMS1117 + 22Ω are Basic). At the
 5-board minimum, paying to load the SMD USB-C beats the THT part premium
-(see item 4). Hand-solder kit shrinks to: 4× IR LED, TSOP, L1 inductor,
-pin headers — all easy through-hole. Everything else is Basic + machine-placed.
-Per-board parts ≈ $7.3 (−55% vs v1.4's $16.2).
+(see item 4). Hand-solder kit: **4× IR LED, TSOP, pin headers** — all easy
+through-hole (the inductor's gone with the buck). Everything else is Basic +
+machine-placed. Per-board parts ≈ $6.85 (−58% vs v1.4's $16.2).
 
 **New C3 GPIO map** (functional pins avoid all strapping pins; spare/unused
 strapping GPIO2/8 left NC to keep boot deterministic):
