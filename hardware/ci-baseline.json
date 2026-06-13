@@ -1,0 +1,17 @@
+{
+  "erc": {
+    "warning:lib_symbol_mismatch": 1,
+    "warning:multiple_net_names": 7
+  },
+  "drc": {
+    "error:courtyards_overlap": 1,
+    "error:items_not_allowed": 2,
+    "warning:lib_footprint_mismatch": 62,
+    "warning:silk_edge_clearance": 5,
+    "warning:silk_over_copper": 35,
+    "warning:silk_overlap": 43,
+    "warning:via_dangling": 8
+  },
+  "drc_unconnected": 7,
+  "drc_parity": 71
+}
