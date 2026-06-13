@@ -1,0 +1,25 @@
+{
+  "_notes": {
+    "purpose": "Accepted ERC/DRC counts from the CI KiCad image (kicad/kicad:10.0.2). Gate is a ratchet: errors fail on ANY change up or down; warnings fail on increase. This is not 'accepting errors' — every entry is a reviewed, documented false-positive or deliberate design choice, and the strict gate forces a conscious review before the set can change. Refresh only inside the CI image via --update-baseline, in the same commit as the design change that justifies it.",
+    "error:courtyards_overlap": "H1 mounting hole vs WROOM antenna keepout — nylon-screw mitigation (bring-up.md).",
+    "error:items_not_allowed": "2 items in the antenna keepout rule area (same H1 corner).",
+    "warning:lib_footprint_mismatch": "Vendored/custom footprints differ from stock KiCad lib metadata; library not installed in the container. Cosmetic.",
+    "warning:silk_overlap": "Cosmetic silk-on-silk; dense board. 44 (was 43) since the D1 TVS rotation moved its polarity band north to mark the +5V pad, where it grazes a neighbor's silk — intrinsic to that correctness fix.",
+    "drc_parity": "Name/metadata residue (dual-label net-name picks, stale auto-names on label-less 2-pin nets, one stale PCB LCSC field). Electrically inert; fab outputs are netlist-driven. Cleanup queued in ROADMAP."
+  },
+  "erc": {
+    "warning:lib_symbol_mismatch": 1,
+    "warning:multiple_net_names": 7
+  },
+  "drc": {
+    "error:courtyards_overlap": 1,
+    "error:items_not_allowed": 2,
+    "warning:lib_footprint_mismatch": 62,
+    "warning:silk_edge_clearance": 5,
+    "warning:silk_over_copper": 35,
+    "warning:silk_overlap": 44,
+    "warning:via_dangling": 8
+  },
+  "drc_unconnected": 7,
+  "drc_parity": 71
+}

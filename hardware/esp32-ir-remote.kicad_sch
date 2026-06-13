@@ -4703,7 +4703,7 @@
 	)
 	(symbol
 		(lib_id "Device:D_TVS")
-		(at 176.53 36.83 90)
+		(at 176.53 36.83 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
