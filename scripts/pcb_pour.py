@@ -41,7 +41,7 @@ def main():
     # --- antenna keepout rule areas (both layers) -----------------------
     ko = pcbnew.ZONE(board)
     ko.SetIsRuleArea(True)
-    ko.SetDoNotAllowCopperPour(True)
+    ko.SetDoNotAllowZoneFills(True)
     ko.SetDoNotAllowTracks(True)
     ko.SetDoNotAllowVias(True)
     ls = pcbnew.LSET()

@@ -36,7 +36,7 @@ def net_widths(name):
         return 0.30, 0.6, 0.3
     if name in IR_NETS or name.lstrip("/") in {n.lstrip("/") for n in IR_NETS}:
         return 0.25, 0.6, 0.3
-    return 0.125, 0.45, 0.25
+    return 0.125, 0.5, 0.3
 
 # short, position-locked local families first; long flexible transit last
 ROUTE_ORDER_HEAD = [
