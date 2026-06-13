@@ -192,6 +192,7 @@ cp hardware/fab/esp32-ir-remote-gerbers.zip \
    hardware/fab/esp32-ir-remote-jlcpcb-bom.csv \
    hardware/fab/esp32-ir-remote-jlcpcb-cpl.csv \
    hardware/fab/esp32-ir-remote-hand-solder-kit.csv \
+   hardware/fab/esp32-ir-remote-orientation-report.csv \
    hardware/fab/final_top.png hardware/fab/final_bottom.png \
    hardware/fab/final_iso.png \
    "$OUT/hardware/fab/"
@@ -294,6 +295,8 @@ the JLCPCB order set. To freeze an order, tag the commit.</p>
   <li><a href="hardware/fab/esp32-ir-remote-jlcpcb-bom.csv">JLCPCB assembly BOM</a></li>
   <li><a href="hardware/fab/esp32-ir-remote-jlcpcb-cpl.csv">JLCPCB CPL (placements)</a></li>
   <li><a href="hardware/fab/esp32-ir-remote-hand-solder-kit.csv">Hand-solder kit (order loose)</a></li>
+  <li><a href="hardware/fab/esp32-ir-remote-orientation-report.csv">Orientation report
+      (rotation-corrected CPL, per-part preview checklist)</a></li>
   <li><a href="hardware/fab/bom-report.html">BOM cost &amp; stock report</a>
       (<a href="hardware/fab/bom-report.json">JSON</a>)</li>
   <li>Final renders:

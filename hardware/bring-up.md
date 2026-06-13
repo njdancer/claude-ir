@@ -15,7 +15,9 @@ ordered/tagged commit; per-part polarity notes included).
 
 - [ ] **Solder the fit-before-first-power kit parts:** J2 (USB-C, THT),
       F1 (polyfuse 1812 — VBUS is open-circuit without it), L1 (4.7µH —
-      no 3.3V without it), D1 (TVS, **cathode band toward F1**).
+      no 3.3V without it), D1 (TVS, **align cathode band with the
+      on-board silk band marker** — the band end is the +5V pad; the
+      marking was corrected 2026-06-13, rev 1.4 boards are true).
       Optionally D6/D7 power LEDs now for visible rails.
 - [ ] No solder bridges around U1 (TSOT-23-6), U2 (SOIC-16), Q3-Q5 (SOT-23),
       and your own J2/F1/L1/D1 joints.

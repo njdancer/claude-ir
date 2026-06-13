@@ -32,6 +32,31 @@ process — open a PR, watch CI; no local check battery required.** New
    Pages site. First run already caught drift: **C17922 (18Ω) is now
    Extended at JLC** (so 4 Extended SMT lines, not 3) and re-confirmed the
    AM2302 squeeze (35 in stock, $6.83/ea ≈ 42% of per-board part cost).
+**Polarity/orientation automation (2026-06-13, Nick: "don't rely on me for
+correctness"):**
+5. **Polarity truth table** in `hardware_validate.py` (gating): 66 pin→net
+   invariants across all 23 polarized/orientation-critical parts (every
+   diode direction, FET pinout, IC power pin, fuse/inductor path), locked
+   from the reviewed design — any future flip fails CI with the exact pin.
+6. **CPL rotation corrections** in `fab-outputs.py`: JLC's per-package
+   zero-orientation offsets applied to the CPL (SOT-23 +270, TSOT-23 +180,
+   SOIC +270, ESP32-WROOM +270 — JLCKicadTools community DB values); every
+   assembled footprint MUST be classified (offset or symmetric) or the
+   script refuses; new `esp32-ir-remote-orientation-report.csv` makes the
+   JLC-preview check a mechanical per-part comparison against
+   final_top.png. ⚠️ First order still verifies the offsets in the preview
+   — if one is wrong, fix the table, not the order.
+7. **🐛 REAL BUG FOUND & FIXED by this work — D1 TVS marking was inverted.**
+   The schematic symbol (`D_TVS`) is bidirectional so no electrical check
+   could see it, but the `D_SMB` footprint prints its cathode band at
+   pad 1, which was wired to GND; correct unidirectional orientation is
+   cathode→+5V. Anyone hand-soldering to the board's own marking would put
+   the TVS forward across the rail (board won't power). Fix: D1 rotated
+   180° in place (pads are symmetric — copper untouched, verified pad
+   positions identical) + schematic symbol rotated to match + netlist
+   updated; the silk band now marks the +5V pad. Kit CSV + bring-up.md
+   instructions updated ("align band with the on-board marker"). The new
+   polarity table locks D1.1(K)=+5V forever.
 **Build artifacts are out of git:** `hardware/fab/` +
 `esp32-ir-remote_bom.csv` untracked/gitignored; Pages regenerates and
 publishes the full fab package + cost report on every merge
@@ -493,9 +518,12 @@ Make the schematic provably correct before any layout effort builds on it.
      upload `esp32-ir-remote-gerbers.zip` + `-jlcpcb-bom.csv` +
      `-jlcpcb-cpl.csv`. Expect ~4 Extended loading fees (~$12 — C17922 18Ω
      flipped to Extended per the CI BOM report) + setup/stencil.
-  2. **In the placement preview, check every polarized part** (U1, U2, D1,
-     Q1-Q5, SW orientation) — rotation-convention mismatches are the #1
-     cause of dead assembled boards.
+  2. **In the placement preview, walk `esp32-ir-remote-orientation-report.csv`**
+     (in the fab package): one row per orientation-critical part (U1, U2,
+     U3, Q1-Q5, SW1/2) — confirm each pin-1/polarity marker matches
+     final_top.png. The CPL is already rotation-corrected (JLC offsets per
+     package), so the preview SHOULD be correct; any mismatch = fix the
+     JLC_ROTATION table in `scripts/fab-outputs.py`, regenerate, re-upload.
   3. Same cart: kit parts from `fab/esp32-ir-remote-hand-solder-kit.csv`
      (add spares; 2-3× AM2302 C83988 while stock lasts; generic 2.54mm
      headers for J4/J5).

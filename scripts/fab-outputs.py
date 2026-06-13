@@ -44,7 +44,8 @@ NET = os.path.join(HW, "esp32-ir-remote.net")
 # all Basic except exactly three Extended lines: U1 (buck), U2 (CH340C),
 # U3 (WROOM) — the placements where machine quality matters most.
 HAND_SOLDER = {
-    "D1":  "TVS SMBJ5.0A, SMB 2-pad. CATHODE BAND TOWARD F1.",
+    "D1":  "TVS SMBJ5.0A, SMB 2-pad. Align cathode band with the on-board "
+           "silk band marker (= the +5V pad; marking fixed 2026-06-13).",
     "D2":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
     "D3":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
     "D4":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
@@ -70,6 +71,29 @@ KIT_EXTRA = [
 ]
 # Not fitted at all: DNP parts (from schematic) and JP1 (bare solder jumper).
 NEVER_PLACE = {"JP1"}
+
+# ---------------------------------------------------------------------------
+# CPL ROTATION CORRECTIONS. JLCPCB's pick-and-place zero-orientation differs
+# from KiCad's library convention per package; an uncorrected CPL is the
+# classic dead-assembled-board cause. Offsets (degrees ADDED to the KiCad
+# rotation, mod 360) follow the community-maintained JLCKicadTools database
+# (matthewlai/JLCKicadTools cpl_rotations_db.csv).
+#
+# EVERY assembled footprint must be classified — either listed here or
+# matching SYMMETRIC_RE — otherwise this script refuses to emit a CPL, so a
+# new package can never reach JLC with an unreviewed rotation.
+JLC_ROTATION = {
+    "TSOT-23-6": 180,                   # U1 AP63203   (^TSOT-23 -> 180)
+    "SOIC-16_3.9x9.9mm_P1.27mm": 270,   # U2 CH340C    (^SOIC-   -> 270)
+    "ESP32-WROOM-32D": 270,             # U3 WROOM-32E (^ESP32-W -> 270)
+    "SOT-23": 270,                      # Q1-Q5        (^SOT-23  -> -90)
+    # Tact switch: pads are 180-symmetric and same-row pads are internally
+    # common, so 0/180 are equivalent; a 90 error would miss the pads
+    # entirely (visible in preview).
+    "SW-SMD_TS-1187A-5.1x5.1": 0,
+}
+# Orientation-irrelevant chip passives (rectangular 2-pad).
+SYMMETRIC_RE = re.compile(r"^[RC]_\d{4}_\d{4}Metric")
 
 KICAD_CLI = os.environ.get("KICAD_CLI") or shutil.which("kicad-cli") or \
     "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
@@ -158,20 +182,59 @@ def main():
             f.write("%s,%s,%s,%s\n" % (val, des, fp, lcsc))
     print("  BOM: %d assembled lines" % len(groups))
 
-    # -- JLC CPL (assembled only) -------------------------------------------
+    # -- JLC CPL (assembled only, rotation-corrected) -----------------------
+    def rotation_offset(ref):
+        fp = comps[ref]["footprint"]
+        if fp in JLC_ROTATION:
+            return JLC_ROTATION[fp]
+        if SYMMETRIC_RE.match(fp):
+            return None  # symmetric: no correction, not orientation-critical
+        raise SystemExit(
+            f"UNCLASSIFIED footprint for CPL rotation: {ref} '{fp}'. Add it "
+            "to JLC_ROTATION (verify against JLCKicadTools' "
+            "cpl_rotations_db.csv + the JLC placement preview) or extend "
+            "SYMMETRIC_RE if it is genuinely orientation-irrelevant.")
+
     keep = set(assembled)
     cpl = os.path.join(FAB, "esp32-ir-remote-jlcpcb-cpl.csv")
+    orient = []  # orientation-critical rows for the report
     n = 0
     with open(raw) as fin, open(cpl, "w") as fout:
         fout.write("Designator,Mid X,Mid Y,Layer,Rotation\n")
         for row in csv.DictReader(fin):
-            if row["Ref"] in keep:
-                fout.write("%s,%f,%f,%s,%f\n" % (
-                    row["Ref"], float(row["PosX"]), float(row["PosY"]),
-                    row["Side"].capitalize(), float(row["Rot"])))
-                n += 1
+            if row["Ref"] not in keep:
+                continue
+            off = rotation_offset(row["Ref"])
+            rot = (float(row["Rot"]) + (off or 0)) % 360
+            fout.write("%s,%f,%f,%s,%f\n" % (
+                row["Ref"], float(row["PosX"]), float(row["PosY"]),
+                row["Side"].capitalize(), rot))
+            if off is not None:
+                c = comps[row["Ref"]]
+                orient.append([row["Ref"], c["value"], c["lcsc"],
+                               c["footprint"], float(row["Rot"]), off, rot])
+            n += 1
     assert n == len(assembled), (n, len(assembled))
-    print("  CPL: %d placements" % n)
+    print("  CPL: %d placements (%d rotation-corrected/orientation-critical)"
+          % (n, len(orient)))
+
+    # -- orientation report: the JLC-preview checklist ------------------------
+    # One row per orientation-critical assembled part. The preview check is
+    # now mechanical: confirm each part's pin-1/polarity marker in JLC's
+    # render matches the board renders (final_top.png) — the CPL rotations
+    # were pre-corrected per the table above, so the preview SHOULD already
+    # be correct; any mismatch means a JLC_ROTATION entry is wrong for that
+    # package and must be fixed there (not by nudging the preview).
+    orep = os.path.join(FAB, "esp32-ir-remote-orientation-report.csv")
+    with open(orep, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["Designator", "Value", "LCSC", "Footprint",
+                    "KiCad rot", "JLC offset", "CPL rot",
+                    "Verify in JLC placement preview"])
+        for r in sorted(orient, key=lambda r: natkey(r[0])):
+            w.writerow(r + ["pin-1/polarity marker matches final_top.png"])
+    print("  orientation report: %d parts -> %s"
+          % (len(orient), os.path.basename(orep)))
 
     # -- hand-solder kit ----------------------------------------------------
     kitcsv = os.path.join(FAB, "esp32-ir-remote-hand-solder-kit.csv")

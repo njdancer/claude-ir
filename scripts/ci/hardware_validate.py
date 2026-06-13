@@ -47,6 +47,59 @@ BASELINE = os.path.join(HW, "ci-baseline.json")
 # anywhere (J4/J5) and the bare solder jumper (JP1).
 NO_LCSC_OK = {"J4", "J5", "JP1"}
 
+# ---------------------------------------------------------------------------
+# Polarity / orientation truth table — pin -> net for every polarized or
+# orientation-critical part, locked from the triple-reviewed v1.4 design
+# (H1.4 datasheet review + 2026-06-13 re-derivation). A value is either a
+# net name (leading '/' ignored) or a list of partner nodes "REF.PIN" that
+# must share the (auto-named) net. ANY future edit that flips a diode,
+# swaps a transistor pinout, or rewires a power pin fails CI loudly.
+# Re-derive consciously, never blindly: each line encodes a datasheet fact.
+POLARITY = {
+    # TVS on +5V rail: pad 1 = cathode = the silk band end = +5V (D1 was
+    # rotated 2026-06-13 so the on-board band marks the correct pad)
+    "D1": {"1": "+5V", "2": "GND"},
+    # IR LEDs: cathodes sink into Q3 drain, anode each via its own 18R
+    "D2": {"1": "IR_DRAIN", "2": ["R9.1"]},
+    "D3": {"1": "IR_DRAIN", "2": ["R10.1"]},
+    "D4": {"1": "IR_DRAIN", "2": ["R11.1"]},
+    "D5": {"1": "IR_DRAIN", "2": ["R12.1"]},
+    # Indicator LEDs: cathode to GND (or sunk by UART line / user-LED FET
+    # drain), anode via series resistor
+    "D6": {"1": "GND", "2": ["R15.2"]},
+    "D7": {"1": "GND", "2": ["R16.2"]},
+    "D8": {"1": "ESP_GPIO1", "2": ["R17.2"]},
+    "D9": {"1": "ESP_GPIO3", "2": ["R18.2"]},
+    "D10": {"1": "GND", "2": ["R19.2"]},
+    "D11": {"1": ["Q4.3"], "2": ["R25.2"]},
+    "D12": {"1": ["Q5.3"], "2": ["R20.1"]},
+    # Auto-reset 2N7002 pair (SOT-23 1=G 2=S 3=D), cross-coupled, with the
+    # R21/R26 470R bypass links on the sources
+    "Q1": {"1": ["R3.2"], "2": ["R26.2", "R4.2"], "3": "ESP_EN"},
+    "Q2": {"1": ["R4.1"], "2": ["R21.1", "R3.1"], "3": "ESP_GPIO0"},
+    # IR driver AO3400A: gate via R13 (+R14 pulldown), low-side switch
+    "Q3": {"1": ["R13.1", "R14.2"], "2": "GND", "3": "IR_DRAIN"},
+    # User-LED drivers: gate from GPIO, source GND, drain = LED cathode
+    "Q4": {"1": "ESP_GPIO16", "2": "GND", "3": ["D11.1"]},
+    "Q5": {"1": "ESP_GPIO17", "2": "GND", "3": ["D12.1"]},
+    # AP63203 (TSOT-26): 1=FB(=VOUT, fixed 3V3) 2=EN(JP1) 3=VIN 4=GND
+    # 5=SW(L1 + BST cap) 6=BST
+    "U1": {"1": "+3.3V", "2": ["JP1.2"], "3": "+5V", "4": "GND",
+           "5": ["C4.2", "L1.1"], "6": ["C4.1"]},
+    # CH340C: 1=GND 4=V3 tied to VCC(16)=+3.3V (3V3 mode), UART to GPIO1/3,
+    # DTR/RTS to the auto-reset bypass links
+    "U2": {"1": "GND", "2": "ESP_GPIO3", "3": "ESP_GPIO1", "4": "+3.3V",
+           "5": "USB_D+", "6": "USB_D-", "13": ["R21.2"], "14": ["R26.1"],
+           "15": "GND", "16": "+3.3V"},
+    # TSOP38238: 1=OUT 2=GND 3=Vs (RC-filtered)
+    "U4": {"1": "ESP_GPIO19", "2": "GND", "3": "IR_RX_VS"},
+    # AM2302: 1=VDD 2=SDA 3=NC/GND 4=GND
+    "U5": {"1": "+3.3V", "2": "ESP_GPIO4", "3": "GND", "4": "GND"},
+    # Buck output path + input fuse direction
+    "L1": {"1": ["C4.2", "U1.5"], "2": "+3.3V"},
+    "F1": {"1": "+5V", "2": ["J2.A4", "J2.A9", "J2.B4", "J2.B9"]},
+}
+
 failures = []  # list of (check, message)
 warnings = []
 summary_rows = []  # (check, status, detail) for the GitHub step summary
@@ -316,6 +369,53 @@ def check_bom(fresh_net):
                          f"{len(missing)} missing"))
 
 
+def check_polarity(fresh_net):
+    """Verify every POLARITY table entry against the freshly exported
+    netlist: named nets by name (leading '/' ignored), auto-named nets by
+    partner nodes sharing the net."""
+    print("\n== Polarity / orientation truth table ==")
+    root = sexp_parse(open(fresh_net).read())
+    pin_net = {}   # (ref, pin) -> net name
+    net_nodes = {}  # net name -> set of (ref, pin)
+    for net in walk(next(walk(root, "nets")), "net"):
+        name = next(c[1] for c in net if isinstance(c, list) and c[0] == "name")
+        nodes = {(n[1][1], next(x[1] for x in n
+                                if isinstance(x, list) and x[0] == "pin"))
+                 for n in walk(net, "node")}
+        net_nodes[name] = nodes
+        for node in nodes:
+            pin_net[node] = name
+    bad = 0
+    for ref, pinmap in POLARITY.items():
+        for pin, expect in pinmap.items():
+            actual = pin_net.get((ref, pin))
+            if actual is None:
+                failures.append(("polarity", f"{ref}.{pin}: pin missing from"
+                                 " netlist"))
+                bad += 1
+                continue
+            if isinstance(expect, str):
+                if actual.lstrip("/") != expect.lstrip("/"):
+                    failures.append(("polarity", f"{ref}.{pin}: on net "
+                                     f"'{actual}', expected '{expect}'"))
+                    bad += 1
+            else:
+                nodes = net_nodes[actual]
+                missing = [p for p in expect
+                           if tuple(p.split(".")) not in nodes]
+                if missing:
+                    failures.append(("polarity", f"{ref}.{pin}: net "
+                                     f"'{actual}' lacks expected partner(s) "
+                                     + ", ".join(missing)))
+                    bad += 1
+    n = sum(len(v) for v in POLARITY.values())
+    if not bad:
+        print(f"  OK: {n} pin->net invariants hold across "
+              f"{len(POLARITY)} polarized parts")
+    summary_rows.append(("polarity truth table", "FAIL" if bad else "PASS",
+                         f"{n} invariants / {len(POLARITY)} parts"))
+
+
 def check_models():
     print("\n== 3D model paths (WARN-only) ==")
     text = open(PCB).read()
@@ -369,6 +469,7 @@ def main():
         drc_base, drc_viol, unconn, parity = check_drc(tmp)
         fresh = check_netlist(tmp)
         check_bom(fresh)
+        check_polarity(fresh)
         check_models()
 
         candidate = {**erc_base, **drc_base}
