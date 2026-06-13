@@ -4,8 +4,9 @@
  * Hardware (pins set per-board via build_flags in platformio.ini):
  *   - nodemcuv2: ESP8266 NodeMCU breadboard - IR RX GPIO14 (D5),
  *     IR TX GPIO4 (D2) via 2N2222 transistor
- *   - esp32dev: ESP32-WROOM-32E custom dev board - IR TX GPIO18 (MOSFET
- *     driver, 4x TSAL6200), IR RX GPIO19 (TSOP38238)
+ *   - esp32-c3: ESP32-C3-WROOM-02 custom board v2 - IR TX GPIO5 (MOSFET
+ *     driver, 4x TSAL6200), IR RX GPIO6 (TSOP38238). Console is the chip's
+ *     native USB-Serial-JTAG over USB-C (no CH340 bridge).
  *
  * Purpose:
  *   Full-duplex IR control for ActronAir AC unit
@@ -92,11 +93,13 @@ void setup() {
   irsend.begin();
   acBosch.begin();
   acCoolix.begin();
-  Serial.println(F("✓ IR Transmitter initialized on GPIO4 (D2)"));
+  Serial.print(F("✓ IR Transmitter initialized on GPIO"));
+  Serial.println(kIrLedPin);
 
   // Initialize IR receiver (for debugging)
   irrecv.enableIRIn();
-  Serial.println(F("✓ IR Receiver initialized on GPIO14 (D5)"));
+  Serial.print(F("✓ IR Receiver initialized on GPIO"));
+  Serial.println(kIrRecvPin);
 
   // Initialize AC state with defaults
   acState.power = false;

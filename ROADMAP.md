@@ -10,6 +10,74 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🟢 **BOARD v2 — ESP32-C3 cost-down redesign IN PROGRESS (2026-06-13, Nick:
+"build it as cheaply as possible, any redesign OK").** The v1.4 BOM is
+**$16.2/board**, 65% of it just two parts: AM2302 ($6.83) + WROOM-32E
+($3.78). v2 attacks the architecture, not just parts. Target **~$7.3/board
+(−55%)** with nearly everything SMD-assembled and a hand-solder kit shrunk
+to only easy through-hole bits (4× IR LED, TSOP, pin headers).
+
+**The change set (Nick approved scope + 3 design calls — keep buck, SMD 0805
+LEDs, Qwiic + small 4-pin spare header):**
+1. **MCU: ESP32-WROOM-32E → ESP32-C3-WROOM-02-N4** (C2934560, $3.11). The C3
+   has a **native USB-Serial-JTAG controller**: USB serial + auto-download/
+   reset over the USB lines, no bridge chip.
+2. **DELETE the whole USB-serial subsystem:** U2 CH340C, Q1/Q2 auto-reset
+   FETs, R3/R4 (cross-couple), R21/R26 (DTR/RTS bypass links), C5 (CH340
+   decoupling). Flash/monitor run straight over USB-C.
+3. **Temp sensor: AM2302 → AHT20** (C2757850, $0.80, I2C, SMD). Kills the
+   single most expensive part AND the 335-unit stock crisis; more accurate
+   (±0.3 °C, factory-cal). Onboard, SMD-assembled. Drops single-wire pullup
+   R22; **un-DNPs the I2C pullups R28/R29** (now real, shared AHT20+Qwiic
+   bus). [[board-v1-macro-direction]]
+4. **USB-C: THT GCT receptacle → SMD 16P** (C393939, $0.065 vs $1.42).
+5. **Status LEDs: 3mm THT → 0805 SMD** (D6/D7/D10/D11/D12), factory-placed.
+   **Drop the amber TX/RX activity LEDs (D8/D9 + R17/R18)** — meaningless
+   once the console is native USB.
+6. **Delete the JTAG header (J6)** — C3 does JTAG over native USB.
+7. **Keep:** AP63203 buck (Nick's call — robustness over the LDO's ~$0.6 +
+   feeder save), IR TX array (Q3/AO3400A + 4× TSAL6200 + 4× 18Ω, value
+   unchanged — no Basic 18Ω exists), TSOP38238 RX, blue user LEDs via
+   Q4/Q5 low-side from 5V, USB-C protection (F1 fuse + D1 TVS + R1/R2 CC).
+
+**New C3 GPIO map** (functional pins avoid all strapping pins; spare/unused
+strapping GPIO2/8 left NC to keep boot deterministic):
+
+| GPIO | Function | Notes |
+|------|----------|-------|
+| EN | Reset (SW1) | RC: R5 pullup + C6 |
+| 9 | Boot (SW2) | strapping, internal + R6 pullup |
+| 5 | IR transmit | → R13 → Q3 gate; → R19 → D10 indicator |
+| 6 | IR receive | TSOP38238 out |
+| 7 | I2C SDA | AHT20 + Qwiic (R28 pullup) |
+| 10 | I2C SCL | AHT20 + Qwiic (R29 pullup) |
+| 3 | User LED1 | → Q4 gate (blue, low-side from 5V) |
+| 4 | User LED2 | → Q5 gate |
+| 18/19 | USB D−/D+ | native USB-Serial-JTAG |
+| 0,1,20,21 | spare → J4 | 0/1 = ADC1; 20/21 = UART0 (ROM log/debug) |
+
+**Execution (staged commits on this branch; CI is the gate):**
+- [x] **Firmware** ported: new `[env:esp32-c3]` (native USB CDC build flags,
+      new pins), banner de-hardcoded, CI builds esp32-c3 not esp32dev.
+      `pio run -e esp32-c3` → SUCCESS (host). Retired the WROOM-32E esp32dev
+      env. F1.3 native tests + nodemcuv2 unchanged.
+- [x] **AHT20 vendored** (C2757850) into `hardware/libraries/` via jlcpcb
+      MCP; symbol lib registered, 3D model path made `${KIPRJMOD}`-relative
+      (CI render-safe per the vendoring lesson). Pinout: 2=VDD 3=SCL 4=SDA
+      5=GND (1/6 NC).
+- [ ] **Schematic surgery** (next): the deletes/swaps/rewire above →
+      `hardware-check.sh` ERC clean → netlist diff reviewed. Then update the
+      per-subsystem notes + spec → **v2.0** to match (schematic wins ritual).
+- [ ] **Re-layout** (Mac): module footprint changed + ~12 parts gone → placement
+      redo + freerouting/heal/pour/DRC (the H2 pipeline). Board can shrink.
+- [ ] **Fab + CI validation rebuild:** new HAND_SOLDER split (kit = IR LEDs +
+      TSOP + headers only), JLC_ROTATION for C3/AHT20/USB-C/SOT-23 packages,
+      rebuild the polarity truth table for the new netlist, add a USB-D±→C3
+      pin invariant + C3 strapping check, refresh ci-baseline. Run
+      `bom_report.py` to confirm the cost.
+
+
+
 ✅ **AM2302 (U5) 3D model seating FIXED & visually verified (2026-06-13, remote
 session).** Nick reported the temp-sensor pins didn't line up with the holes in
 the 3D viewer, the silk outline was off by a different amount, and suspected a
