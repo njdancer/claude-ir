@@ -218,11 +218,16 @@ def check_erc(tmp):
 
 
 def parity_is_noise(desc):
-    """KiCad-10-reads-v9 artifacts with no electrical meaning:
-    - empty-vs-'~' Datasheet field normalization
-    - root-sheet net-name prefix: PCB 'ESP_EN' vs schematic '/ESP_EN'"""
+    """Parity classes with no electrical meaning:
+    - empty-vs-'~' Datasheet field normalization (KiCad 10 reading v9)
+    - root-sheet net-name prefix: PCB 'ESP_EN' vs schematic '/ESP_EN'
+    - custom fields (LCSC etc.) not copied into footprints — cosmetic;
+      BOM/fab outputs read fields from the netlist, and the BOM lint
+      gates LCSC coverage there"""
     if re.fullmatch(r"Field 'Datasheet' differs \(PCB: '~', Schematic: ''\)",
                     desc):
+        return True
+    if re.fullmatch(r"Missing symbol field '[^']*' in footprint", desc):
         return True
     m = re.fullmatch(r"Pad net \(([^)]*)\) doesn't match net given by "
                      r"schematic \(([^)]*)\)", desc)
