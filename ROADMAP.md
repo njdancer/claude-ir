@@ -49,6 +49,24 @@ LEDs, Qwiic + small 4-pin spare header):**
    rest of IR TX array (Q3/AO3400A + 4× TSAL6200), TSOP38238 RX, blue user
    LEDs via Q4/Q5 low-side from 5V, USB-C protection (F1 + D1 + R1/R2 CC).
 
+**Refinements (2026-06-13 pt 2, Nick's BOM audit):**
+- **Drop J3 Qwiic** — a 1mm-pitch SMD that's miserable to hand-solder and
+  would otherwise need a 5th feeder. I2C expansion preserved by breaking
+  SDA/SCL out on the spare header. R28/R29 (4.7k I2C pullups) stay fitted
+  for the AHT20 bus.
+- **Spare header J4 → 2×5** carrying **5V, 3V3, 2×GND, SDA(7), SCL(10),
+  GPIO0, GPIO1**: covers I2C expansion (post-Qwiic), 2 spare ADC GPIO, and
+  **external power injection** — a future battery+boost module can feed 5V
+  here (the AP63203 buck can't run off a 1-cell LiPo directly: dropout needs
+  Vin ≳ 3.8V, so true onboard battery is a v2 power section, not a DNP). JP1
+  buck-disable also allows direct 3V3 injection. Buck kept (Nick: validation
+  + keeps the door open).
+- **All status LEDs → Basic 0805** (blue dropped — not in JLC Basic in any
+  package). User-LED color TBD from the Basic palette (red/yellow/green/
+  white); a low-Vf pick (red/yellow) also lets us **delete Q4/Q5 + R23/R24**
+  and direct-drive from GPIO (the FETs only existed for blue's 3.4V Vf).
+  3V3 power LED → yellow (green barely lights on 3.3V).
+
 **Assembly split → 4 feeder fees** (~$12/order, one-time not per-board):
 C3 + AHT20 + AP63203 buck + SMD USB-C stay machine-placed (Extended); the
 22Ω swap dodges the 5th feeder (no Basic 18Ω, but 22Ω is Basic). At the
