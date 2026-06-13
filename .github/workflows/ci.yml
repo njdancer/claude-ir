@@ -40,6 +40,15 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends git
       - uses: actions/checkout@v4
+      - name: Install KiCad global library tables
+        # The job runs as root, which has no KiCad config; without the global
+        # sym/fp lib tables ERC drowns in ~170 bogus lib_symbol_issues /
+        # footprint_link_issues ("configuration does not include library X")
+        run: |
+          mkdir -p "$HOME/.config/kicad/10.0"
+          cp /usr/share/kicad/template/sym-lib-table \
+             /usr/share/kicad/template/fp-lib-table \
+             "$HOME/.config/kicad/10.0/"
       - name: Validate design (ERC, DRC, netlist, BOM, models)
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -68,7 +77,9 @@ jobs:
             .pio
           key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
       - name: Install PlatformIO
-        run: pip install platformio
+        # intelhex: espressif32's vendored esptool.py imports it but doesn't
+        # declare it; the ESP32 bootloader.bin step dies without it
+        run: pip install platformio intelhex
       - name: Native unit tests
         run: pio test -e native
       - name: Build ESP8266 + ESP32 firmware

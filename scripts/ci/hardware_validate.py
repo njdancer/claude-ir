@@ -217,6 +217,20 @@ def check_erc(tmp):
     return {"erc": counts_to_json(counts)}, viol
 
 
+def parity_is_noise(desc):
+    """KiCad-10-reads-v9 artifacts with no electrical meaning:
+    - empty-vs-'~' Datasheet field normalization
+    - root-sheet net-name prefix: PCB 'ESP_EN' vs schematic '/ESP_EN'"""
+    if re.fullmatch(r"Field 'Datasheet' differs \(PCB: '~', Schematic: ''\)",
+                    desc):
+        return True
+    m = re.fullmatch(r"Pad net \(([^)]*)\) doesn't match net given by "
+                     r"schematic \(([^)]*)\)", desc)
+    if m and m.group(2).lstrip("/") == m.group(1).lstrip("/"):
+        return True
+    return False
+
+
 def check_drc(tmp):
     print("\n== DRC (incl. schematic parity) ==")
     out = os.path.join(tmp, "drc.json")
@@ -226,8 +240,14 @@ def check_drc(tmp):
     viol = rep.get("violations", [])
     unconn = [v for v in rep.get("unconnected_items", [])
               if not v.get("excluded") and v.get("severity") != "exclusion"]
-    parity = [v for v in rep.get("schematic_parity", [])
-              if not v.get("excluded") and v.get("severity") != "exclusion"]
+    parity_all = [v for v in rep.get("schematic_parity", [])
+                  if not v.get("excluded") and v.get("severity") != "exclusion"]
+    parity = [v for v in parity_all
+              if not parity_is_noise(v.get("description", ""))]
+    n_noise = len(parity_all) - len(parity)
+    if n_noise:
+        print(f"  parity noise filtered: {n_noise} "
+              "(Datasheet ''/'~' + net-name '/'-prefix artifacts)")
     counts = count_violations(viol)
     print("  violation counts:", dict(counts_to_json(counts)))
     print(f"  unconnected items: {len(unconn)}   schematic parity: {len(parity)}")
