@@ -142,16 +142,29 @@ strapping GPIO2/8 left NC to keep boot deterministic):
       AHT20 VDD is `unspecified` type). Then: **J2 → SMD USB-C footprint**
       (verify pad names vs C393939 — pad-map risk), **un-DNP R28/R29** (I2C
       pull-ups now fitted).
-- [ ] **PCB re-layout (the large remaining phase):** the board still carries
-      v1.4 footprints/routing. Needs: sync (remove deleted fps, swap U1/U3/U5/
-      J2/LEDs, the MCP sync only adds → use pcbnew on v10 app-python, confirmed
-      importable), re-place (C3 footprint differs; board can shrink), re-route
-      (freerouting via podman — image not yet pulled), pours, DRC, parity.
-- [ ] **Validation rebuild + green CI:** polarity truth table for the new
-      netlist, HAND_SOLDER split (kit = IR LEDs+TSOP+headers), JLC_ROTATION
-      for C3/AHT20/SOT-223/SMD-USB-C, USB-D±→C3 + strap invariants, refresh
-      ci-baseline in the kicad:10.0.2 container, fab-outputs, bom_report.
-      Then push → watch CI green.
+- [~] **PCB re-layout ~97% DONE (autonomous, 2026-06-14).** Tooling:
+      `scripts/pcb_sync.py` (pcbnew ECO on the v10 app-python + a numpy venv
+      `/tmp/kv10`) removed the 20 deleted footprints, swapped U1→AMS1117/
+      U3→C3/U5→AHT20/LEDs→0805, reassigned 167 pads + metadata from the
+      netlist. Routed with the repo's own grid-A* (`pcb_router.py`, **no
+      freerouting needed**) + GND pour (`pcb_pour.py`, v10 API fixed). State:
+      **549 tracks, GND poured (3 zones, 99 stitch vias), DRC 5 minor**
+      (2 antenna-keepout, 1 track-crossing, 1 accepted U3/H1 courtyard, 1
+      starved-thermal). **7 unconnected remain** — 4 long cross-board nets
+      (CC1 R1↔J2, I2C_SDA U5↔U3, USB-C A5/A6/A7 edge, the C3 strap/boot legs)
+      the router can't close through congestion, + IR_RX_VS track-join + 2
+      GND thermal. These need **placement optimization** (move the C3's
+      I2C/CC/strap partners adjacent to it, then re-route) — crude
+      fixed-offset nudges traded gaps for clearance violations, so it wants
+      a real placement pass. Helper venv: `python3 -m venv --system-site-packages`
+      off the app python + `pip install numpy`.
+- [ ] **Validation rebuild + green CI (remaining):** rewrite the POLARITY
+      table in `hardware_validate.py` for the v2 netlist (currently all v1.4
+      parts — D8/D9/Q1/Q2/Q4/Q5/U2 buck/CH340/AM2302/L1); update
+      `fab-outputs.py` HAND_SOLDER (kit = 4×IR LED + TSOP + USB-C + headers)
+      + JLC_ROTATION for SOT-223/ESP32-C3-WROOM-02/AHT20/0805; refresh
+      `ci-baseline.json` in the kicad:10.0.2 container; regen fab-outputs +
+      bom_report. Then the PCB DRC must reach the accepted-baseline set.
 - [ ] **Re-layout** (Mac): module footprint changed + ~12 parts gone → placement
       redo + freerouting/heal/pour/DRC (the H2 pipeline). Board can shrink.
 - [ ] **Fab + CI validation rebuild:** new HAND_SOLDER split (kit = IR LEDs +
