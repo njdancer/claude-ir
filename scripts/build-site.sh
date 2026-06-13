@@ -181,6 +181,27 @@ VIEWER
 sed -i.bak "s/__REV__/$REV/g" "$OUT/hardware/pcb/viewer.html"
 rm -f "$OUT/hardware/pcb/viewer.html.bak"
 
+# --- Fab package + BOM cost report ----------------------------------------
+# hardware/fab/ is gitignored: the JLCPCB order package is regenerated from
+# the board sources on every build and published here. To freeze an order,
+# tag the commit (e.g. order/v1.4) — the package is reproducible from it.
+echo "Regenerating fab package..."
+KICAD_CLI="$KICAD_CLI_BIN" python3 scripts/fab-outputs.py
+mkdir -p "$OUT/hardware/fab"
+cp hardware/fab/esp32-ir-remote-gerbers.zip \
+   hardware/fab/esp32-ir-remote-jlcpcb-bom.csv \
+   hardware/fab/esp32-ir-remote-jlcpcb-cpl.csv \
+   hardware/fab/esp32-ir-remote-hand-solder-kit.csv \
+   hardware/fab/final_top.png hardware/fab/final_bottom.png \
+   hardware/fab/final_iso.png \
+   "$OUT/hardware/fab/"
+
+echo "BOM cost & stock report (best effort — needs network)..."
+python3 scripts/ci/bom_report.py --boards 5 \
+    --json "$OUT/hardware/fab/bom-report.json" \
+    --html "$OUT/hardware/fab/bom-report.html" \
+    || echo "WARN: BOM report failed (offline or JLCPCB API change)"
+
 # --- Render markdown docs --------------------------------------------------
 # Mirror repo paths under docs/ so relative links between docs keep working
 # after the .md -> .html rewrite below.
@@ -263,6 +284,22 @@ Source: <a href="https://github.com/njdancer/claude-ir">github.com/njdancer/clau
   <li><a href="hardware/pcb/board-top.png">3D render - top</a></li>
   <li><a href="hardware/pcb/board-bottom.png">3D render - bottom</a></li>
   <li><a href="hardware/pcb/board-copper.svg">Copper + silkscreen (SVG)</a></li>
+</ul>
+
+<h2>Fabrication package</h2>
+<p>Regenerated from the board sources at this commit (<code>$commit</code>) —
+the JLCPCB order set. To freeze an order, tag the commit.</p>
+<ul>
+  <li><a href="hardware/fab/esp32-ir-remote-gerbers.zip"><strong>Gerbers (zip)</strong></a></li>
+  <li><a href="hardware/fab/esp32-ir-remote-jlcpcb-bom.csv">JLCPCB assembly BOM</a></li>
+  <li><a href="hardware/fab/esp32-ir-remote-jlcpcb-cpl.csv">JLCPCB CPL (placements)</a></li>
+  <li><a href="hardware/fab/esp32-ir-remote-hand-solder-kit.csv">Hand-solder kit (order loose)</a></li>
+  <li><a href="hardware/fab/bom-report.html">BOM cost &amp; stock report</a>
+      (<a href="hardware/fab/bom-report.json">JSON</a>)</li>
+  <li>Final renders:
+      <a href="hardware/fab/final_top.png">top</a> ·
+      <a href="hardware/fab/final_bottom.png">bottom</a> ·
+      <a href="hardware/fab/final_iso.png">iso</a></li>
 </ul>
 
 <h2>Key documents</h2>

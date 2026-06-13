@@ -1,0 +1,130 @@
+# Full validation suite — runs on every PR and on main. The local scripts
+# (hardware-check.sh etc.) remain for fast bench feedback, but THIS is the
+# authoritative gate: open a PR and watch CI; nothing needs to be run
+# locally before merging.
+#
+# Jobs:
+#   hardware  ERC + DRC (incl. schematic parity) vs hardware/ci-baseline.json,
+#             netlist freshness (electrical partition check), BOM LCSC lint,
+#             3D model path check, then regenerates the JLCPCB fab package
+#             and uploads it as an artifact.
+#   firmware  PlatformIO: native unit tests + ESP8266/ESP32 builds.
+#   app       Web UI: typecheck, unit tests, build, Playwright e2e.
+#   bom-report  Cost/stock telemetry from the JLCPCB API (non-gating).
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hardware:
+    runs-on: ubuntu-latest
+    container:
+      # Same image as pages.yml — the ERC/DRC baseline counts are tied to
+      # this KiCad version; bump both together and refresh the baseline.
+      image: kicad/kicad:10.0.2
+      options: --user root
+    steps:
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git
+      - uses: actions/checkout@v4
+      - name: Validate design (ERC, DRC, netlist, BOM, models)
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python3 scripts/ci/hardware_validate.py
+      - name: Regenerate fab package
+        run: python3 scripts/fab-outputs.py --skip-renders
+      - name: Upload fab package
+        uses: actions/upload-artifact@v4
+        with:
+          name: fab-package
+          path: hardware/fab/
+          if-no-files-found: error
+
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            .pio
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Native unit tests
+        run: pio test -e native
+      - name: Build ESP8266 + ESP32 firmware
+        run: pio run -e nodemcuv2 -e esp32dev
+      - name: Python scripts compile check
+        run: python3 -m compileall -q scripts analysis
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: E2E tests
+        run: pnpm test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: app/playwright-report/
+
+  # Telemetry, not a gate: prices/stock move without code changes. The job
+  # warns on low stock and archives a JSON snapshot per run, so cost history
+  # is reconstructable from artifacts; the latest report ships on Pages.
+  bom-report:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: BOM cost & stock report
+        run: |
+          mkdir -p _bom
+          python3 scripts/ci/bom_report.py --boards 5 \
+            --json _bom/bom-report.json --html _bom/bom-report.html
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom-report
+          path: _bom/
