@@ -30,11 +30,13 @@ LEDs, Qwiic + small 4-pin spare header):**
    (±0.3 °C, factory-cal). Onboard, SMD-assembled. Drops single-wire pullup
    R22; **un-DNPs the I2C pullups R28/R29** (now real, shared AHT20+Qwiic
    bus). [[board-v1-macro-direction]]
-4. **USB-C: KEEP the THT GCT receptacle** (no change). Nick's original
-   call: hand-solder it to dodge the SMT feeder fee, and the through-hole
-   part is mechanically tougher for a bench-handled board. (An SMD 16P
-   would be $1.36 cheaper as a part but adds a feeder; for a small run the
-   per-order feeder dominates.)
+4. **USB-C: THT GCT receptacle → SMD 16P** (C393939, $0.065 vs $1.42).
+   Revisited 2026-06-13: at the 5-board minimum the THT part premium
+   ($1.42×5 = $7.10) exceeds the one-time SMD feeder ($0.065×5 + $3 = $3.33)
+   — SMD is ~$3.77 cheaper *and* no hand-soldering. Break-even ≈2.2 boards,
+   below the floor. The 16P SMD has through-hole mounting posts, so it's
+   mechanically sturdy despite SMD signal pads. Vendor C393939's EasyEDA
+   footprint (verify pads vs JLC part) when wiring the schematic.
 5. **Status LEDs: 3mm THT → 0805 SMD** (D6/D7/D10/D11/D12), factory-placed.
    **Drop the amber TX/RX activity LEDs (D8/D9 + R17/R18)** — meaningless
    once the console is native USB.
@@ -47,11 +49,13 @@ LEDs, Qwiic + small 4-pin spare header):**
    rest of IR TX array (Q3/AO3400A + 4× TSAL6200), TSOP38238 RX, blue user
    LEDs via Q4/Q5 low-side from 5V, USB-C protection (F1 + D1 + R1/R2 CC).
 
-**Assembly split → 3 feeder fees** (~$9/order, one-time not per-board):
-C3 + AHT20 + AP63203 buck stay machine-placed (Extended); the 22Ω swap and
-the THT USB-C each dodge a feeder vs the first-draft plan (5→3). Hand-solder
-kit: 4× IR LED, TSOP, **THT USB-C**, L1 inductor, pin headers — all easy
-through-hole. Everything else is Basic + machine-placed.
+**Assembly split → 4 feeder fees** (~$12/order, one-time not per-board):
+C3 + AHT20 + AP63203 buck + SMD USB-C stay machine-placed (Extended); the
+22Ω swap dodges the 5th feeder (no Basic 18Ω, but 22Ω is Basic). At the
+5-board minimum, paying to load the SMD USB-C beats the THT part premium
+(see item 4). Hand-solder kit shrinks to: 4× IR LED, TSOP, L1 inductor,
+pin headers — all easy through-hole. Everything else is Basic + machine-placed.
+Per-board parts ≈ $7.3 (−55% vs v1.4's $16.2).
 
 **New C3 GPIO map** (functional pins avoid all strapping pins; spare/unused
 strapping GPIO2/8 left NC to keep boot deterministic):
