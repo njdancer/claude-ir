@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-14T00:04:13")
+		(date "2026-06-14T02:33:15")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -220,66 +220,6 @@
 				(tstamps "/")
 			)
 			(tstamps "1f9393ae-73f4-4e05-a984-e2b1f4164fc3")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C4")
-			(value "100nF")
-			(footprint "Capacitor_SMD:C_0603_1608Metric")
-			(description "Unpolarized capacitor")
-			(fields
-				(field
-					(name "LCSC") "C14663")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Unpolarized capacitor")
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "LCSC")
-				(value "C14663")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "af0f4943-cd14-4213-abbc-b6df4ff2a108")
 			(units
 				(unit
 					(name "A")
@@ -981,15 +921,15 @@
 		(comp
 			(ref "D6")
 			(value "Red")
-			(footprint "LED_THT:LED_D3.0mm")
+			(footprint "LED_SMD:LED_0805_2012Metric")
 			(description "Light emitting diode")
 			(fields
 				(field
 					(name "Sim.Pins") "1=K 2=A")
 				(field
-					(name "LCSC") "C99772")
+					(name "LCSC") "C84256")
 				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1007,7 +947,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C99772")
+				(value "C84256")
 			)
 			(property
 				(name "Sheetname")
@@ -1046,16 +986,16 @@
 		)
 		(comp
 			(ref "D7")
-			(value "Green")
-			(footprint "LED_THT:LED_D3.0mm")
+			(value "Red")
+			(footprint "LED_SMD:LED_0805_2012Metric")
 			(description "Light emitting diode")
 			(fields
 				(field
 					(name "Sim.Pins") "1=K 2=A")
 				(field
-					(name "LCSC") "C85161")
+					(name "LCSC") "C84256")
 				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1073,7 +1013,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C85161")
+				(value "C84256")
 			)
 			(property
 				(name "Sheetname")
@@ -1111,149 +1051,17 @@
 			)
 		)
 		(comp
-			(ref "D8")
-			(value "Amber")
-			(footprint "LED_THT:LED_D3.0mm")
-			(description "Light emitting diode")
-			(fields
-				(field
-					(name "Sim.Pins") "1=K 2=A")
-				(field
-					(name "LCSC") "C85160")
-				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Light emitting diode")
-			)
-			(libsource
-				(lib "Device")
-				(part "LED")
-				(description "Light emitting diode")
-			)
-			(property
-				(name "Sim.Pins")
-				(value "1=K 2=A")
-			)
-			(property
-				(name "LCSC")
-				(value "C85160")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "LED diode")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "LED* LED_SMD:* LED_THT:*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "287e8a65-d96b-4373-a7e8-170fa88eb5b5")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "D9")
-			(value "Amber")
-			(footprint "LED_THT:LED_D3.0mm")
-			(description "Light emitting diode")
-			(fields
-				(field
-					(name "Sim.Pins") "1=K 2=A")
-				(field
-					(name "LCSC") "C85160")
-				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Light emitting diode")
-			)
-			(libsource
-				(lib "Device")
-				(part "LED")
-				(description "Light emitting diode")
-			)
-			(property
-				(name "Sim.Pins")
-				(value "1=K 2=A")
-			)
-			(property
-				(name "LCSC")
-				(value "C85160")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "LED diode")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "LED* LED_SMD:* LED_THT:*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "92362e40-4b45-4750-bc38-fb8a7ce35fc7")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "D10")
 			(value "Red")
-			(footprint "LED_THT:LED_D3.0mm")
+			(footprint "LED_SMD:LED_0805_2012Metric")
 			(description "Light emitting diode")
 			(fields
 				(field
 					(name "Sim.Pins") "1=K 2=A")
 				(field
-					(name "LCSC") "C99772")
+					(name "LCSC") "C84256")
 				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1271,7 +1079,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C99772")
+				(value "C84256")
 			)
 			(property
 				(name "Sheetname")
@@ -1310,16 +1118,16 @@
 		)
 		(comp
 			(ref "D11")
-			(value "Blue")
-			(footprint "LED_THT:LED_D3.0mm")
+			(value "Yellow")
+			(footprint "LED_SMD:LED_0805_2012Metric")
 			(description "Light emitting diode")
 			(fields
 				(field
 					(name "Sim.Pins") "1=K 2=A")
 				(field
-					(name "LCSC") "C86881")
+					(name "LCSC") "C2296")
 				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1337,7 +1145,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C86881")
+				(value "C2296")
 			)
 			(property
 				(name "Sheetname")
@@ -1376,16 +1184,16 @@
 		)
 		(comp
 			(ref "D12")
-			(value "Blue")
-			(footprint "LED_THT:LED_D3.0mm")
+			(value "Yellow")
+			(footprint "LED_SMD:LED_0805_2012Metric")
 			(description "Light emitting diode")
 			(fields
 				(field
 					(name "Sim.Pins") "1=K 2=A")
 				(field
-					(name "LCSC") "C86881")
+					(name "LCSC") "C2296")
 				(field
-					(name "Footprint") "LED_THT:LED_D3.0mm")
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1403,7 +1211,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C86881")
+				(value "C2296")
 			)
 			(property
 				(name "Sheetname")
@@ -1600,72 +1408,6 @@
 			)
 		)
 		(comp
-			(ref "J3")
-			(value "Qwiic_I2C")
-			(footprint "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal")
-			(fields
-				(field
-					(name "LCSC") "C160404")
-				(field
-					(name "Footprint") "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Connector_Generic")
-				(part "Conn_01x04")
-				(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
-			)
-			(property
-				(name "LCSC")
-				(value "C160404")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "connector")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Connector*:*_1x??_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "464aa605-74bd-4251-81ff-179b7c43bae0")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "4")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "J4")
 			(value "GPIO_PWR")
 			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical")
@@ -1798,12 +1540,12 @@
 			)
 		)
 		(comp
-			(ref "J6")
-			(value "JTAG")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical")
+			(ref "JP1")
+			(value "LDO Disable")
+			(footprint "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
 			(fields
 				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical")
+					(name "Footprint") "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
 				(field
 					(name "Datasheet")
 				)
@@ -1812,97 +1554,9 @@
 				)
 			)
 			(libsource
-				(lib "Connector_Generic")
-				(part "Conn_02x05_Odd_Even")
-				(description "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "dnp")
-			)
-			(property
-				(name "ki_keywords")
-				(value "connector")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Connector*:*_2x??_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "f052ba9b-9340-4077-b187-958892ee0b3a")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "5")
-						)
-						(pin
-							(num "7")
-						)
-						(pin
-							(num "9")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "4")
-						)
-						(pin
-							(num "6")
-						)
-						(pin
-							(num "8")
-						)
-						(pin
-							(num "10")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "JP1")
-			(value "Buck Disable")
-			(footprint "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
-			(description "Jumper, 2-pole, open")
-			(fields
-				(field
-					(name "LCSC")
-				)
-				(field
-					(name "Footprint") "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Jumper, 2-pole, open")
-			)
-			(libsource
 				(lib "Jumper")
 				(part "Jumper_2_Open")
 				(description "Jumper, 2-pole, open")
-			)
-			(property
-				(name "LCSC")
-				(value "")
 			)
 			(property
 				(name "Sheetname")
@@ -1924,191 +1578,13 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "209c2ebb-7428-484c-a174-231ca735d57f")
+			(tstamps "55a8e8e6-f4ad-400d-9f0c-78865c0923c2")
 			(units
 				(unit
 					(name "A")
 					(pins
 						(pin
 							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "L1")
-			(value "4.7µH")
-			(footprint "lib:IND-SMD_L6.7-W6.7")
-			(description "Inductor")
-			(fields
-				(field
-					(name "LCSC") "C78804")
-				(field
-					(name "Footprint") "lib:IND-SMD_L6.7-W6.7")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Inductor")
-			)
-			(libsource
-				(lib "Device")
-				(part "L")
-				(description "Inductor")
-			)
-			(property
-				(name "LCSC")
-				(value "C78804")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "inductor choke coil reactor magnetic")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Choke_* *Coil* Inductor_* L_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "89c89309-e934-492a-8681-cb4c67e694d0")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "Q1")
-			(value "2N7002")
-			(footprint "Package_TO_SOT_SMD:SOT-23")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-			(description "N-MOSFET transistor, gate/source/drain")
-			(fields
-				(field
-					(name "LCSC") "C8545")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-				(field
-					(name "Description") "N-MOSFET transistor, gate/source/drain")
-			)
-			(libsource
-				(lib "Transistor_FET")
-				(part "Q_NMOS_GSD")
-				(description "N-MOSFET transistor, gate/source/drain")
-			)
-			(property
-				(name "LCSC")
-				(value "C8545")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "transistor NMOS N-MOS N-MOSFET")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "fa93b1c0-c4b1-4662-a955-7477bbf9448f")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "Q2")
-			(value "2N7002")
-			(footprint "Package_TO_SOT_SMD:SOT-23")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-			(description "N-MOSFET transistor, gate/source/drain")
-			(fields
-				(field
-					(name "LCSC") "C8545")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-				(field
-					(name "Description") "N-MOSFET transistor, gate/source/drain")
-			)
-			(libsource
-				(lib "Transistor_FET")
-				(part "Q_NMOS_GSD")
-				(description "N-MOSFET transistor, gate/source/drain")
-			)
-			(property
-				(name "LCSC")
-				(value "C8545")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "transistor NMOS N-MOS N-MOSFET")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "4625229c-27d8-48d3-9a68-4faaa38cc48b")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
 						)
 						(pin
 							(num "2")
@@ -2159,124 +1635,6 @@
 				(tstamps "/")
 			)
 			(tstamps "2f7cbe37-6f4d-4f7d-a3b3-a8965b6c5bd7")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "Q4")
-			(value "2N7002")
-			(footprint "Package_TO_SOT_SMD:SOT-23")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-			(fields
-				(field
-					(name "LCSC") "C8545")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Transistor_FET")
-				(part "Q_NMOS_GSD")
-				(description "N-MOSFET transistor, gate/source/drain")
-			)
-			(property
-				(name "LCSC")
-				(value "C8545")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "transistor NMOS N-MOS N-MOSFET")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "85693143-bf99-48bd-ae23-e115455bbc36")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "Q5")
-			(value "2N7002")
-			(footprint "Package_TO_SOT_SMD:SOT-23")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-			(fields
-				(field
-					(name "LCSC") "C8545")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Transistor_FET")
-				(part "Q_NMOS_GSD")
-				(description "N-MOSFET transistor, gate/source/drain")
-			)
-			(property
-				(name "LCSC")
-				(value "C8545")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "transistor NMOS N-MOS N-MOSFET")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "d6567524-979b-4c8c-9398-f714941f495b")
 			(units
 				(unit
 					(name "A")
@@ -2415,126 +1773,6 @@
 			)
 		)
 		(comp
-			(ref "R3")
-			(value "10kΩ")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
-			(description "Resistor")
-			(fields
-				(field
-					(name "LCSC") "C17902")
-				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C17902")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "dcbd1cd6-e393-4ec9-91ac-0497000ef60c")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R4")
-			(value "10kΩ")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
-			(description "Resistor")
-			(fields
-				(field
-					(name "LCSC") "C17902")
-				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C17902")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "55aa636c-7447-48b0-8fb9-770ab9c3ff89")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "R5")
 			(value "10kΩ")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
@@ -2656,9 +1894,8 @@
 		)
 		(comp
 			(ref "R7")
-			(value "10kΩ")
+			(value "10kΩ")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
-			(description "Resistor")
 			(fields
 				(field
 					(name "LCSC") "C17902")
@@ -2668,7 +1905,8 @@
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description")
+				)
 			)
 			(libsource
 				(lib "Device")
@@ -2699,7 +1937,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "699be057-7b46-421e-a200-b308299f4780")
+			(tstamps "5dc71729-0123-4056-b4b7-3ff287caf898")
 			(units
 				(unit
 					(name "A")
@@ -2716,9 +1954,8 @@
 		)
 		(comp
 			(ref "R8")
-			(value "10kΩ")
+			(value "10kΩ")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
-			(description "Resistor")
 			(fields
 				(field
 					(name "LCSC") "C17902")
@@ -2728,7 +1965,8 @@
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description")
+				)
 			)
 			(libsource
 				(lib "Device")
@@ -2759,7 +1997,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9855be7d-895e-43d8-ac02-69077055fd8a")
+			(tstamps "1df97975-4e19-4c39-9a43-37246fec07d6")
 			(units
 				(unit
 					(name "A")
@@ -2776,12 +2014,12 @@
 		)
 		(comp
 			(ref "R9")
-			(value "18Ω")
+			(value "22Ω")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
 			(description "Resistor")
 			(fields
 				(field
-					(name "LCSC") "C17922")
+					(name "LCSC") "C17958")
 				(field
 					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
 				(field
@@ -2797,7 +2035,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17922")
+				(value "C17958")
 			)
 			(property
 				(name "Sheetname")
@@ -2836,12 +2074,12 @@
 		)
 		(comp
 			(ref "R10")
-			(value "18Ω")
+			(value "22Ω")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
 			(description "Resistor")
 			(fields
 				(field
-					(name "LCSC") "C17922")
+					(name "LCSC") "C17958")
 				(field
 					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
 				(field
@@ -2857,7 +2095,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17922")
+				(value "C17958")
 			)
 			(property
 				(name "Sheetname")
@@ -2896,12 +2134,12 @@
 		)
 		(comp
 			(ref "R11")
-			(value "18Ω")
+			(value "22Ω")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
 			(description "Resistor")
 			(fields
 				(field
-					(name "LCSC") "C17922")
+					(name "LCSC") "C17958")
 				(field
 					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
 				(field
@@ -2917,7 +2155,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17922")
+				(value "C17958")
 			)
 			(property
 				(name "Sheetname")
@@ -2956,12 +2194,12 @@
 		)
 		(comp
 			(ref "R12")
-			(value "18Ω")
+			(value "22Ω")
 			(footprint "Resistor_SMD:R_1206_3216Metric")
 			(description "Resistor")
 			(fields
 				(field
-					(name "LCSC") "C17922")
+					(name "LCSC") "C17958")
 				(field
 					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
 				(field
@@ -2977,7 +2215,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17922")
+				(value "C17958")
 			)
 			(property
 				(name "Sheetname")
@@ -3255,126 +2493,6 @@
 			)
 		)
 		(comp
-			(ref "R17")
-			(value "470Ω")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
-			(description "Resistor")
-			(fields
-				(field
-					(name "LCSC") "C17710")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C17710")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "813174a0-7676-47b1-8b35-6c13c0ddf07f")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R18")
-			(value "470Ω")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
-			(description "Resistor")
-			(fields
-				(field
-					(name "LCSC") "C17710")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C17710")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "228cbf40-ace9-4e2a-b7c3-859903e01fed")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "R19")
 			(value "470Ω")
 			(footprint "Resistor_SMD:R_0805_2012Metric")
@@ -3438,14 +2556,14 @@
 			(ref "R20")
 			(value "1kΩ")
 			(footprint "Resistor_SMD:R_0805_2012Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2205311800_UNI-ROYAL-Uniroyal-Elec-0805W8F1001T5E_C17513.pdf")
 			(fields
 				(field
 					(name "LCSC") "C17513")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2205311800_UNI-ROYAL-Uniroyal-Elec-0805W8F1001T5E_C17513.pdf")
+					(name "Datasheet")
+				)
 				(field
 					(name "Description")
 				)
@@ -3479,247 +2597,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7a4fcb17-eb98-482a-a03d-1a7c0361eca0")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R21")
-			(value "470Ω")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf")
-			(fields
-				(field
-					(name "LCSC") "C23179")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C23179")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "7120af10-60c9-40aa-a79b-7b63c73f8b62")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R22")
-			(value "10kΩ")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
-			(description "Resistor")
-			(fields
-				(field
-					(name "LCSC") "C17902")
-				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C17902")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "e0d73bfb-3811-4bbb-8f4e-c3af023f9e15")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R23")
-			(value "100kΩ")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf")
-			(fields
-				(field
-					(name "LCSC") "C25803")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C25803")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "2e35914e-21ca-418b-b58d-7dc73cbe825b")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R24")
-			(value "100kΩ")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf")
-			(fields
-				(field
-					(name "LCSC") "C25803")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C25803")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "06b8631e-2d7c-4a37-a677-82d21e0608e0")
+			(tstamps "112f26ec-7cf6-4d64-b071-db3c06c4d7e9")
 			(units
 				(unit
 					(name "A")
@@ -3738,14 +2616,14 @@
 			(ref "R25")
 			(value "1kΩ")
 			(footprint "Resistor_SMD:R_0805_2012Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2205311800_UNI-ROYAL-Uniroyal-Elec-0805W8F1001T5E_C17513.pdf")
 			(fields
 				(field
 					(name "LCSC") "C17513")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2205311800_UNI-ROYAL-Uniroyal-Elec-0805W8F1001T5E_C17513.pdf")
+					(name "Datasheet")
+				)
 				(field
 					(name "Description")
 				)
@@ -3779,67 +2657,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "eadbae8d-c0b1-4beb-917d-9cf1bc2d4898")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R26")
-			(value "470Ω")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf")
-			(fields
-				(field
-					(name "LCSC") "C23179")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf")
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C23179")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "c655690c-38d3-474e-bebf-6d40ae7d9f00")
+			(tstamps "7bdfe71a-4faf-4a01-b8c1-ee691f7f7c8b")
 			(units
 				(unit
 					(name "A")
@@ -4217,100 +3035,28 @@
 		)
 		(comp
 			(ref "U1")
-			(value "AP63203WU")
-			(footprint "Package_TO_SOT_SMD:TSOT-23-6")
-			(datasheet "https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf")
-			(description "2A, 1.1MHz Buck DC/DC Converter, fixed 3.3V output voltage, TSOT-23-6")
+			(value "AMS1117-3.3")
+			(footprint "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
 			(fields
 				(field
-					(name "LCSC") "C780769")
+					(name "LCSC") "C6186")
 				(field
-					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-6")
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
 				(field
-					(name "Datasheet") "https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf")
+					(name "Datasheet")
+				)
 				(field
-					(name "Description") "2A, 1.1MHz Buck DC/DC Converter, fixed 3.3V output voltage, TSOT-23-6")
-			)
-			(libsource
-				(lib "Regulator_Switching")
-				(part "AP63203WU")
-				(description "2A, 1.1MHz Buck DC/DC Converter, fixed 3.3V output voltage, TSOT-23-6")
-			)
-			(property
-				(name "LCSC")
-				(value "C780769")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "2A Buck DC/DC")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "TSOT?23*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "fa8ba25f-0dce-478e-b0d9-47ef51fd04c8")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "4")
-						)
-						(pin
-							(num "5")
-						)
-						(pin
-							(num "6")
-						)
-						(pin
-							(num "1")
-						)
-					)
+					(name "Description")
 				)
 			)
-		)
-		(comp
-			(ref "U2")
-			(value "CH340C")
-			(footprint "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm")
-			(datasheet "https://datasheet.lcsc.com/szlcsc/Jiangsu-Qin-Heng-CH340C_C84681.pdf")
-			(description "USB serial converter, crystal-less, UART, SOIC-16")
-			(fields
-				(field
-					(name "LCSC") "C84681")
-				(field
-					(name "Footprint") "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm")
-				(field
-					(name "Datasheet") "https://datasheet.lcsc.com/szlcsc/Jiangsu-Qin-Heng-CH340C_C84681.pdf")
-				(field
-					(name "Description") "USB serial converter, crystal-less, UART, SOIC-16")
-			)
 			(libsource
-				(lib "Interface_USB")
-				(part "CH340C")
-				(description "USB serial converter, crystal-less, UART, SOIC-16")
+				(lib "Regulator_Linear")
+				(part "AMS1117-3.3")
+				(description "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223")
 			)
 			(property
 				(name "LCSC")
-				(value "C84681")
+				(value "C6186")
 			)
 			(property
 				(name "Sheetname")
@@ -4322,68 +3068,29 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "USB UART Serial Converter Interface")
+				(value "linear regulator ldo fixed positive")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "SOIC*3.9x9.9mm*P1.27mm*")
+				(value "SOT?223*TabPin2*")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f02aad4f-09b7-4168-94bf-85fd06996c22")
+			(tstamps "597f5288-d254-4c0e-bc79-25ed75ca0ba8")
 			(units
 				(unit
 					(name "A")
 					(pins
 						(pin
-							(num "15")
-						)
-						(pin
-							(num "5")
-						)
-						(pin
-							(num "6")
-						)
-						(pin
-							(num "7")
-						)
-						(pin
-							(num "8")
-						)
-						(pin
-							(num "16")
-						)
-						(pin
-							(num "4")
+							(num "3")
 						)
 						(pin
 							(num "1")
 						)
 						(pin
 							(num "2")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "9")
-						)
-						(pin
-							(num "10")
-						)
-						(pin
-							(num "11")
-						)
-						(pin
-							(num "12")
-						)
-						(pin
-							(num "13")
-						)
-						(pin
-							(num "14")
 						)
 					)
 				)
@@ -4391,28 +3098,28 @@
 		)
 		(comp
 			(ref "U3")
-			(value "ESP32-WROOM-32E")
-			(footprint "RF_Module:ESP32-WROOM-32D")
-			(datasheet "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf")
-			(description "RF Module, ESP32-D0WD-V3 SoC, without PSRAM, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD")
+			(value "ESP32-C3-WROOM-02")
+			(footprint "RF_Module:ESP32-C3-WROOM-02")
 			(fields
 				(field
-					(name "LCSC") "C701341")
+					(name "LCSC") "C2934560")
 				(field
-					(name "Footprint") "RF_Module:ESP32-WROOM-32D")
+					(name "Footprint") "RF_Module:ESP32-C3-WROOM-02")
 				(field
-					(name "Datasheet") "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf")
+					(name "Datasheet")
+				)
 				(field
-					(name "Description") "RF Module, ESP32-D0WD-V3 SoC, without PSRAM, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD")
+					(name "Description")
+				)
 			)
 			(libsource
 				(lib "RF_Module")
-				(part "ESP32-WROOM-32E")
-				(description "RF Module, ESP32-D0WD-V3 SoC, without PSRAM, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD")
+				(part "ESP32-C3-WROOM-02")
+				(description "802.11 b/g/n Wi­Fi and Bluetooth 5 module, ESP32­C3 SoC, RISC­V microprocessor, On-board antenna")
 			)
 			(property
 				(name "LCSC")
-				(value "C701341")
+				(value "C2934560")
 			)
 			(property
 				(name "Sheetname")
@@ -4424,21 +3131,36 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "RF Radio BT ESP ESP32 Espressif onboard PCB antenna")
+				(value "esp32 espressif WiFi Bluetooth LE")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "ESP32?WROOM?32D*")
+				(value "ESP32?C3*WROOM?02*")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "95115408-2e27-4c67-a6bf-c3f87ec48e3c")
+			(tstamps "af1a8bb1-37bd-4ce3-b35b-6432746cae60")
 			(units
 				(unit
 					(name "A")
 					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "15")
+						)
 						(pin
 							(num "3")
 						)
@@ -4449,112 +3171,37 @@
 							(num "5")
 						)
 						(pin
-							(num "32")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "39")
-						)
-						(pin
-							(num "15")
-						)
-						(pin
-							(num "38")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "25")
-						)
-						(pin
-							(num "35")
-						)
-						(pin
-							(num "24")
-						)
-						(pin
-							(num "34")
-						)
-						(pin
-							(num "26")
-						)
-						(pin
-							(num "29")
-						)
-						(pin
-							(num "14")
-						)
-						(pin
-							(num "16")
-						)
-						(pin
-							(num "13")
-						)
-						(pin
-							(num "23")
-						)
-						(pin
-							(num "27")
-						)
-						(pin
-							(num "28")
-						)
-						(pin
-							(num "30")
-						)
-						(pin
-							(num "31")
-						)
-						(pin
-							(num "33")
-						)
-						(pin
-							(num "36")
-						)
-						(pin
-							(num "37")
-						)
-						(pin
-							(num "10")
-						)
-						(pin
-							(num "11")
-						)
-						(pin
-							(num "12")
-						)
-						(pin
-							(num "8")
-						)
-						(pin
-							(num "9")
-						)
-						(pin
 							(num "6")
 						)
 						(pin
 							(num "7")
 						)
 						(pin
-							(num "20")
+							(num "8")
 						)
 						(pin
-							(num "21")
+							(num "10")
 						)
 						(pin
-							(num "22")
+							(num "13")
 						)
 						(pin
-							(num "17")
+							(num "14")
 						)
 						(pin
-							(num "18")
+							(num "1")
+						)
+						(pin
+							(num "9")
 						)
 						(pin
 							(num "19")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
 						)
 					)
 				)
@@ -4625,28 +3272,28 @@
 		)
 		(comp
 			(ref "U5")
-			(value "AM2302")
-			(footprint "Sensor:ASAIR_AM2302_P2.54mm_Vertical")
-			(datasheet "http://akizukidenshi.com/download/ds/aosong/AM2302.pdf")
-			(description "3.3 to 5.0V, Temperature and humidity module,  DHT22, AM2302")
+			(value "AHT20")
+			(footprint "JLC-MCP:SENSOR-SMD_L3.0-W3.0-P1.00-BR")
 			(fields
 				(field
-					(name "LCSC") "C83988")
+					(name "LCSC") "C2757850")
 				(field
-					(name "Footprint") "Sensor:ASAIR_AM2302_P2.54mm_Vertical")
+					(name "Footprint") "JLC-MCP:SENSOR-SMD_L3.0-W3.0-P1.00-BR")
 				(field
-					(name "Datasheet") "http://akizukidenshi.com/download/ds/aosong/AM2302.pdf")
+					(name "Datasheet")
+				)
 				(field
-					(name "Description") "3.3 to 5.0V, Temperature and humidity module,  DHT22, AM2302")
+					(name "Description")
+				)
 			)
 			(libsource
-				(lib "Sensor")
-				(part "AM2302")
-				(description "3.3 to 5.0V, Temperature and humidity module,  DHT22, AM2302")
+				(lib "JLC-MCP-Sensors")
+				(part "AHT20_C2757850")
+				(description "0%RH~100%RH 2.2V~5.5V 20bit 570uA I2C ±0.3℃ ±2%RH SMD Temperature and Humidity Sensor ROHS")
 			)
 			(property
 				(name "LCSC")
-				(value "C83988")
+				(value "C2757850")
 			)
 			(property
 				(name "Sheetname")
@@ -4658,17 +3305,13 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "digital sensor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "ASAIR*AM2302*P2.54mm*")
+				(value "C2757850")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9bf42b7e-71ad-47d2-9860-d23da8339d82")
+			(tstamps "365d9a6b-2555-4703-8ae3-427aa8123895")
 			(units
 				(unit
 					(name "A")
@@ -4677,13 +3320,19 @@
 							(num "1")
 						)
 						(pin
+							(num "2")
+						)
+						(pin
 							(num "3")
 						)
 						(pin
-							(num "4")
+							(num "6")
 						)
 						(pin
-							(num "2")
+							(num "5")
+						)
+						(pin
+							(num "4")
 						)
 					)
 				)
@@ -4862,50 +3511,6 @@
 		)
 		(libpart
 			(lib "Connector_Generic")
-			(part "Conn_01x04")
-			(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
-			(footprints
-				(fp "Connector*:*_1x??_*")
-			)
-			(fields
-				(field
-					(name "Reference") "J")
-				(field
-					(name "Value") "Conn_01x04")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "Pin_1")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "Pin_2")
-					(type "passive")
-				)
-				(pin
-					(num "3")
-					(name "Pin_3")
-					(type "passive")
-				)
-				(pin
-					(num "4")
-					(name "Pin_4")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Connector_Generic")
 			(part "Conn_02x05_Odd_Even")
 			(description "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
 			(footprints
@@ -5045,43 +3650,6 @@
 				(pin
 					(num "2")
 					(name "A2")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Device")
-			(part "L")
-			(description "Inductor")
-			(footprints
-				(fp "Choke_*")
-				(fp "*Coil*")
-				(fp "Inductor_*")
-				(fp "L_*")
-			)
-			(fields
-				(field
-					(name "Reference") "L")
-				(field
-					(name "Value") "L")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Inductor")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "1")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "2")
 					(type "passive")
 				)
 			)
@@ -5232,105 +3800,82 @@
 			)
 		)
 		(libpart
-			(lib "Interface_USB")
-			(part "CH340C")
-			(description "USB serial converter, crystal-less, UART, SOIC-16")
-			(docs "https://datasheet.lcsc.com/szlcsc/Jiangsu-Qin-Heng-CH340C_C84681.pdf")
-			(footprints
-				(fp "SOIC*3.9x9.9mm*P1.27mm*")
-			)
+			(lib "JLC-MCP-Sensors")
+			(part "AHT20_C2757850")
+			(description "0%RH~100%RH 2.2V~5.5V 20bit 570uA I2C ±0.3℃ ±2%RH SMD Temperature and Humidity Sensor ROHS")
+			(docs "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2310231158_Aosong--Guangzhou-Elec-AHT20_C2757850.pdf")
 			(fields
 				(field
 					(name "Reference") "U")
 				(field
-					(name "Value") "CH340C")
+					(name "Value") "AHT20_C2757850")
 				(field
-					(name "Footprint") "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm")
+					(name "Footprint") "JLC-MCP:SENSOR-SMD_L3.0-W3.0-P1.00-BR")
 				(field
-					(name "Datasheet") "https://datasheet.lcsc.com/szlcsc/Jiangsu-Qin-Heng-CH340C_C84681.pdf")
+					(name "Datasheet") "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2310231158_Aosong--Guangzhou-Elec-AHT20_C2757850.pdf")
 				(field
-					(name "Description") "USB serial converter, crystal-less, UART, SOIC-16")
+					(name "Description") "0%RH~100%RH 2.2V~5.5V 20bit 570uA I2C ±0.3℃ ±2%RH SMD Temperature and Humidity Sensor ROHS")
+				(field
+					(name "LCSC") "C2757850")
+				(field
+					(name "Manufacturer") "广州奥松")
+				(field
+					(name "Process") "SMT")
+				(field
+					(name "Attrition Qty") "0")
+				(field
+					(name "Class") "Extended Part")
+				(field
+					(name "Part") "AHT20")
+				(field
+					(name "Temperature Tolerance") "±0.3℃")
+				(field
+					(name "Voltage - Supply") "2.2V~5.5V")
+				(field
+					(name "Humidity") "0%RH~100%RH")
+				(field
+					(name "Temperature Range") "-40℃~+120℃")
+				(field
+					(name "Features") "Factory calibration")
+				(field
+					(name "Current - Supply") "570uA")
+				(field
+					(name "Interface") "I2C")
+				(field
+					(name "Resolution") "20bit")
+				(field
+					(name "Humidity Tolerance") "±2%RH")
 			)
 			(pins
 				(pin
 					(num "1")
+					(name "NC")
+					(type "unspecified")
+				)
+				(pin
+					(num "2")
+					(name "VDD")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "SCL")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
 					(name "GND")
 					(type "power_in")
 				)
 				(pin
-					(num "2")
-					(name "TXD")
-					(type "output")
-				)
-				(pin
-					(num "3")
-					(name "RXD")
-					(type "input")
-				)
-				(pin
-					(num "4")
-					(name "V3")
-					(type "power_out")
-				)
-				(pin
-					(num "5")
-					(name "UD+")
-					(type "bidirectional")
-				)
-				(pin
 					(num "6")
-					(name "UD-")
-					(type "bidirectional")
-				)
-				(pin
-					(num "7")
 					(name "NC")
-					(type "no_connect")
-				)
-				(pin
-					(num "8")
-					(name "NC")
-					(type "no_connect")
-				)
-				(pin
-					(num "9")
-					(name "~{CTS}")
-					(type "input")
-				)
-				(pin
-					(num "10")
-					(name "~{DSR}")
-					(type "input")
-				)
-				(pin
-					(num "11")
-					(name "~{RI}")
-					(type "input")
-				)
-				(pin
-					(num "12")
-					(name "~{DCD}")
-					(type "input")
-				)
-				(pin
-					(num "13")
-					(name "~{DTR}")
-					(type "output")
-				)
-				(pin
-					(num "14")
-					(name "~{RTS}")
-					(type "output")
-				)
-				(pin
-					(num "15")
-					(name "R232")
-					(type "input")
-				)
-				(pin
-					(num "16")
-					(name "VCC")
-					(type "power_in")
+					(type "unspecified")
 				)
 			)
 		)
@@ -5372,315 +3917,157 @@
 		)
 		(libpart
 			(lib "RF_Module")
-			(part "ESP32-WROOM-32E")
-			(description "RF Module, ESP32-D0WD-V3 SoC, without PSRAM, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD")
-			(docs "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf")
+			(part "ESP32-C3-WROOM-02")
+			(description "802.11 b/g/n Wi­Fi and Bluetooth 5 module, ESP32­C3 SoC, RISC­V microprocessor, On-board antenna")
+			(docs "https://www.espressif.com/sites/default/files/documentation/esp32-c3-wroom-02_datasheet_en.pdf")
 			(footprints
-				(fp "ESP32?WROOM?32D*")
+				(fp "ESP32?C3*WROOM?02*")
 			)
 			(fields
 				(field
 					(name "Reference") "U")
 				(field
-					(name "Value") "ESP32-WROOM-32E")
+					(name "Value") "ESP32-C3-WROOM-02")
 				(field
-					(name "Footprint") "RF_Module:ESP32-WROOM-32D")
+					(name "Footprint") "RF_Module:ESP32-C3-WROOM-02")
 				(field
-					(name "Datasheet") "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf")
+					(name "Datasheet") "https://www.espressif.com/sites/default/files/documentation/esp32-c3-wroom-02_datasheet_en.pdf")
 				(field
-					(name "Description") "RF Module, ESP32-D0WD-V3 SoC, without PSRAM, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD")
+					(name "Description") "802.11 b/g/n Wi­Fi and Bluetooth 5 module, ESP32­C3 SoC, RISC­V microprocessor, On-board antenna")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "GND")
+					(name "3V3")
 					(type "power_in")
 				)
 				(pin
 					(num "2")
-					(name "VDD")
-					(type "power_in")
-				)
-				(pin
-					(num "3")
 					(name "EN")
 					(type "input")
 				)
 				(pin
-					(num "4")
-					(name "SENSOR_VP")
-					(type "input")
-				)
-				(pin
-					(num "5")
-					(name "SENSOR_VN")
-					(type "input")
-				)
-				(pin
-					(num "6")
-					(name "IO34")
-					(type "input")
-				)
-				(pin
-					(num "7")
-					(name "IO35")
-					(type "input")
-				)
-				(pin
-					(num "8")
-					(name "IO32")
-					(type "bidirectional")
-				)
-				(pin
-					(num "9")
-					(name "IO33")
-					(type "bidirectional")
-				)
-				(pin
-					(num "10")
-					(name "IO25")
-					(type "bidirectional")
-				)
-				(pin
-					(num "11")
-					(name "IO26")
-					(type "bidirectional")
-				)
-				(pin
-					(num "12")
-					(name "IO27")
-					(type "bidirectional")
-				)
-				(pin
-					(num "13")
-					(name "IO14")
-					(type "bidirectional")
-				)
-				(pin
-					(num "14")
-					(name "IO12")
-					(type "bidirectional")
-				)
-				(pin
-					(num "15")
-					(name "GND")
-					(type "passive")
-				)
-				(pin
-					(num "16")
-					(name "IO13")
-					(type "bidirectional")
-				)
-				(pin
-					(num "17")
-					(name "IO9")
-					(type "bidirectional")
-				)
-				(pin
-					(num "18")
-					(name "IO10")
-					(type "bidirectional")
-				)
-				(pin
-					(num "19")
-					(name "IO11")
-					(type "bidirectional")
-				)
-				(pin
-					(num "20")
-					(name "IO6")
-					(type "bidirectional")
-				)
-				(pin
-					(num "21")
-					(name "IO7")
-					(type "bidirectional")
-				)
-				(pin
-					(num "22")
-					(name "IO8")
-					(type "bidirectional")
-				)
-				(pin
-					(num "23")
-					(name "IO15")
-					(type "bidirectional")
-				)
-				(pin
-					(num "24")
-					(name "IO2")
-					(type "bidirectional")
-				)
-				(pin
-					(num "25")
-					(name "IO0")
-					(type "bidirectional")
-				)
-				(pin
-					(num "26")
+					(num "3")
 					(name "IO4")
 					(type "bidirectional")
 				)
 				(pin
-					(num "27")
-					(name "IO16")
-					(type "bidirectional")
-				)
-				(pin
-					(num "28")
-					(name "IO17")
-					(type "bidirectional")
-				)
-				(pin
-					(num "29")
+					(num "4")
 					(name "IO5")
 					(type "bidirectional")
 				)
 				(pin
-					(num "30")
+					(num "5")
+					(name "IO6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "IO7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "IO8")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "IO9")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "10")
+					(name "IO10")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "IO20/RXD")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "IO21/TXD")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
 					(name "IO18")
 					(type "bidirectional")
 				)
 				(pin
-					(num "31")
+					(num "14")
 					(name "IO19")
 					(type "bidirectional")
 				)
 				(pin
-					(num "32")
-					(name "NC")
-					(type "no_connect")
-				)
-				(pin
-					(num "33")
-					(name "IO21")
+					(num "15")
+					(name "IO3")
 					(type "bidirectional")
 				)
 				(pin
-					(num "34")
-					(name "RXD0/IO3")
+					(num "16")
+					(name "IO2")
 					(type "bidirectional")
 				)
 				(pin
-					(num "35")
-					(name "TXD0/IO1")
+					(num "17")
+					(name "IO1")
 					(type "bidirectional")
 				)
 				(pin
-					(num "36")
-					(name "IO22")
+					(num "18")
+					(name "IO0")
 					(type "bidirectional")
 				)
 				(pin
-					(num "37")
-					(name "IO23")
-					(type "bidirectional")
-				)
-				(pin
-					(num "38")
-					(name "GND")
-					(type "passive")
-				)
-				(pin
-					(num "39")
+					(num "19")
 					(name "GND")
 					(type "passive")
 				)
 			)
 		)
 		(libpart
-			(lib "Regulator_Switching")
-			(part "AP63203WU")
-			(description "2A, 1.1MHz Buck DC/DC Converter, fixed 3.3V output voltage, TSOT-23-6")
-			(docs "https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf")
+			(lib "Regulator_Linear")
+			(part "AMS1117-3.3")
+			(description "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223")
+			(docs "http://www.advanced-monolithic.com/pdf/ds1117.pdf")
 			(footprints
-				(fp "TSOT?23*")
+				(fp "SOT?223*TabPin2*")
 			)
 			(fields
 				(field
 					(name "Reference") "U")
 				(field
-					(name "Value") "AP63203WU")
+					(name "Value") "AMS1117-3.3")
 				(field
-					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-6")
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
 				(field
-					(name "Datasheet") "https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf")
+					(name "Datasheet") "http://www.advanced-monolithic.com/pdf/ds1117.pdf")
 				(field
-					(name "Description") "2A, 1.1MHz Buck DC/DC Converter, fixed 3.3V output voltage, TSOT-23-6")
+					(name "Description") "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "FB")
-					(type "input")
-				)
-				(pin
-					(num "2")
-					(name "EN")
-					(type "input")
-				)
-				(pin
-					(num "3")
-					(name "IN")
-					(type "power_in")
-				)
-				(pin
-					(num "4")
 					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "5")
-					(name "SW")
-					(type "output")
-				)
-				(pin
-					(num "6")
-					(name "BST")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Sensor")
-			(part "AM2302")
-			(description "3.3 to 5.0V, Temperature and humidity module,  DHT22, AM2302")
-			(docs "http://akizukidenshi.com/download/ds/aosong/AM2302.pdf")
-			(footprints
-				(fp "ASAIR*AM2302*P2.54mm*")
-			)
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "AM2302")
-				(field
-					(name "Footprint") "Sensor:ASAIR_AM2302_P2.54mm_Vertical")
-				(field
-					(name "Datasheet") "http://akizukidenshi.com/download/ds/aosong/AM2302.pdf")
-				(field
-					(name "Description") "3.3 to 5.0V, Temperature and humidity module,  DHT22, AM2302")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "VDD")
 					(type "power_in")
 				)
 				(pin
 					(num "2")
-					(name "SDA")
-					(type "bidirectional")
+					(name "VO")
+					(type "power_out")
 				)
 				(pin
 					(num "3")
-					(name "GND")
+					(name "VI")
 					(type "power_in")
-				)
-				(pin
-					(num "4")
-					(name "GND")
-					(type "passive")
 				)
 			)
 		)
@@ -5770,8 +4157,8 @@
 			(uri "${KICAD10_SYMBOL_DIR}/Interface_Optical.kicad_sym")
 		)
 		(library
-			(logical "Interface_USB")
-			(uri "${KICAD10_SYMBOL_DIR}/Interface_USB.kicad_sym")
+			(logical "JLC-MCP-Sensors")
+			(uri "${KIPRJMOD}/libraries/symbols/JLC-MCP-Sensors.kicad_sym")
 		)
 		(library
 			(logical "Jumper")
@@ -5782,12 +4169,8 @@
 			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
 		)
 		(library
-			(logical "Regulator_Switching")
-			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Switching.kicad_sym")
-		)
-		(library
-			(logical "Sensor")
-			(uri "${KICAD10_SYMBOL_DIR}/Sensor.kicad_sym")
+			(logical "Regulator_Linear")
+			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
 		)
 		(library
 			(logical "Switch")
@@ -5834,27 +4217,15 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J3")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
 				(ref "J4")
 				(pin "1")
 				(pinfunction "Pin_1_1")
 				(pintype "passive")
 			)
 			(node
-				(ref "J6")
-				(pin "1")
-				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "L1")
+				(ref "JP1")
 				(pin "2")
-				(pinfunction "2_2")
+				(pinfunction "B_2")
 				(pintype "passive")
 			)
 			(node
@@ -5875,21 +4246,6 @@
 			(node
 				(ref "R16")
 				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R17")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R18")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R22")
-				(pin "2")
 				(pintype "passive")
 			)
 			(node
@@ -5923,38 +4279,30 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "R9")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "U1")
-				(pin "1")
-				(pinfunction "FB_1")
-				(pintype "input")
-			)
-			(node
-				(ref "U2")
-				(pin "16")
-				(pinfunction "VCC_16")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U2")
-				(pin "4")
-				(pinfunction "V3_4")
-				(pintype "power_out")
-			)
-			(node
 				(ref "U3")
-				(pin "2")
-				(pinfunction "VDD_2")
+				(pin "1")
+				(pinfunction "3V3_1")
 				(pintype "power_in")
 			)
 			(node
 				(ref "U5")
-				(pin "1")
-				(pinfunction "VDD_1")
+				(pin "2")
+				(pinfunction "VDD_2")
 				(pintype "power_in")
 			)
 		)
@@ -5990,41 +4338,73 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R20")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R25")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
 				(ref "U1")
 				(pin "3")
-				(pinfunction "IN_3")
+				(pinfunction "VI_3")
 				(pintype "power_in")
 			)
 		)
 		(net
 			(code "3")
+			(name "/D11_A")
+			(class "Default")
+			(node
+				(ref "D11")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R25")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "4")
+			(name "/D12_A")
+			(class "Default")
+			(node
+				(ref "D12")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R20")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "5")
+			(name "/ESP_BOOT")
+			(class "Default")
+			(node
+				(ref "R6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "8")
+				(pinfunction "IO9_8")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "6")
 			(name "/ESP_EN")
 			(class "Default")
 			(node
 				(ref "C6")
 				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "J6")
-				(pin "10")
-				(pinfunction "Pin_10_10")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q1")
-				(pin "3")
-				(pinfunction "D_3")
 				(pintype "passive")
 			)
 			(node
@@ -6040,392 +4420,13 @@
 			)
 			(node
 				(ref "U3")
-				(pin "3")
-				(pinfunction "EN_3")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "4")
-			(name "/ESP_GPIO0")
-			(class "Default")
-			(node
-				(ref "Q2")
-				(pin "3")
-				(pinfunction "D_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "R6")
 				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "SW2")
-				(pin "1")
-				(pinfunction "1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "25")
-				(pinfunction "IO0_25")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "5")
-			(name "/ESP_GPIO1")
-			(class "Default")
-			(node
-				(ref "D8")
-				(pin "1")
-				(pinfunction "K_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "3")
-				(pinfunction "RXD_3")
+				(pinfunction "EN_2")
 				(pintype "input")
-			)
-			(node
-				(ref "U3")
-				(pin "35")
-				(pinfunction "TXD0/IO1_35")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "6")
-			(name "/ESP_GPIO2")
-			(class "Default")
-			(node
-				(ref "R7")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "24")
-				(pinfunction "IO2_24")
-				(pintype "bidirectional")
 			)
 		)
 		(net
 			(code "7")
-			(name "/ESP_GPIO3")
-			(class "Default")
-			(node
-				(ref "D9")
-				(pin "1")
-				(pinfunction "K_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "2")
-				(pinfunction "TXD_2")
-				(pintype "output")
-			)
-			(node
-				(ref "U3")
-				(pin "34")
-				(pinfunction "RXD0/IO3_34")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "8")
-			(name "/ESP_GPIO4")
-			(class "Default")
-			(node
-				(ref "R22")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "26")
-				(pinfunction "IO4_26")
-				(pintype "bidirectional")
-			)
-			(node
-				(ref "U5")
-				(pin "2")
-				(pinfunction "SDA_2")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "9")
-			(name "/ESP_GPIO12")
-			(class "Default")
-			(node
-				(ref "J6")
-				(pin "8")
-				(pinfunction "Pin_8_8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "14")
-				(pinfunction "IO12_14")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "10")
-			(name "/ESP_GPIO13")
-			(class "Default")
-			(node
-				(ref "J6")
-				(pin "4")
-				(pinfunction "Pin_4_4")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "16")
-				(pinfunction "IO13_16")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "11")
-			(name "/ESP_GPIO14")
-			(class "Default")
-			(node
-				(ref "J6")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "13")
-				(pinfunction "IO14_13")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "12")
-			(name "/ESP_GPIO15")
-			(class "Default")
-			(node
-				(ref "J6")
-				(pin "6")
-				(pinfunction "Pin_6_6")
-				(pintype "passive")
-			)
-			(node
-				(ref "R8")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "23")
-				(pinfunction "IO15_23")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "13")
-			(name "/ESP_GPIO16")
-			(class "Default")
-			(node
-				(ref "Q4")
-				(pin "1")
-				(pinfunction "G_1")
-				(pintype "input")
-			)
-			(node
-				(ref "R23")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "27")
-				(pinfunction "IO16_27")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "14")
-			(name "/ESP_GPIO17")
-			(class "Default")
-			(node
-				(ref "Q5")
-				(pin "1")
-				(pinfunction "G_1")
-				(pintype "input")
-			)
-			(node
-				(ref "R24")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "28")
-				(pinfunction "IO17_28")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "15")
-			(name "/ESP_GPIO18")
-			(class "Default")
-			(node
-				(ref "R13")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R19")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "30")
-				(pinfunction "IO18_30")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "16")
-			(name "/ESP_GPIO19")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "31")
-				(pinfunction "IO19_31")
-				(pintype "bidirectional")
-			)
-			(node
-				(ref "U4")
-				(pin "1")
-				(pinfunction "OUT_1")
-				(pintype "output")
-			)
-		)
-		(net
-			(code "17")
-			(name "/ESP_GPIO21")
-			(class "Default")
-			(node
-				(ref "J3")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "R28")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "33")
-				(pinfunction "IO21_33")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "18")
-			(name "/ESP_GPIO22")
-			(class "Default")
-			(node
-				(ref "J3")
-				(pin "4")
-				(pinfunction "Pin_4_4")
-				(pintype "passive")
-			)
-			(node
-				(ref "R29")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "36")
-				(pinfunction "IO22_36")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "19")
-			(name "/ESP_GPIO23")
-			(class "Default")
-			(node
-				(ref "J4")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "37")
-				(pinfunction "IO23_37")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "20")
-			(name "/ESP_GPIO32")
-			(class "Default")
-			(node
-				(ref "J4")
-				(pin "6")
-				(pinfunction "Pin_6_6")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "8")
-				(pinfunction "IO32_8")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "21")
-			(name "/ESP_GPIO33")
-			(class "Default")
-			(node
-				(ref "J4")
-				(pin "7")
-				(pinfunction "Pin_7_7")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "9")
-				(pinfunction "IO33_9")
-				(pintype "bidirectional")
-			)
-		)
-		(net
-			(code "22")
-			(name "/ESP_GPIO34")
-			(class "Default")
-			(node
-				(ref "J4")
-				(pin "8")
-				(pinfunction "Pin_8_8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "6")
-				(pinfunction "IO34_6")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "23")
 			(name "/EXT_IR_A")
 			(class "IR_Drive")
 			(node
@@ -6441,7 +4442,95 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "8")
+			(name "/I2C_SCL")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "R29")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "10")
+				(pinfunction "IO10_10")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U5")
+				(pin "3")
+				(pinfunction "SCL_3")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "9")
+			(name "/I2C_SDA")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R28")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "IO7_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U5")
+				(pin "4")
+				(pinfunction "SDA_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "10")
+			(name "/IO2_STRAP")
+			(class "Default")
+			(node
+				(ref "R8")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "16")
+				(pinfunction "IO2_16")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "11")
+			(name "/IO8_STRAP")
+			(class "Default")
+			(node
+				(ref "R7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "7")
+				(pinfunction "IO8_7")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "12")
 			(name "/IR_DRAIN")
 			(class "IR_Drive")
 			(node
@@ -6482,7 +4571,24 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "13")
+			(name "/IR_RX")
+			(class "Default")
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "IO6_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U4")
+				(pin "1")
+				(pinfunction "OUT_1")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "14")
 			(name "/IR_RX_VS")
 			(class "Default")
 			(node
@@ -6503,7 +4609,113 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "15")
+			(name "/IR_TX")
+			(class "Default")
+			(node
+				(ref "R13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R19")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "IO5_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "16")
+			(name "/LDO_OUT")
+			(class "Default")
+			(node
+				(ref "JP1")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "VO_2")
+				(pintype "power_out")
+			)
+		)
+		(net
+			(code "17")
+			(name "/SPARE_IO0")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "5")
+				(pinfunction "Pin_5_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "18")
+				(pinfunction "IO0_18")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "18")
+			(name "/SPARE_IO1")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "6")
+				(pinfunction "Pin_6_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "17")
+				(pinfunction "IO1_17")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "19")
+			(name "/SPARE_RX")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "7")
+				(pinfunction "Pin_7_7")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "11")
+				(pinfunction "IO20/RXD_11")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "20")
+			(name "/SPARE_TX")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "8")
+				(pinfunction "Pin_8_8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "12")
+				(pinfunction "IO21/TXD_12")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "21")
 			(name "/USB_D+")
 			(class "Default")
 			(node
@@ -6519,14 +4731,14 @@
 				(pintype "bidirectional")
 			)
 			(node
-				(ref "U2")
-				(pin "5")
-				(pinfunction "UD+_5")
+				(ref "U3")
+				(pin "14")
+				(pinfunction "IO19_14")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "27")
+			(code "22")
 			(name "/USB_D-")
 			(class "Default")
 			(node
@@ -6542,14 +4754,46 @@
 				(pintype "bidirectional")
 			)
 			(node
-				(ref "U2")
-				(pin "6")
-				(pinfunction "UD-_6")
+				(ref "U3")
+				(pin "13")
+				(pinfunction "IO18_13")
 				(pintype "bidirectional")
 			)
 		)
 		(net
-			(code "28")
+			(code "23")
+			(name "/USER_LED1")
+			(class "Default")
+			(node
+				(ref "R25")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "15")
+				(pinfunction "IO3_15")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "24")
+			(name "/USER_LED2")
+			(class "Default")
+			(node
+				(ref "R20")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "3")
+				(pinfunction "IO4_3")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "25")
 			(name "GND")
 			(class "Power")
 			(node
@@ -6610,6 +4854,18 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "D11")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "D12")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
 				(ref "D6")
 				(pin "1")
 				(pinfunction "K_1")
@@ -6652,12 +4908,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J3")
-				(pin "1")
-				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
 				(ref "J4")
 				(pin "10")
 				(pinfunction "Pin_10_10")
@@ -6670,43 +4920,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J6")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "J6")
-				(pin "5")
-				(pinfunction "Pin_5_5")
-				(pintype "passive")
-			)
-			(node
-				(ref "J6")
-				(pin "9")
-				(pinfunction "Pin_9_9")
-				(pintype "passive")
-			)
-			(node
-				(ref "JP1")
-				(pin "1")
-				(pinfunction "A_1")
-				(pintype "passive")
-			)
-			(node
 				(ref "Q3")
-				(pin "2")
-				(pinfunction "S_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q4")
-				(pin "2")
-				(pinfunction "S_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q5")
 				(pin "2")
 				(pinfunction "S_2")
 				(pintype "passive")
@@ -6727,26 +4941,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R23")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R24")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R7")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R8")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
 				(ref "SW1")
 				(pin "2")
 				(pinfunction "2_2")
@@ -6760,45 +4954,21 @@
 			)
 			(node
 				(ref "U1")
-				(pin "4")
-				(pinfunction "GND_4")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U2")
-				(pin "1")
-				(pinfunction "GND_1")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U2")
-				(pin "15")
-				(pinfunction "R232_15")
-				(pintype "input")
-			)
-			(node
-				(ref "U3")
 				(pin "1")
 				(pinfunction "GND_1")
 				(pintype "power_in")
 			)
 			(node
 				(ref "U3")
-				(pin "15")
-				(pinfunction "GND_15")
+				(pin "19")
+				(pinfunction "GND_19")
 				(pintype "passive")
 			)
 			(node
 				(ref "U3")
-				(pin "38")
-				(pinfunction "GND_38")
-				(pintype "passive")
-			)
-			(node
-				(ref "U3")
-				(pin "39")
-				(pinfunction "GND_39")
-				(pintype "passive")
+				(pin "9")
+				(pinfunction "GND_9")
+				(pintype "power_in")
 			)
 			(node
 				(ref "U4")
@@ -6808,19 +4978,13 @@
 			)
 			(node
 				(ref "U5")
-				(pin "3")
-				(pinfunction "GND_3")
+				(pin "5")
+				(pinfunction "GND_5")
 				(pintype "power_in")
-			)
-			(node
-				(ref "U5")
-				(pin "4")
-				(pinfunction "GND_4")
-				(pintype "passive")
 			)
 		)
 		(net
-			(code "29")
+			(code "26")
 			(name "Net-(D2-A)")
 			(class "IR_Drive")
 			(node
@@ -6836,7 +5000,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "27")
 			(name "Net-(D3-A)")
 			(class "IR_Drive")
 			(node
@@ -6852,7 +5016,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "28")
 			(name "Net-(D4-A)")
 			(class "IR_Drive")
 			(node
@@ -6868,7 +5032,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "29")
 			(name "Net-(D5-A)")
 			(class "IR_Drive")
 			(node
@@ -6884,7 +5048,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "30")
 			(name "Net-(D6-A)")
 			(class "Default")
 			(node
@@ -6900,7 +5064,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "31")
 			(name "Net-(D7-A)")
 			(class "Default")
 			(node
@@ -6916,39 +5080,7 @@
 			)
 		)
 		(net
-			(code "35")
-			(name "Net-(D8-A)")
-			(class "Default")
-			(node
-				(ref "D8")
-				(pin "2")
-				(pinfunction "A_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R17")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "36")
-			(name "Net-(D9-A)")
-			(class "Default")
-			(node
-				(ref "D9")
-				(pin "2")
-				(pinfunction "A_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R18")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "37")
+			(code "32")
 			(name "Net-(D10-A)")
 			(class "Default")
 			(node
@@ -6964,7 +5096,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "33")
 			(name "Net-(F1-Pad2)")
 			(class "Power")
 			(node
@@ -6998,7 +5130,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "34")
 			(name "Net-(J2-CC1)")
 			(class "Default")
 			(node
@@ -7014,7 +5146,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "35")
 			(name "Net-(J2-CC2)")
 			(class "Default")
 			(node
@@ -7030,98 +5162,7 @@
 			)
 		)
 		(net
-			(code "41")
-			(name "Net-(JP1-B)")
-			(class "Default")
-			(node
-				(ref "JP1")
-				(pin "2")
-				(pinfunction "B_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "2")
-				(pinfunction "EN_2")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "42")
-			(name "Net-(Q1-G)")
-			(class "Default")
-			(node
-				(ref "Q1")
-				(pin "1")
-				(pinfunction "G_1")
-				(pintype "input")
-			)
-			(node
-				(ref "R3")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "43")
-			(name "Net-(Q1-S)")
-			(class "Default")
-			(node
-				(ref "Q1")
-				(pin "2")
-				(pinfunction "S_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R26")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R4")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "44")
-			(name "Net-(Q2-G)")
-			(class "Default")
-			(node
-				(ref "Q2")
-				(pin "1")
-				(pinfunction "G_1")
-				(pintype "input")
-			)
-			(node
-				(ref "R4")
-				(pin "1")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "45")
-			(name "Net-(Q2-S)")
-			(class "Default")
-			(node
-				(ref "Q2")
-				(pin "2")
-				(pinfunction "S_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R21")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R3")
-				(pin "1")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "46")
+			(code "36")
 			(name "Net-(Q3-G)")
 			(class "Default")
 			(node
@@ -7139,362 +5180,6 @@
 				(ref "R14")
 				(pin "2")
 				(pintype "passive")
-			)
-		)
-		(net
-			(code "47")
-			(name "Net-(U1-BST)")
-			(class "Default")
-			(node
-				(ref "C4")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "6")
-				(pinfunction "BST_6")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "48")
-			(name "Net-(U1-SW)")
-			(class "Power")
-			(node
-				(ref "C4")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "L1")
-				(pin "1")
-				(pinfunction "1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "5")
-				(pinfunction "SW_5")
-				(pintype "output")
-			)
-		)
-		(net
-			(code "49")
-			(name "unconnected-(D11-A-Pad2)")
-			(class "Default")
-			(node
-				(ref "D11")
-				(pin "2")
-				(pinfunction "A_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R25")
-				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "50")
-			(name "unconnected-(D11-K-Pad1)")
-			(class "Default")
-			(node
-				(ref "D11")
-				(pin "1")
-				(pinfunction "K_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q4")
-				(pin "3")
-				(pinfunction "D_3")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "51")
-			(name "unconnected-(D12-A-Pad2)")
-			(class "Default")
-			(node
-				(ref "D12")
-				(pin "2")
-				(pinfunction "A_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R20")
-				(pin "1")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "52")
-			(name "unconnected-(D12-K-Pad1)")
-			(class "Default")
-			(node
-				(ref "D12")
-				(pin "1")
-				(pinfunction "K_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q5")
-				(pin "3")
-				(pinfunction "D_3")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "53")
-			(name "unconnected-(U2-NC-Pad7)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "7")
-				(pinfunction "NC_7")
-				(pintype "no_connect")
-			)
-		)
-		(net
-			(code "54")
-			(name "unconnected-(U2-NC-Pad8)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "8")
-				(pinfunction "NC_8")
-				(pintype "no_connect")
-			)
-		)
-		(net
-			(code "55")
-			(name "unconnected-(U2-~{CTS}-Pad9)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "9")
-				(pinfunction "~{CTS}_9")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "56")
-			(name "unconnected-(U2-~{DCD}-Pad12)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "12")
-				(pinfunction "~{DCD}_12")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "57")
-			(name "unconnected-(U2-~{DSR}-Pad10)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "10")
-				(pinfunction "~{DSR}_10")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "58")
-			(name "unconnected-(U2-~{DTR}-Pad13)")
-			(class "Default")
-			(node
-				(ref "R21")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "13")
-				(pinfunction "~{DTR}_13")
-				(pintype "output")
-			)
-		)
-		(net
-			(code "59")
-			(name "unconnected-(U2-~{RI}-Pad11)")
-			(class "Default")
-			(node
-				(ref "U2")
-				(pin "11")
-				(pinfunction "~{RI}_11")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "60")
-			(name "unconnected-(U2-~{RTS}-Pad14)")
-			(class "Default")
-			(node
-				(ref "R26")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "14")
-				(pinfunction "~{RTS}_14")
-				(pintype "output")
-			)
-		)
-		(net
-			(code "61")
-			(name "unconnected-(U3-IO5-Pad29)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "29")
-				(pinfunction "IO5_29")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "62")
-			(name "unconnected-(U3-IO6-Pad20)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "20")
-				(pinfunction "IO6_20")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "63")
-			(name "unconnected-(U3-IO7-Pad21)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "21")
-				(pinfunction "IO7_21")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "64")
-			(name "unconnected-(U3-IO8-Pad22)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "22")
-				(pinfunction "IO8_22")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "65")
-			(name "unconnected-(U3-IO9-Pad17)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "17")
-				(pinfunction "IO9_17")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "66")
-			(name "unconnected-(U3-IO10-Pad18)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "18")
-				(pinfunction "IO10_18")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "67")
-			(name "unconnected-(U3-IO11-Pad19)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "19")
-				(pinfunction "IO11_19")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "68")
-			(name "unconnected-(U3-IO25-Pad10)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "10")
-				(pinfunction "IO25_10")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "69")
-			(name "unconnected-(U3-IO26-Pad11)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "11")
-				(pinfunction "IO26_11")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "70")
-			(name "unconnected-(U3-IO27-Pad12)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "12")
-				(pinfunction "IO27_12")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "71")
-			(name "unconnected-(U3-IO35-Pad7)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "7")
-				(pinfunction "IO35_7")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "72")
-			(name "unconnected-(U3-NC-Pad32)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "32")
-				(pinfunction "NC_32")
-				(pintype "no_connect")
-			)
-		)
-		(net
-			(code "73")
-			(name "unconnected-(U3-SENSOR_VN-Pad5)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "5")
-				(pinfunction "SENSOR_VN_5")
-				(pintype "input+no_connect")
-			)
-		)
-		(net
-			(code "74")
-			(name "unconnected-(U3-SENSOR_VP-Pad4)")
-			(class "Default")
-			(node
-				(ref "U3")
-				(pin "4")
-				(pinfunction "SENSOR_VP_4")
-				(pintype "input+no_connect")
 			)
 		)
 	)
