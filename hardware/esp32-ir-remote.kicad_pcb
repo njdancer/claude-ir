@@ -7997,7 +7997,7 @@
 		(pad "19" thru_hole circle
 			(at -0.14 -0.35 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8008,7 +8008,7 @@
 		(pad "19" thru_hole circle
 			(at -0.14 0.75 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8019,7 +8019,7 @@
 		(pad "19" thru_hole circle
 			(at 0.41 -0.9 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8030,7 +8030,7 @@
 		(pad "19" thru_hole circle
 			(at 0.41 0.2 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8041,7 +8041,7 @@
 		(pad "19" thru_hole circle
 			(at 0.41 1.3 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8052,7 +8052,7 @@
 		(pad "19" thru_hole circle
 			(at 0.96 -0.35 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8072,7 +8072,7 @@
 		(pad "19" thru_hole circle
 			(at 0.96 0.75 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8083,7 +8083,7 @@
 		(pad "19" thru_hole circle
 			(at 1.51 -0.9 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8094,7 +8094,7 @@
 		(pad "19" thru_hole circle
 			(at 1.51 0.2 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8105,7 +8105,7 @@
 		(pad "19" thru_hole circle
 			(at 1.51 1.3 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8116,7 +8116,7 @@
 		(pad "19" thru_hole circle
 			(at 2.06 -0.35 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -8127,7 +8127,7 @@
 		(pad "19" thru_hole circle
 			(at 2.06 0.75 90)
 			(size 0.6 0.6)
-			(drill 0.2)
+			(drill 0.3)
 			(property pad_prop_heatsink)
 			(layers "*.Cu" "F.Mask")
 			(remove_unused_layers no)
@@ -16148,6 +16148,14 @@
 		(uuid "78018ff2-e427-4dc0-8f42-326db72b0fd9")
 	)
 	(segment
+		(start 171 104.6)
+		(end 169.54 103.5)
+		(width 0.25)
+		(layer "F.Cu")
+		(net "/I2C_SDA")
+		(uuid "7c196139-3326-4889-89ac-2a52def07768")
+	)
+	(segment
 		(start 175.9 104.3)
 		(end 175.8 104.4)
 		(width 0.25)
@@ -16514,6 +16522,14 @@
 		(layer "B.Cu")
 		(net "/IR_DRAIN")
 		(uuid "72dc9554-62f6-4507-954a-428fd076b5d9")
+	)
+	(segment
+		(start 132 64.8)
+		(end 133 66)
+		(width 0.25)
+		(layer "B.Cu")
+		(net "/IR_DRAIN")
+		(uuid "75f1fe4b-6f34-43ac-8d6e-7790dae8fcd5")
 	)
 	(segment
 		(start 129.699999 63.6)
@@ -17042,6 +17058,14 @@
 		(layer "B.Cu")
 		(net "/ESP_EN")
 		(uuid "d7a551d7-3f77-4eab-b8ae-0247d23f961e")
+	)
+	(segment
+		(start 148.59 93.15)
+		(end 148.1 92.4)
+		(width 0.25)
+		(layer "F.Cu")
+		(net "/USER_LED1")
+		(uuid "429f12e8-ea48-4c57-a4b6-3a41d062bade")
 	)
 	(segment
 		(start 145.6 89.9)
@@ -18572,6 +18596,14 @@
 		(uuid "16e82c09-17d3-48a8-91b6-c85e6b66edc8")
 	)
 	(segment
+		(start 115.2 111.5)
+		(end 115.9 110.8)
+		(width 0.25)
+		(layer "F.Cu")
+		(net "/LDO_OUT")
+		(uuid "4fb43b29-6c97-4315-816e-f861b61c3e00")
+	)
+	(segment
 		(start 115.9 110.8)
 		(end 118.3 108.4)
 		(width 0.25)
@@ -19411,6 +19443,14 @@
 		(net "/SPARE_TX")
 		(uuid "e2ba2e6f-6a4e-4469-9d1c-001aa368b1b6")
 	)
+	(segment
+		(start 131.6 114)
+		(end 132.449999 112.65)
+		(width 0.25)
+		(layer "F.Cu")
+		(net "/USB_D-")
+		(uuid "fab0b3f9-3ae2-45c3-9450-d66d1ad77e2e")
+	)
 	(via
 		(at 115.5 70)
 		(size 0.5)
@@ -19434,6 +19474,14 @@
 		(layer "B.Cu")
 		(net "/USB_D-")
 		(uuid "e81c22dd-93f7-4987-a4dc-168d5480a388")
+	)
+	(segment
+		(start 131.6 112.65)
+		(end 132.449999 114)
+		(width 0.25)
+		(layer "F.Cu")
+		(net "/USB_D+")
+		(uuid "5f233b66-4933-48a1-8472-3589b09aae6b")
 	)
 	(via
 		(at 114 70)
@@ -19570,6 +19618,14 @@
 		(layer "B.Cu")
 		(net "/SPARE_IO1")
 		(uuid "4910995b-61c3-4c74-8066-490360886fb6")
+	)
+	(segment
+		(start 170.6 99.8)
+		(end 172.08 100.96)
+		(width 0.25)
+		(layer "B.Cu")
+		(net "/SPARE_IO1")
+		(uuid "55d3136d-5a15-4a86-889e-0f3ddf578d47")
 	)
 	(segment
 		(start 114.7 74.6)
@@ -19882,6 +19938,14 @@
 		(layer "B.Cu")
 		(net "/SPARE_IO0")
 		(uuid "98e0a51e-2a04-4d12-87c2-69da507daa0c")
+	)
+	(segment
+		(start 170.6 102.4)
+		(end 172.08 103.5)
+		(width 0.25)
+		(layer "B.Cu")
+		(net "/SPARE_IO0")
+		(uuid "9e3bec1d-f4bd-4bfe-9335-eb88d914f0ab")
 	)
 	(segment
 		(start 114.5 75.2)
