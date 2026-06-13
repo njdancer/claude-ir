@@ -5365,6 +5365,17 @@
 			(uuid "f4712477-e872-45fd-a3b4-1b51f19a67c2")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/lib/3dshapes/TS-1187A-B-A-B.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_1206_3216Metric"
 		(layer "F.Cu")
@@ -10236,6 +10247,17 @@
 			(uuid "f6eaea13-70d6-4dab-88f4-724744b260a3")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/lib/3dshapes/TS-1187A-B-A-B.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Package_TO_SOT_SMD:SOT-23"
 		(layer "F.Cu")

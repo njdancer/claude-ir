@@ -26,4 +26,9 @@
   (fp_text user ${REFERENCE} (at 0 0) (layer F.Fab)
     (effects (font (size 1 1) (thickness 0.15)))
   )
+  (model ${KIPRJMOD}/lib/3dshapes/TS-1187A-B-A-B.step
+    (at (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
 )

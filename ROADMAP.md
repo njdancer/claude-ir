@@ -113,10 +113,21 @@ netlist↔PCB partition IDENTICAL, 235 pads):
    **v1.4** + index. Headless toolchain: ghcr.io/inti-cmnb/kicad9_auto
    (KiCad 9.0.7; docker hub was rate-limited), baseline reproduced exactly
    before any edit.
-   ⚠️ Cosmetic debts: SW1/SW2 have no vendored STEP (render as bare
-   footprints — re-vendor for the Pages viewer when convenient);
-   lib_footprint_issues DRC warnings 63→73 (re-serialization noise);
-   PCB still carries single-pad nets named ESP_GPIO25/26 on U3 (harmless).
+   Nick's render review (2026-06-13): TS-1187A switch STEP vendored
+   (EasyEDA via jlcpcb MCP; model terminals verified to land on the
+   footprint pads — DONE, models resolve in CI). ⚠️ AM2302 (U5) model
+   seating NOT fixed: an attempted offset tweak via pcbnew Python didn't
+   persist (SWIG returns m_Offset by value, so the assignment mutated a
+   throwaway copy — the committed offset is still y −0.7), and the
+   AM2302.step model uses internal STEP placement transforms that raw
+   geometry parsing can't resolve, so the correct offset can't be
+   computed headlessly and renders are ambiguous on z-seating. Copper is
+   unaffected (4 pads @ 2.54 pitch, fab-safe) — this is 3D-viewer
+   cosmetic only. **Defer to Nick's KiCad 3D viewer on the Mac** (it
+   resolves STEP transforms; he's reviewing there anyway). Remaining
+   cosmetic debts: lib_footprint_issues DRC warnings
+   63→73 (re-serialization noise); PCB still carries single-pad nets
+   named ESP_GPIO25/26 on U3 (harmless).
 
 ⚠️ **AM2302 stock at LCSC: 35 units ($6.82)** — order the kit parts early or
 substitute a generic DHT22.
