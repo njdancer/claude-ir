@@ -65,6 +65,14 @@ strapping GPIO2/8 left NC to keep boot deterministic):
       MCP; symbol lib registered, 3D model path made `${KIPRJMOD}`-relative
       (CI render-safe per the vendoring lesson). Pinout: 2=VDD 3=SCL 4=SDA
       5=GND (1/6 NC).
+- [x] **Bench upgraded to KiCad 10** (Nick; CI already on 10.0.2). v10's
+      netlist exporter uses the expanded multi-line s-expr (+`libparts`);
+      fixed `fab-outputs.py`'s brittle single-line parser to reuse
+      `hardware_validate.py`'s tokenizer (was silently parsing 0 comps →
+      empty BOM/CPL), added a lib-table self-heal to `hardware-check.sh`,
+      regenerated the committed netlist under v10 (verified electrically
+      empty). Full local validation passes on 10.0.3 = CI. **First CI run on
+      this branch: green.** PR <https://github.com/njdancer/claude-ir/pull/11>.
 - [ ] **Schematic surgery** (next): the deletes/swaps/rewire above →
       `hardware-check.sh` ERC clean → netlist diff reviewed. Then update the
       per-subsystem notes + spec → **v2.0** to match (schematic wins ritual).
