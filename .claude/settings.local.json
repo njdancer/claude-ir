@@ -31,7 +31,8 @@
       "mcp__kicad__find_component_connections",
       "mcp__kicad__analyze_schematic_connections",
       "mcp__kicad__analyze_project_circuit_patterns",
-      "mcp__jlcpcb__component_search"
+      "mcp__jlcpcb__component_search",
+      "mcp__jlcpcb__library_install"
     ]
   },
   "enableAllProjectMcpServers": true,
