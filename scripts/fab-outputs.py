@@ -34,6 +34,9 @@ FAB = os.path.join(HW, "fab")
 PCB = os.path.join(HW, "esp32-ir-remote.kicad_pcb")
 NET = os.path.join(HW, "esp32-ir-remote.net")
 
+sys.path.insert(0, os.path.join(ROOT, "scripts", "ci"))
+from hardware_validate import netlist_fields, netlist_model  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # THE ASSEMBLY SPLIT.
 #
@@ -108,19 +111,24 @@ def run(*args):
 
 
 def parse_netlist():
-    """ref -> dict(value, footprint, lcsc, dnp)"""
-    net = open(NET).read()
+    """ref -> dict(value, footprint, lcsc, dnp).
+
+    Reuses the s-expression parser in scripts/ci/hardware_validate.py so this
+    is whitespace-robust: it handles both the KiCad 9 compact netlist and the
+    KiCad 10 expanded (multi-line, tab-nested, libparts) format. The old
+    single-line regex silently parsed 0 components on a v10-exported netlist
+    (which would have emitted an empty BOM/CPL).
+    """
+    fields = netlist_fields(NET)
+    _, model_comps, _ = netlist_model(NET)
     comps = {}
-    for blk in re.split(r"\n    \(comp ", net)[1:]:
-        ref = re.search(r'\(ref "([^"]+)"\)', blk).group(1)
-        val = re.search(r'\(value "([^"]*)"\)', blk)
-        fp = re.search(r'\(footprint "([^"]*)"\)', blk)
-        lcsc = re.search(r'\(field \(name "LCSC"\) "([^"]*)"\)', blk)
+    for ref, f in fields.items():
+        fp = model_comps.get(ref, ("", ""))[1]
         comps[ref] = {
-            "value": val.group(1) if val else "",
-            "footprint": (fp.group(1) if fp else "").split(":")[-1],
-            "lcsc": lcsc.group(1) if lcsc else "",
-            "dnp": '(property (name "dnp")' in blk,
+            "value": f["value"],
+            "footprint": fp.split(":")[-1],
+            "lcsc": f["fields"].get("LCSC", ""),
+            "dnp": f["dnp"],
         }
     return comps
 
