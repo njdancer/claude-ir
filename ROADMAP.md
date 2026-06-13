@@ -123,18 +123,35 @@ strapping GPIO2/8 left NC to keep boot deterministic):
       regenerated the committed netlist under v10 (verified electrically
       empty). Full local validation passes on 10.0.3 = CI. **First CI run on
       this branch: green.** PR <https://github.com/njdancer/claude-ir/pull/11>.
-- [~] **Schematic surgery IN PROGRESS** (autonomous, 2026-06-14). Done +
-      verified: **20 deletes** (U2/CH340, Q1/Q2+R3/R4/R21/R26 auto-reset,
-      D8/D9+R17/R18 TX-RX LEDs, J6 JTAG, J3 Qwiic, L1, C4, R22, Q4/Q5+R23/R24)
-      — 52 comps remain, file valid. **Golden netlist verifier written**
-      (`scripts/ci/golden_netlist_v2.py`) — the machine-checkable target;
-      **16/36 nets already match**, 20 to wire. NEXT (drive to "GOLDEN OK"):
-      swap U1→AMS1117 / U3→ESP32-C3 / U5→AHT20 (delete+re-add, label pins per
-      golden); J4 repurpose (SDA/SCL/IO0/IO1/IO20/IO21); JP1→LDO-disconnect
-      (LDO_OUT/+3V3); R7/R8→IO8/IO2 strap pull-ups; user LEDs D11/D12 direct
-      GPIO (R25/R20); edit LED footprints→0805 + colors, R9-12→22Ω, un-DNP
-      R28/R29, J2→SMD USB-C. Then ERC clean → notes/spec → **v2.0**.
-      Recovery: MCP snapshot `step0_v1.4_before_c3_surgery` + golden verifier.
+- [x] **Schematic redesign DONE + machine-verified (autonomous, 2026-06-14).**
+      All 20 deletes + 3 IC swaps (U1→AMS1117, U3→ESP32-C3, U5→AHT20) + full
+      rewire via `connect_to_net`. **`scripts/ci/golden_netlist_v2.py` → GOLDEN
+      OK: all 36 multi-pin nets match the intended v2 design exactly** (C3
+      pinout, LDO + JP1 disconnect, AHT20 I2C bus, native USB D±, IO2/IO8
+      strap pull-ups, direct-GPIO user LEDs, repurposed J4). BOM attrs set:
+      0805 LEDs (red system / yellow user), 22Ω IR (C17958), LCSC on all new
+      parts. Commits on PR #11. **The electrical redesign — the hard, dead-
+      board-risk part — is complete and verified.**
+- [ ] **Schematic cleanup (next):** ERC is 219 violations, but **~197 are
+      orphan graphics** from the deletions (99 unconnected_wire_endpoint, 44
+      endpoint_off_grid, 25 label_dangling, 18 no_connect_dangling, 11
+      wire_dangling) — the netlist is correct, the dangling wire/label/NC
+      stubs left by removed symbols need sweeping. Plus: real residue = 13
+      multiple_net_names (dual functional+GPIO labels, acceptable), 4
+      pin_to_pin + 1 power_pin_not_driven (PWR_FLAG/pin-type config, e.g.
+      AHT20 VDD is `unspecified` type). Then: **J2 → SMD USB-C footprint**
+      (verify pad names vs C393939 — pad-map risk), **un-DNP R28/R29** (I2C
+      pull-ups now fitted).
+- [ ] **PCB re-layout (the large remaining phase):** the board still carries
+      v1.4 footprints/routing. Needs: sync (remove deleted fps, swap U1/U3/U5/
+      J2/LEDs, the MCP sync only adds → use pcbnew on v10 app-python, confirmed
+      importable), re-place (C3 footprint differs; board can shrink), re-route
+      (freerouting via podman — image not yet pulled), pours, DRC, parity.
+- [ ] **Validation rebuild + green CI:** polarity truth table for the new
+      netlist, HAND_SOLDER split (kit = IR LEDs+TSOP+headers), JLC_ROTATION
+      for C3/AHT20/SOT-223/SMD-USB-C, USB-D±→C3 + strap invariants, refresh
+      ci-baseline in the kicad:10.0.2 container, fab-outputs, bom_report.
+      Then push → watch CI green.
 - [ ] **Re-layout** (Mac): module footprint changed + ~12 parts gone → placement
       redo + freerouting/heal/pour/DRC (the H2 pipeline). Board can shrink.
 - [ ] **Fab + CI validation rebuild:** new HAND_SOLDER split (kit = IR LEDs +
