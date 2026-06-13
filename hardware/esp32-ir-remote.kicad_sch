@@ -4657,51 +4657,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 252.73 110.49 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "228cbf40-ace9-4e2a-b7c3-859903e01fed")
-		(property "Reference" "R18"
-			(at 252.73 104.14 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "470Ω"
-			(at 252.73 106.68 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 252.73 112.268 90)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 252.73 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Resistor"
-			(at 252.73 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C17710"
-			(at 252.73 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "59ae295f-3430-4379-afdd-b5ac23b6eead"))
-		(pin "2" (uuid "3edf2315-9ba9-418e-886a-cfb219bd6cff"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "R18")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:D_TVS")
 		(at 176.53 36.83 270)
 		(unit 1)
@@ -4911,55 +4866,6 @@
 			(project "esp32-ir-remote"
 				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
 					(reference "C8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:LED")
-		(at 262.89 99.06 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "287e8a65-d96b-4373-a7e8-170fa88eb5b5")
-		(property "Reference" "D8"
-			(at 264.4775 91.44 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "Amber"
-			(at 264.4775 93.98 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "LED_THT:LED_D3.0mm"
-			(at 262.89 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 262.89 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Light emitting diode"
-			(at 262.89 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Sim.Pins" "1=K 2=A"
-			(at 262.89 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C85160"
-			(at 262.89 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "c4e5e2a8-0011-4484-bbb0-7c16e84cc33c"))
-		(pin "2" (uuid "d1dd4850-13b4-4ccd-92cb-8cee27c12adf"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "D8")
 					(unit 1)
 				)
 			)
@@ -5397,52 +5303,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_FET:Q_NMOS_GSD")
-		(at 176.53 144.78 0)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "4625229c-27d8-48d3-9a68-4faaa38cc48b")
-		(property "Reference" "Q2"
-			(at 181.61 146.0501 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Value" "2N7002"
-			(at 181.61 143.5101 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 181.61 147.32 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
-			(at 176.53 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "N-MOSFET transistor, gate/source/drain"
-			(at 176.53 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C8545"
-			(at 176.53 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "72451696-31fd-4610-9d0a-1d795c3905a1"))
-		(pin "3" (uuid "ea88d288-1aad-4921-8dec-ad6f61f1d435"))
-		(pin "2" (uuid "255532bb-2c78-466d-b80a-2993fd536889"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "Q2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 41.91 116.84 0)
 		(unit 1)
@@ -5648,50 +5508,6 @@
 			(project "esp32-ir-remote"
 				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
 					(reference "#PWR024")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 163.83 144.78 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "55aa636c-7447-48b0-8fb9-770ab9c3ff89")
-		(property "Reference" "R4"
-			(at 163.83 151.13 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "10kΩ"
-			(at 163.83 148.59 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
-			(at 163.83 143.002 90)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 163.83 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Resistor"
-			(at 163.83 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C17902"
-			(at 163.83 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "28b40a79-8600-485b-8044-e31a1af71a38"))
-		(pin "2" (uuid "1640b556-9160-4625-b0be-e629004e49ea"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -6190,51 +6006,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 252.73 99.06 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "813174a0-7676-47b1-8b35-6c13c0ddf07f")
-		(property "Reference" "R17"
-			(at 252.73 92.71 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "470Ω"
-			(at 252.73 95.25 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 252.73 100.838 90)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 252.73 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Resistor"
-			(at 252.73 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C17710"
-			(at 252.73 99.06 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "28d32210-6b5c-42b1-a243-c0ddb64dd266"))
-		(pin "2" (uuid "578318ca-512a-4853-b5e1-e7d842689e15"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "R17")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 238.76 58.42 0)
 		(unit 1)
@@ -6269,51 +6040,6 @@
 			(project "esp32-ir-remote"
 				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
 					(reference "#PWR033")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:L")
-		(at 165.1 83.82 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "89c89309-e934-492a-8681-cb4c67e694d0")
-		(property "Reference" "L1"
-			(at 165.1 78.74 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "4.7µH"
-			(at 165.1 81.28 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "lib:IND-SMD_L6.7-W6.7"
-			(at 165.1 83.82 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 165.1 83.82 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Inductor"
-			(at 165.1 83.82 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C78804"
-			(at 165.1 83.82 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "2" (uuid "4ae4db9c-52e5-4ab6-83a5-a1c44d5cf6bc"))
-		(pin "1" (uuid "5bec995f-de68-4f45-88c2-be72532a6422"))
-		(instances
-			(project ""
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "L1")
 					(unit 1)
 				)
 			)
@@ -6444,55 +6170,6 @@
 			(project "esp32-ir-remote"
 				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
 					(reference "R10")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:LED")
-		(at 262.89 110.49 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "92362e40-4b45-4750-bc38-fb8a7ce35fc7")
-		(property "Reference" "D9"
-			(at 264.4775 102.87 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "Amber"
-			(at 264.4775 105.41 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "LED_THT:LED_D3.0mm"
-			(at 262.89 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 262.89 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Light emitting diode"
-			(at 262.89 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Sim.Pins" "1=K 2=A"
-			(at 262.89 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C85160"
-			(at 262.89 110.49 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "3c4778f5-1750-4172-8aaa-485006470549"))
-		(pin "2" (uuid "5a0e6df9-36af-453a-8563-5a96a0c0acfb"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "D9")
 					(unit 1)
 				)
 			)
@@ -7130,51 +6807,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:C")
-		(at 151.13 87.63 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "af0f4943-cd14-4213-abbc-b6df4ff2a108")
-		(property "Reference" "C4"
-			(at 154.94 86.3599 0)
-			(effects (font (size 1.27 1.27)) (justify right))
-		)
-		(property "Value" "100nF"
-			(at 154.94 88.8999 0)
-			(effects (font (size 1.27 1.27)) (justify right))
-		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 150.1648 83.82 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 151.13 87.63 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 151.13 87.63 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C14663"
-			(at 151.13 87.63 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "2" (uuid "91a1be87-37bc-4c7e-95bf-72cc79588451"))
-		(pin "1" (uuid "7475cb27-2fba-4132-8777-1ed410383fb0"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "C4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+3.3V")
 		(at 198.12 146.05 0)
 		(unit 1)
@@ -7605,95 +7237,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 163.83 132.08 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "dcbd1cd6-e393-4ec9-91ac-0497000ef60c")
-		(property "Reference" "R3"
-			(at 163.83 125.73 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "10kΩ"
-			(at 163.83 128.27 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
-			(at 163.83 133.858 90)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 163.83 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Resistor"
-			(at 163.83 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C17902"
-			(at 163.83 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "3bb81822-01e5-4c29-8389-90ce76351705"))
-		(pin "2" (uuid "7aeff3db-a94c-446f-8242-63864f67d4d2"))
-		(instances
-			(project ""
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "R3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 161.29 168.91 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "e0d73bfb-3811-4bbb-8f4e-c3af023f9e15")
-		(property "Reference" "R22"
-			(at 161.29 175.26 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "10kΩ"
-			(at 161.29 172.72 90)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
-			(at 161.29 167.132 90)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 161.29 168.91 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "Resistor"
-			(at 161.29 168.91 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C17902"
-			(at 161.29 168.91 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "0ef6c0b1-39da-438a-a3be-628c7f33cced"))
-		(pin "2" (uuid "c71287a6-36f6-49cc-989f-f1dedf645006"))
-		(instances
-			(project "esp32-ir-remote"
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "R22")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 252.73 121.92 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -7863,65 +7406,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Interface_USB:CH340C")
-		(at 123.19 134.62 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f02aad4f-09b7-4168-94bf-85fd06996c22")
-		(property "Reference" "U2"
-			(at 125.3333 149.86 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Value" "CH340C"
-			(at 125.3333 152.4 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
-			(at 104.648 104.394 0)
-			(effects (font (size 1.27 1.27)) (justify left) (hide yes))
-		)
-		(property "Datasheet" "https://datasheet.lcsc.com/szlcsc/Jiangsu-Qin-Heng-CH340C_C84681.pdf"
-			(at 116.586 101.346 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "USB serial converter, crystal-less, UART, SOIC-16"
-			(at 121.666 98.552 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C84681"
-			(at 123.19 134.62 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "3" (uuid "c1a0aadc-f811-4c84-b05c-fffd1265951b"))
-		(pin "10" (uuid "6685fdd3-bb2d-4664-bc67-daa654c79a11"))
-		(pin "2" (uuid "930e9aad-12e1-41fd-aa18-494eff122b30"))
-		(pin "6" (uuid "ce474a6f-8c50-4f12-b8c5-8a365c6a6f2a"))
-		(pin "4" (uuid "f5bf9716-5280-4bb2-a728-afa644fb65b7"))
-		(pin "16" (uuid "d82ec835-6d47-458a-a7f3-4c9d77915914"))
-		(pin "1" (uuid "635624ac-4c5f-4c53-b243-b79dde5b69b5"))
-		(pin "15" (uuid "7b315b44-4816-4bcb-a1eb-2e7dfcd9959e"))
-		(pin "5" (uuid "1bb98e83-17b1-4d63-a432-01ba8a8e47a2"))
-		(pin "8" (uuid "0e901ee4-c920-4c57-b91c-f78192f5fdad"))
-		(pin "7" (uuid "a060623a-89e7-4391-8a47-483df101fc57"))
-		(pin "13" (uuid "84f4c5b8-3126-4491-a868-04bb5889f07c"))
-		(pin "14" (uuid "f62eea66-8ab5-4057-b2ea-4d88c86165d8"))
-		(pin "12" (uuid "9eb6734a-f269-4e73-8431-f455aa5291a7"))
-		(pin "11" (uuid "bc0c8621-dc07-4ff0-bbbe-c4d2a9d29312"))
-		(pin "9" (uuid "79e2a19c-0cbe-425b-b526-9eac79560708"))
-		(instances
-			(project ""
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "U2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Regulator_Switching:AP63203WU")
 		(at 132.08 92.71 0)
 		(unit 1)
@@ -7971,83 +7455,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_FET:Q_NMOS_GSD")
-		(at 176.53 132.08 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "fa93b1c0-c4b1-4662-a955-7477bbf9448f")
-		(property "Reference" "Q1"
-			(at 181.61 130.8099 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Value" "2N7002"
-			(at 181.61 133.3499 0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 181.61 129.54 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
-			(at 176.53 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Description" "N-MOSFET transistor, gate/source/drain"
-			(at 176.53 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C8545"
-			(at 176.53 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(pin "1" (uuid "c67d99cb-7e30-4ebb-a021-d87d40954a3a"))
-		(pin "3" (uuid "a22ff694-5663-4903-b24c-f26b974eb2e0"))
-		(pin "2" (uuid "5683b10b-fe1e-40f1-8302-e2dec2c7db9d"))
-		(instances
-			(project ""
-				(path "/09f96520-8fed-4ae0-9534-bf9e422c04cd"
-					(reference "Q1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 255.27 40.64 270.0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "2e35914e-21ca-418b-b58d-7dc73cbe825b")
-		(property "Reference" "R23"
-			(at 255.27 42.672 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "100kΩ"
-			(at 255.27 40.64 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 255.27 38.862 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf"
-			(at 255.27 40.64 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C25803" (at 255.27 40.64 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "R23") (unit 1)))
-		)
-	)
-	(symbol
 		(lib_id "Device:R")
 		(at 223.52 36.83 180.0)
 		(unit 1)
@@ -8080,68 +7487,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 144.78 132.08 270.0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "7120af10-60c9-40aa-a79b-7b63c73f8b62")
-		(property "Reference" "R21"
-			(at 144.78 134.112 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "470Ω"
-			(at 144.78 132.08 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 144.78 130.302 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf"
-			(at 144.78 132.08 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C23179" (at 144.78 132.08 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "R21") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 246.38 57.15 270.0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "06b8631e-2d7c-4a37-a677-82d21e0608e0")
-		(property "Reference" "R24"
-			(at 246.38 59.182 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "100kΩ"
-			(at 246.38 57.15 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 246.38 55.372 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1003T5E_C25803.pdf"
-			(at 246.38 57.15 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C25803" (at 246.38 57.15 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "R24") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 231.14 29.21 90.0)
 		(unit 1)
 		(in_bom yes)
@@ -8169,101 +7514,6 @@
     )
 		(instances
 			(project "project" (path "/" (reference "R25") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 144.78 144.78 90.0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "c655690c-38d3-474e-bebf-6d40ae7d9f00")
-		(property "Reference" "R26"
-			(at 144.78 142.748 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "470Ω"
-			(at 144.78 144.78 90.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 144.78 146.558 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2206010116_UNI-ROYAL-Uniroyal-Elec-0603WAF4700T5E_C23179.pdf"
-			(at 144.78 144.78 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C23179" (at 144.78 144.78 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "R26") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Transistor_FET:Q_NMOS_GSD")
-		(at 250.19 35.56 0.0)
-		(mirror y)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "85693143-bf99-48bd-ae23-e115455bbc36")
-		(property "Reference" "Q4"
-			(at 255.27 37.465 0.0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Value" "2N7002"
-			(at 255.27 35.56 0.0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 255.27 38.1 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
-			(at 250.19 35.56 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C8545" (at 250.19 35.56 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "Q4") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Transistor_FET:Q_NMOS_GSD")
-		(at 241.3 52.07 0.0)
-		(mirror y)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d6567524-979b-4c8c-9398-f714941f495b")
-		(property "Reference" "Q5"
-			(at 246.38 53.975 0.0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Value" "2N7002"
-			(at 246.38 52.07 0.0)
-			(effects (font (size 1.27 1.27)) (justify left))
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 246.38 54.61 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002_C8545.pdf"
-			(at 241.3 52.07 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-    (property "LCSC" "C8545" (at 241.3 52.07 0)
-      (effects (font (size 1.27 1.27)) (hide yes))
-    )
-		(instances
-			(project "project" (path "/" (reference "Q5") (unit 1)))
 		)
 	)
 	(junction
@@ -8376,38 +7626,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "84fa4e0b-a8e3-4b32-abb2-8f476102501b")
-	)
-	(symbol
-		(lib_id "Connector_Generic:Conn_01x04")
-		(at 27.94 140.97 0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "464aa605-74bd-4251-81ff-179b7c43bae0")
-		(property "Reference" "J3"
-			(at 27.94 146.05 0.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "Qwiic_I2C"
-			(at 27.94 133.35 0.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal"
-			(at 27.94 140.97 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 27.94 140.97 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "LCSC" "C160404"
-			(at 27.94 140.97 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(instances
-			(project "project" (path "/" (reference "J3") (unit 1)))
-		)
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -8559,34 +7777,6 @@
 		)
 		(instances
 			(project "project" (path "/" (reference "R30") (unit 1)))
-		)
-	)
-	(symbol
-		(lib_id "Connector_Generic:Conn_02x05_Odd_Even")
-		(at 68.58 168.91 0)
-		(unit 1)
-		(in_bom yes)
-		(on_board yes)
-		(dnp yes)
-		(uuid "f052ba9b-9340-4077-b187-958892ee0b3a")
-		(property "Reference" "J6"
-			(at 69.85 176.53 0.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "JTAG"
-			(at 69.85 161.29 0.0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical"
-			(at 68.58 168.91 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~"
-			(at 68.58 168.91 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(instances
-			(project "project" (path "/" (reference "J6") (unit 1)))
 		)
 	)
 		(no_connect

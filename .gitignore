@@ -71,3 +71,4 @@ _site/
 hardware/fab/
 hardware/esp32-ir-remote_bom.csv
 hardware/erc-report.txt
+hardware/snapshots/

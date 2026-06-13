@@ -123,9 +123,18 @@ strapping GPIO2/8 left NC to keep boot deterministic):
       regenerated the committed netlist under v10 (verified electrically
       empty). Full local validation passes on 10.0.3 = CI. **First CI run on
       this branch: green.** PR <https://github.com/njdancer/claude-ir/pull/11>.
-- [ ] **Schematic surgery** (next): the deletes/swaps/rewire above →
-      `hardware-check.sh` ERC clean → netlist diff reviewed. Then update the
-      per-subsystem notes + spec → **v2.0** to match (schematic wins ritual).
+- [~] **Schematic surgery IN PROGRESS** (autonomous, 2026-06-14). Done +
+      verified: **20 deletes** (U2/CH340, Q1/Q2+R3/R4/R21/R26 auto-reset,
+      D8/D9+R17/R18 TX-RX LEDs, J6 JTAG, J3 Qwiic, L1, C4, R22, Q4/Q5+R23/R24)
+      — 52 comps remain, file valid. **Golden netlist verifier written**
+      (`scripts/ci/golden_netlist_v2.py`) — the machine-checkable target;
+      **16/36 nets already match**, 20 to wire. NEXT (drive to "GOLDEN OK"):
+      swap U1→AMS1117 / U3→ESP32-C3 / U5→AHT20 (delete+re-add, label pins per
+      golden); J4 repurpose (SDA/SCL/IO0/IO1/IO20/IO21); JP1→LDO-disconnect
+      (LDO_OUT/+3V3); R7/R8→IO8/IO2 strap pull-ups; user LEDs D11/D12 direct
+      GPIO (R25/R20); edit LED footprints→0805 + colors, R9-12→22Ω, un-DNP
+      R28/R29, J2→SMD USB-C. Then ERC clean → notes/spec → **v2.0**.
+      Recovery: MCP snapshot `step0_v1.4_before_c3_surgery` + golden verifier.
 - [ ] **Re-layout** (Mac): module footprint changed + ~12 parts gone → placement
       redo + freerouting/heal/pour/DRC (the H2 pipeline). Board can shrink.
 - [ ] **Fab + CI validation rebuild:** new HAND_SOLDER split (kit = IR LEDs +
