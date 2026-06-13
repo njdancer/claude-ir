@@ -10,6 +10,77 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔄 **CI pipeline overhaul (2026-06-13, Nick's request): software-style
+process — open a PR, watch CI; no local check battery required.** New
+`.github/workflows/ci.yml` runs on every PR + main:
+1. **hardware** (kicad/kicad:10.0.2, same image as Pages):
+   `scripts/ci/hardware_validate.py` — ERC + DRC (incl. schematic parity)
+   compared against `hardware/ci-baseline.json` (errors gate strictly,
+   warnings gate on increase; refresh with `--update-baseline` inside the
+   CI image), **netlist freshness as an electrical partition check**
+   (KiCad-version-proof: compares pad partitions + component
+   value/footprint sets, not text — this also codifies the previously
+   ad-hoc session "partition check"), BOM LCSC lint (allowlist J4/J5/JP1),
+   3D-model path check (warn-only). Then regenerates the fab package and
+   uploads it as a CI artifact.
+2. **firmware**: `pio test -e native` (35 tests) + ESP8266/ESP32 builds —
+   previously local-only.
+3. **app**: typecheck, vitest, build, Playwright e2e (mock serial).
+4. **bom-report** (non-gating telemetry): `scripts/ci/bom_report.py` pulls
+   live JLCPCB price tiers/stock/Basic-Extended per BOM line; markdown in
+   the job summary, JSON artifact per run (cost history), HTML+JSON on the
+   Pages site. First run already caught drift: **C17922 (18Ω) is now
+   Extended at JLC** (so 4 Extended SMT lines, not 3) and re-confirmed the
+   AM2302 squeeze (35 in stock, $6.83/ea ≈ 42% of per-board part cost).
+**Polarity/orientation automation (2026-06-13, Nick: "don't rely on me for
+correctness"):**
+5. **Polarity truth table** in `hardware_validate.py` (gating): 66 pin→net
+   invariants across all 23 polarized/orientation-critical parts (every
+   diode direction, FET pinout, IC power pin, fuse/inductor path), locked
+   from the reviewed design — any future flip fails CI with the exact pin.
+6. **CPL rotation corrections** in `fab-outputs.py`: JLC's per-package
+   zero-orientation offsets applied to the CPL (SOT-23 +270, TSOT-23 +180,
+   SOIC +270, ESP32-WROOM +270 — JLCKicadTools community DB values); every
+   assembled footprint MUST be classified (offset or symmetric) or the
+   script refuses; new `esp32-ir-remote-orientation-report.csv` makes the
+   JLC-preview check a mechanical per-part comparison against
+   final_top.png. ⚠️ First order still verifies the offsets in the preview
+   — if one is wrong, fix the table, not the order.
+7. **🐛 REAL BUG FOUND & FIXED by this work — D1 TVS marking was inverted.**
+   The schematic symbol (`D_TVS`) is bidirectional so no electrical check
+   could see it, but the `D_SMB` footprint prints its cathode band at
+   pad 1, which was wired to GND; correct unidirectional orientation is
+   cathode→+5V. Anyone hand-soldering to the board's own marking would put
+   the TVS forward across the rail (board won't power). Fix: D1 rotated
+   180° in place (pads are symmetric — copper untouched, verified pad
+   positions identical) + schematic symbol rotated to match + netlist
+   updated; the silk band now marks the +5V pad. Kit CSV + bring-up.md
+   instructions updated ("align band with the on-board marker"). The new
+   polarity table locks D1.1(K)=+5V forever.
+**Build artifacts are out of git:** `hardware/fab/` +
+`esp32-ir-remote_bom.csv` untracked/gitignored; Pages regenerates and
+publishes the full fab package + cost report on every merge
+(`build-site.sh`). Freeze an order by tagging the commit (`order/v1.4`).
+The committed netlist STAYS tracked — it's the reviewable electrical diff,
+and CI now enforces its freshness. SPICE was evaluated and **rejected** for
+rev 1: the analog content is a vendor-qualified buck module, an
+analytically-verified gate-drive RC, and LED resistor math — dead boards
+come from footprints/rotations/pinouts, which simulation can't see (the
+checks above can). **Baseline committed** (`hardware/ci-baseline.json`,
+reviewed from the CI container run): DRC errors = the 3 documented accepted
+ones (H1 antenna keepout), unconnected = the 7 pour-fragment notices,
+ERC = 7 deliberate dual-label warnings + 1 lib_symbol_mismatch. Residual
+parity 71 = accepted name/metadata residue, re-verified harmless this
+session: dual-label picks (PCB `UART_TX` vs netlist `/ESP_GPIO1`), stale
+auto-names on label-less 2-pin nets (`unconnected-(D11-A-Pad2)` actually
+contains D11.2+R25.2 — the known KiCad netlister quirk; proper fix = put
+labels on those nets, queued below), one stale PCB-side LCSC field
+(C124375) + DNP-attr mismatch — all inert for fab outputs, which are
+netlist-driven. Cleanup debt (cosmetic, any KiCad session): label the
+auto-named 2-pin nets, clear the stale C124375 footprint field, sync DNP
+attrs onto J6/R28-R30 footprints — would shrink the parity baseline
+toward ~10.
+
 ✅ **Board v1.4: pre-order review pass — SMT-only assembly + Basic-part swaps
 (2026-06-11, remote session, Nick approved scope).** Full design review before
 H3.2 ordering (electrical re-verify came back clean — third independent pass).
@@ -195,9 +266,11 @@ footprint's model path is `${KIPRJMOD}`-relative. Reason: the `kicad/kicad:9.0`
 CI container ships **no** 3D library, so `${KICAD9_3DMODEL_DIR}` paths silently
 drop from Pages-built GLB/renders (the "only the inductor rendered" bug).
 If a footprint changes, re-vendor its model the same way (copy STEP, rewrite
-path) or the deployed viewer regresses. The Pages pipeline builds everything
-in `_site/` from source on every push — never commit site artifacts;
-`hardware/fab/` stays committed deliberately as the frozen order package.
+path) or the deployed viewer regresses (CI's model-path check warns on broken
+paths). The Pages pipeline builds everything in `_site/` from source on every
+push — never commit site artifacts. `hardware/fab/` is likewise gitignored
+since the 2026-06-13 CI overhaul: CI regenerates it per PR, Pages publishes
+it per merge, and order packages are frozen via git tag.
 
 ### Tooling: second KiCad MCP (`kicad-edit`) — **needs a session restart**
 
@@ -437,12 +510,20 @@ Make the schematic provably correct before any layout effort builds on it.
       soon or substitute.
 - [ ] **H3.2 Order checklist for Nick** — **Nick places the order, never
       autonomous.** Suggested package:
+  0. Download the fab package from the Pages site (<https://njdancer.github.io/claude-ir/>
+     → "Fabrication package") or the `fab-package` CI artifact of the
+     main-branch run you're ordering from, then **tag that commit**
+     (`git tag order/v1.4 && git push origin order/v1.4`).
   1. JLCPCB: 5× PCB (80×55, 2-layer) + economic SMT assembly ×2, top side,
-     upload `fab/esp32-ir-remote-gerbers.zip` + `-jlcpcb-bom.csv` +
-     `-jlcpcb-cpl.csv`. Expect 3 Extended loading fees ($9) + setup/stencil.
-  2. **In the placement preview, check every polarized part** (U1, U2, D1,
-     Q1-Q5, SW orientation) — rotation-convention mismatches are the #1
-     cause of dead assembled boards.
+     upload `esp32-ir-remote-gerbers.zip` + `-jlcpcb-bom.csv` +
+     `-jlcpcb-cpl.csv`. Expect ~4 Extended loading fees (~$12 — C17922 18Ω
+     flipped to Extended per the CI BOM report) + setup/stencil.
+  2. **In the placement preview, walk `esp32-ir-remote-orientation-report.csv`**
+     (in the fab package): one row per orientation-critical part (U1, U2,
+     U3, Q1-Q5, SW1/2) — confirm each pin-1/polarity marker matches
+     final_top.png. The CPL is already rotation-corrected (JLC offsets per
+     package), so the preview SHOULD be correct; any mismatch = fix the
+     JLC_ROTATION table in `scripts/fab-outputs.py`, regenerate, re-upload.
   3. Same cart: kit parts from `fab/esp32-ir-remote-hand-solder-kit.csv`
      (add spares; 2-3× AM2302 C83988 while stock lasts; generic 2.54mm
      headers for J4/J5).

@@ -44,6 +44,19 @@ pass) → review the netlist diff (`git diff hardware/esp32-ir-remote.net`) →
 commit schematic + netlist together. Refactors (e.g. hierarchical sheets)
 must produce an electrically-empty netlist diff.
 
+**CI is the authoritative gate** (`.github/workflows/ci.yml`): every PR runs
+ERC/DRC vs `hardware/ci-baseline.json`, the netlist partition-freshness
+check, schematic↔PCB parity, BOM LCSC lint, firmware builds + native tests,
+and app typecheck/unit/e2e — open a PR and watch CI rather than re-running
+the battery by hand. Local scripts remain for fast feedback only. If a
+design change legitimately alters accepted ERC/DRC counts, refresh the
+baseline inside the CI KiCad image (`kicad/kicad:10.0.2`):
+`python3 scripts/ci/hardware_validate.py --update-baseline` and commit it
+with the change. Build artifacts (`hardware/fab/`, generated BOM CSVs) are
+gitignored — CI regenerates them on every PR (artifact upload) and the
+Pages deploy publishes them on every merge; freeze an order package by
+tagging the ordered commit (e.g. `order/v1.4`).
+
 ## Environments
 
 **Nick's Mac (primary for hardware work):**
@@ -69,6 +82,9 @@ pio test -e native               # host-side unit tests
 python3 scripts/capture.py <lbl> # capture one IR signal to captures/
 python3 analysis/decoder.py      # analyze capture corpus
 ./scripts/hardware-check.sh      # ERC + regenerate netlist (needs kicad-cli)
+python3 scripts/ci/hardware_validate.py  # full design gate (what CI runs)
+python3 scripts/ci/bom_report.py # BOM cost/stock from JLCPCB API
+python3 scripts/fab-outputs.py   # regenerate JLCPCB order package (gitignored)
 
 cd app && pnpm dev               # web control UI (React Router)
 cd app && pnpm test              # vitest unit tests
