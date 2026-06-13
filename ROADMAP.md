@@ -10,6 +10,13 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🐛 **Hotfix (2026-06-13): Pages deploy was failing since the CI overhaul
+merge.** `fab-outputs.py`'s isometric render passed `--rotate=-30,0,45`;
+kicad-cli 10's arg parser reads a value starting with `-` as a flag
+(`Unknown argument: -30,0,45`) and aborts. Fixed by adopting the same
+leading-space trick `build-site.sh` already uses (`--rotate " -30,0,45"`).
+`ci.yml` was green throughout — only the separate `pages.yml` workflow broke.
+
 🔄 **CI pipeline overhaul (2026-06-13, Nick's request): software-style
 process — open a PR, watch CI; no local check battery required.** New
 `.github/workflows/ci.yml` runs on every PR + main:

@@ -262,8 +262,11 @@ def main():
         run(KICAD_CLI, "pcb", "render", "--side", "bottom", "--quality", "high",
             "--width", "1600", "--height", "1100",
             "-o", os.path.join(FAB, "final_bottom.png"), PCB)
+        # The leading space on the --rotate value is load-bearing: kicad-cli
+        # 10's arg parser otherwise reads a value beginning with '-' as a flag
+        # ("Unknown argument: -30,0,45") and aborts. Same trick as build-site.sh.
         run(KICAD_CLI, "pcb", "render", "--side", "top", "--perspective",
-            "--rotate=-30,0,45", "--zoom", "0.9", "--quality", "high",
+            "--rotate", " -30,0,45", "--zoom", "0.9", "--quality", "high",
             "--width", "1600", "--height", "1100",
             "-o", os.path.join(FAB, "final_iso.png"), PCB)
 
