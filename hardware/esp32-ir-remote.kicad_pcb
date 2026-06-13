@@ -15532,13 +15532,13 @@
 		(embedded_fonts no)
 		(model "${KIPRJMOD}/lib/3dshapes/AM2302.step"
 			(offset
-				(xyz 3.81 -0.7 9.2)
+				(xyz 3.81 -1.35 9.2)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz 0 0 180)
 			)
 		)
 	)

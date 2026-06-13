@@ -10,6 +10,27 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **AM2302 (U5) 3D model seating FIXED & visually verified (2026-06-13, remote
+session).** Nick reported the temp-sensor pins didn't line up with the holes in
+the 3D viewer, the silk outline was off by a different amount, and suspected a
+180° rotation. All three were the same root cause: the vendored EasyEDA
+`AM2302.step` is oriented 180° about its vertical axis vs how KiCad's silk/fab/
+courtyard were drawn, so the body sat on the wrong side of the pin row and the
+pins landed +2.05 mm off in board-Y. **Fix: `(rotate (xyz 0 0 180))` +
+`(offset (xyz 3.81 -1.35 9.2))`** (was offset y −0.7, rotate 0). Method, since
+this repo has no KiCad on Mac-only assumptions: installed kicad-cli 9.0.9 (PPA)
+in the remote container, exported the board to GLB (KiCad bakes all STEP
+assembly transforms), parsed the mesh in board coordinates, and measured the 4
+pin-leg centroids vs the pad centers — iterated to **dX=0.000, dY=0.000 on all
+four pins**, re-confirmed against the real board file (not just an isolated
+copy). Visual check (kicad-cli render, bottom view) shows each pin dead-centre
+in its via; top/iso show the body now flush inside the silk with the grille
+facing up. **Copper/pads/drills/silk/courtyard/netlist UNCHANGED** — the diff is
+2 lines inside the `(model …)` block only, so zero fab/electrical impact (CPL
+uses footprint origin + pads, not the model offset). No effect on the actual
+board. Supersedes the "model seating NOT fixed — defer to Nick's Mac" note
+below.
+
 🐛 **Hotfix (2026-06-13): Pages deploy was failing since the CI overhaul
 merge.** `fab-outputs.py`'s isometric render passed `--rotate=-30,0,45`;
 kicad-cli 10's arg parser reads a value starting with `-` as a flag
@@ -122,17 +143,16 @@ netlist↔PCB partition IDENTICAL, 235 pads):
    before any edit.
    Nick's render review (2026-06-13): TS-1187A switch STEP vendored
    (EasyEDA via jlcpcb MCP; model terminals verified to land on the
-   footprint pads — DONE, models resolve in CI). ⚠️ AM2302 (U5) model
-   seating NOT fixed: an attempted offset tweak via pcbnew Python didn't
-   persist (SWIG returns m_Offset by value, so the assignment mutated a
-   throwaway copy — the committed offset is still y −0.7), and the
-   AM2302.step model uses internal STEP placement transforms that raw
-   geometry parsing can't resolve, so the correct offset can't be
-   computed headlessly and renders are ambiguous on z-seating. Copper is
-   unaffected (4 pads @ 2.54 pitch, fab-safe) — this is 3D-viewer
-   cosmetic only. **Defer to Nick's KiCad 3D viewer on the Mac** (it
-   resolves STEP transforms; he's reviewing there anyway). Remaining
-   cosmetic debts: lib_footprint_issues DRC warnings
+   footprint pads — DONE, models resolve in CI). ✅ AM2302 (U5) model
+   seating FIXED 2026-06-13 (see the "Now" entry above): rotate Z 180 +
+   offset y −1.35; pins verified dead-centre in the vias by parsing the
+   KiCad-baked GLB mesh in board coords (dX=dY=0.000) and by bottom-view
+   render. The earlier pcbnew-Python attempt failed because SWIG returns
+   m_Offset by value (mutated a throwaway copy) and raw STEP parsing
+   couldn't resolve the model's internal transforms — solved here by
+   letting kicad-cli's GLB export bake every transform, then measuring the
+   mesh. Copper unaffected (4 pads @ 2.54 pitch, fab-safe); model-block
+   diff only. Remaining cosmetic debts: lib_footprint_issues DRC warnings
    63→73 (re-serialization noise); PCB still carries single-pad nets
    named ESP_GPIO25/26 on U3 (harmless).
 
