@@ -27,8 +27,8 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (110.0, 74.0), "H2": (176.0, 80.5),
-         "H3": (110.0, 105.0), "H4": (184.0, 109.5)}
+HOLES = {"H1": (110.0, 74.0), "H2": (176.5, 80.5),
+         "H3": (110.0, 105.0), "H4": (182.5, 109.5)}
 
 # Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
 # render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
@@ -40,14 +40,15 @@ ANCHORS = {
     "D1":  (130.0, 95.0, 90),    # TVS
     # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
     "U3":  (150.0, 88.5, 0),
-    # --- EAST end (front): IR-TX fan firing east. Rotations are placeholders;
-    #     tuned to the bent-LED model so each fold fires at its fan angle.
-    #     Bodies DIVERGE (fan), so pitch 9 + splay gives bend/finger room. ---
+    # --- EAST end (front): IR-TX fan firing east. base east = rot270; fan is
+    #     ±15/±45° around it. (x,y) here is the desired pad-CENTROID; main()
+    #     shifts each LED so it pivots about its true centre and the row stays
+    #     aligned while the beams fan. ---
     "Q3":  (182.0, 88.0, 0),     # IR MOSFET driver, inboard of the LED column
-    "D2":  (191.0, 76.0, 270),   # straight row, all fire E
-    "D3":  (191.0, 87.0, 270),   # +22.5
-    "D4":  (191.0, 98.0, 270),    # -22.5
-    "D5":  (191.0, 109.0, 270),
+    "D2":  (191.0, 76.0, 315),   # +45° (N-most, fires NE)
+    "D3":  (191.0, 87.0, 285),   # +15°
+    "D4":  (191.0, 98.0, 255),   # -15°
+    "D5":  (191.0, 109.0, 225),  # -45° (S-most, fires SE)
     # --- North edge (clear apart from the central antenna keepout x136-164) ---
     "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
     "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
@@ -88,7 +89,8 @@ def set_outline(b):
 def main():
     b = pcbnew.LoadBoard(PCB)
     fps = {f.GetReference(): f for f in b.GetFootprints()}
-    set_outline(b)
+    # NB: set_outline() does b.Remove() which curses later .Pads() iteration,
+    # so it runs LAST (after the LED-centroid alignment below).
     moved = 0
     for ref, (x, y, rot) in {**HOLES_AS_ANCHORS(), **ANCHORS}.items():
         f = fps.get(ref)
@@ -99,6 +101,26 @@ def main():
         if rot is not None:
             f.SetOrientationDegrees(rot)
         moved += 1
+
+    # IR LEDs fan but must stay ALIGNED: rotate about the true LED centre, not
+    # the footprint anchor (pad 1). After rotation, shift each so its pad
+    # centroid lands on the ANCHORS target — equivalent to pivoting in place.
+    for ref in ("D2", "D3", "D4", "D5"):
+        f = fps.get(ref)
+        if not f:
+            continue
+        tx, ty, _ = ANCHORS[ref]
+        xs, ys = [], []
+        for p in f.Pads():
+            pp = p.GetPosition()
+            xs.append(pcbnew.ToMM(pp.x))
+            ys.append(pcbnew.ToMM(pp.y))
+        cx, cy = sum(xs) / len(xs), sum(ys) / len(ys)
+        pos = f.GetPosition()
+        f.SetPosition(pcbnew.VECTOR2I(pos.x + pcbnew.FromMM(tx - cx),
+                                      pos.y + pcbnew.FromMM(ty - cy)))
+
+    set_outline(b)   # last: its b.Remove() curses .Pads() iteration above
     pcbnew.SaveBoard(PCB, b)
     print(f"outline {BX1-BX0:.0f}x{BY1-BY0:.0f}mm, moved {moved} parts")
 
