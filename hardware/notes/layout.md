@@ -39,12 +39,14 @@ constraints that rules can't express.
    radius, rotated to their fan angle, with silkscreen aim guides. Each LED
    is an independent string (own 18Ω resistor from +3.3V, all cathodes to
    `IR_DRAIN`) — they are NOT series pairs. Hand-soldered; leave finger room.
-3. **AP63203 buck (U1) switching loop tight:** C1 (input cap) hard
-   against VIN/GND pins; L1 adjacent to SW; C2/C3 (output) close to L1 return
-   with short GND back to U1. Keep the SW node (`Net-(U1-SW)`) copper area
-   minimal — it's the noisy node. No signal traces under the buck loop.
-4. **USB-C (J2) + CH340C (U2) short data traces:** J2 on board edge;
-   U2 close to J2; route D+/D− as a loosely coupled pair, < 30 mm, no layer
+3. **AMS1117 LDO (U1) caps tight (v2 — no buck):** the v2 board uses a
+   SOT-223 AMS1117-3.3 linear LDO, NOT the v1 AP63203 buck — there is no
+   inductor or SW node. Place the input cap (C1) hard against VIN/GND and the
+   **10 µF output cap within ~3 mm of VOUT** (PSRR/transient for the C3 WiFi
+   bursts — SI review). No switching loop / SW-keepout applies any more.
+4. **USB-C (J2) native USB (v2 — no CH340C):** v2 uses the C3's native USB
+   PHY (the CH340C bridge is gone). J2 on the board edge; route D+/D− as a
+   tight pair on F.Cu over continuous ground, < 30 mm, no layer
    change if possible. ESD/TVS (D1) and fuse (F1) sit between J2 and the
    rest: order on VBUS must be J2 → F1 → D1 → U1 (fuse before TVS,
    per H1.4).

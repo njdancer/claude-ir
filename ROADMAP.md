@@ -44,7 +44,25 @@ is settled. Execute in phases, commit+push each:
       search to re-seat decoupling/pullups/RC against the new anchors.
 - [ ] **Phase C — route + pour + silk.** `pcb_router.py → pcb_pour.py →
       pcb_silk.py`. **Render to Nick before routing commits** (H2.2 rule).
-- [~] **Phase C-rework — from 3 adversarial subagent reviews (2026-06-14).**
+**STATUS 2026-06-14 (end of autonomous PCB session):** the restructure is
+substantively DONE and pushed. Board: long-thin 92×44, zoned (power/USB W,
+MCU+antenna N-centre, IR fan E, status cluster + buttons S), USB mouth
+overhanging the W edge, 4 M3 holes clear, **0 DRC errors** (kicad-cli). All
+review blockers addressed: bent-LED model + east-firing fan (geometry
+verified: D2..D5 fire +67.5/+22.5/−22.5/−67.5° around east), TSOP off the LED
+column, ground plane reclaimed (B-signal 40%→24%, critical nets F-pinned),
+status LEDs clustered + captioned, underside metadata block (logo + stamped
+rev/commit/date/URL). **Remaining (blocked or polish):**
+- [ ] **CI baseline refresh** — every count drifted (full restructure); must
+      run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
+      (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
+- [ ] **Silk polish** — 46 silk_overlap + RD-over-copper; tune `pcb_silk.py`
+      RD placement (back-silk-over-pour warnings are cosmetic/expected).
+- [ ] **Phase E schematic split** — GUI-bound, still pending.
+- [ ] check_models() flags the bent .wrl "missing" though it exists — likely a
+      ${KIPRJMOD} path-resolution quirk in the validator; verify on Pages.
+
+- [x] **Phase C-rework — from 3 adversarial subagent reviews (2026-06-14).**
   Round-1 board routes clean (0 DRC) but review found real blockers:
   - **IR-LED bend geometry (mech, BLOCKER + Nick):** flat `LED_D5.0mm` has an
     ambiguous bend plane; rotating it doesn't reliably aim the beam. Fix: bent
