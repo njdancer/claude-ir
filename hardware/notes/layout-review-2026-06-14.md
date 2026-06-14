@@ -1,5 +1,13 @@
 # PCB Layout Review — v2 board (2026-06-14)
 
+> **RESOLVED (2026-06-14, same day):** the Major findings were actioned via an
+> SI re-layout (commits `68e2410` LDO pour, `19e86f3` re-route). Net result,
+> DRC-validated on KiCad 10.0.3: USB pair 100 % F.Cu (off B.Cu), IR_RX 5.5→2.7 mm,
+> LDO tab copper ~20→69 mm², unconnected 1→0, silk_overlap 44→0. Decoupling
+> (~7 mm) is a module-courtyard limit and accepted; a 4-layer board is the
+> proper lever for a fully solid ground + coupled USB pair. See ROADMAP "Now".
+> The findings below are the original as-reviewed snapshot.
+
 Objective + subjective review of the restructured long-thin ESP32-C3 board
 (`esp32-ir-remote.kicad_pcb`, commit at review time `f7d6d02`). Done in a
 remote session **without kicad-cli**, so DRC/ERC counts could not be re-run;
