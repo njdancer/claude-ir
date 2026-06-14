@@ -16,14 +16,34 @@ Run: /tmp/kv10/bin/python scripts/pcb_silk.py
 """
 import pcbnew
 
+import subprocess
+
 BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 REF_SIZE = 0.8          # silk text min (smaller trips the text_height rule)
-EDGE = (100.3, 60.3, 179.7, 114.7)
+EDGE = (106.3, 70.3, 197.7, 113.7)   # new long-thin board interior
 STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
+# Front labels: the title sits in the antenna-keepout strip (copper-free, no
+# parts), plus a caption over the status-LED cluster (S of the MCU).
 LABELS = [
-    ("ESP32-C3 IR REMOTE v2", 117.0, 59.2, 1.0),
-    ("njdancer.github.io/claude-ir", 150.0, 59.2, 0.8),
+    ("ESP32-C3 IR REMOTE", 150.0, 73.5, 1.0),
+    ("STATUS", 151.0, 99.5, 0.7),
 ]
+# Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
+LOGO_LIB = "hardware/libraries/Branding.pretty"
+LOGO_FP = "Claude_Spark_Logo"
+LOGO_AT = (118.0, 92.0)   # free back area over the GND pour, W-central
+# Old front-silk spark = a single top-level gr_poly on F.SilkS near here.
+OLD_SPARK_BBOX = (126.0, 98.0, 132.0, 104.0)
+
+
+def git_stamp():
+    try:
+        h = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
+                                    text=True).strip()
+        dirty = subprocess.call(["git", "diff", "--quiet"]) != 0
+        return h + ("-dirty" if dirty else "")
+    except Exception:
+        return "unknown"
 
 
 def mm(v):
@@ -43,6 +63,12 @@ def phase1():
     texts = [d for d in b.GetDrawings()
              if isinstance(d, pcbnew.PCB_TEXT)
              and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]
+    # old front-silk Claude spark (a top-level gr_poly) -> relocated to B.SilkS
+    # as a logo footprint in phase2; remove the stray front poly here.
+    spark = [d for d in b.GetDrawings()
+             if isinstance(d, pcbnew.PCB_SHAPE) and d.GetLayer() == pcbnew.F_SilkS
+             and OLD_SPARK_BBOX[0] - 2 < pcbnew.ToMM(d.GetBoundingBox().GetCenter().x) < OLD_SPARK_BBOX[2] + 2
+             and OLD_SPARK_BBOX[1] - 2 < pcbnew.ToMM(d.GetBoundingBox().GetCenter().y) < OLD_SPARK_BBOX[3] + 2]
     # collect passive silk graphics to remove (collect THEN remove)
     rm = []
     for fp in b.GetFootprints():
@@ -53,10 +79,13 @@ def phase1():
                 rm.append((fp, g))
     for t in texts:
         b.Remove(t)
+    for d in spark:
+        b.Remove(d)
     for fp, g in rm:
         fp.Remove(g)
     pcbnew.SaveBoard(BOARD_PATH, b)
-    print(f"phase1: removed {len(texts)} board texts, {len(rm)} passive outlines")
+    print(f"phase1: removed {len(texts)} texts, {len(spark)} spark polys, "
+          f"{len(rm)} passive outlines")
 
 
 def phase2():
@@ -128,8 +157,45 @@ def phase2():
         t.SetLayer(pcbnew.F_SilkS)
         board.Add(t)
 
+    # --- underside metadata block (B.SilkS, mirror-correct) ---------------
+    try:
+        date = subprocess.check_output(
+            ["git", "show", "-s", "--format=%cs", "HEAD"], text=True).strip()
+    except Exception:
+        date = ""
+    meta = [
+        ("Designed by Claude", 0.95),
+        ("ESP32-C3 IR Remote  rev v2", 0.8),
+        (f"{date}  git {git_stamp()}", 0.7),
+        ("njdancer.github.io/claude-ir", 0.7),
+        ("Non-commercial hobby project", 0.6),
+    ]
+    mx, my = 152.0, 88.0
+    for i, (text, size) in enumerate(meta):
+        t = pcbnew.PCB_TEXT(board)
+        t.SetText(text)
+        t.SetLayer(pcbnew.B_SilkS)
+        t.SetMirrored(True)
+        t.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
+        t.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(mx), pcbnew.FromMM(my + i * 1.7)))
+        t.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(size), pcbnew.FromMM(size)))
+        t.SetTextThickness(pcbnew.FromMM(max(0.1, size / 6)))
+        board.Add(t)
+    # Claude spark logo footprint on the back, left of the text block
+    n_logo = 0
+    try:
+        logo = pcbnew.FootprintLoad(LOGO_LIB, LOGO_FP)
+        if logo:
+            logo.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(LOGO_AT[0]),
+                                             pcbnew.FromMM(LOGO_AT[1])))
+            board.Add(logo)
+            n_logo = 1
+    except Exception as e:
+        print("  logo place failed:", e)
+
     pcbnew.SaveBoard(BOARD_PATH, board)
-    print(f"phase2: refs placed, {hidden} hidden, {len(LABELS)} labels")
+    print(f"phase2: refs placed, {hidden} hidden, {len(LABELS)} front labels, "
+          f"{len(meta)} back-meta lines, {n_logo} logo")
 
 
 if __name__ == "__main__":
