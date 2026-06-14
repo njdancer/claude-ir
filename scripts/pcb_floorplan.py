@@ -27,8 +27,8 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (110.0, 74.0), "H2": (184.0, 74.0),
-         "H3": (110.0, 105.0), "H4": (178.5, 104.5)}
+HOLES = {"H1": (110.0, 74.0), "H2": (184.0, 109.5),
+         "H3": (110.0, 105.0), "H4": (129.5, 102.5)}
 
 # Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
 # render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
@@ -40,26 +40,31 @@ ANCHORS = {
     "D1":  (130.0, 95.0, 90),    # TVS
     # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
     "U3":  (150.0, 88.5, 0),
-    # --- EAST end (front): IR-TX fan firing east, Q3 just inboard ---
-    "Q3":  (181.0, 96.0, 0),     # IR MOSFET driver
-    "D2":  (191.0, 84.0, 68),    # TSAL6200 fan: N-most, tilt north
-    "D3":  (191.0, 92.0, 23),
-    "D4":  (191.0, 100.0, 337),  # -23
-    "D5":  (191.0, 108.0, 292),  # -67.5
+    # --- EAST end (front): IR-TX fan firing east. Rotations are placeholders;
+    #     tuned to the bent-LED model so each fold fires at its fan angle.
+    #     Bodies DIVERGE (fan), so pitch 9 + splay gives bend/finger room. ---
+    "Q3":  (182.0, 88.0, 0),     # IR MOSFET driver, inboard of the LED column
+    "D2":  (191.0, 76.0, 157),   # fan: NNE (+67.5 from east)
+    "D3":  (191.0, 86.0, 112),   # +22.5
+    "D4":  (191.0, 96.0, 68),    # -22.5
+    "D5":  (191.0, 106.0, 22),   # SSE (-67.5)
     # --- North edge (clear apart from the central antenna keepout x136-164) ---
     "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
-    "J5":  (170.0, 74.0, 0),     # ext-IR header, NE (near the IR array)
-    "U4":  (191.0, 74.0, 0),     # TSOP receiver, faces east (room), NE corner
-    # --- South edge: power jumper, sensor, buttons, status LEDs ---
-    "JP1": (112.0, 110.0, 0),    # LDO-disable jumper near U1
-    "U5":  (123.0, 110.0, 0),    # AHT20 sensor (away from IR-LED heat at east)
-    "SW1": (136.0, 109.0, 0),    # RESET
-    "SW2": (147.0, 109.0, 0),    # BOOT
-    "D6":  (156.0, 110.0, 90),   # status LEDs, S row
-    "D7":  (163.0, 110.0, 90),
-    "D10": (170.0, 110.0, 90),
-    "D11": (177.0, 110.0, 90),
-    "D12": (184.0, 110.0, 90),
+    "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
+    # --- TSOP receiver: NORTH edge, far from the LED column (anti-blind);
+    #     faces north/room, rotation tuned by render ---
+    "U4":  (175.0, 73.0, 0),
+    # --- South / west: power jumper, buttons, sensor ---
+    "JP1": (110.0, 110.0, 0),    # LDO-disable jumper near U1
+    "SW1": (120.0, 109.0, 0),    # RESET
+    "SW2": (131.0, 109.0, 0),    # BOOT
+    "U5":  (165.0, 110.0, 0),    # AHT20 sensor, S edge, far from LDO heat (W)
+    # --- Status-LED cluster: tight labelled block, top face, S of the MCU ---
+    "D6":  (141.0, 104.0, 90),
+    "D7":  (146.0, 104.0, 90),
+    "D10": (151.0, 104.0, 90),
+    "D11": (156.0, 104.0, 90),
+    "D12": (161.0, 104.0, 90),
 }
 
 

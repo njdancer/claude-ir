@@ -30,6 +30,12 @@ F, B = 0, 1
 POWER_NETS = {"+5V", "+3.3V", "Net-(U1-SW)", "Net-(F1-Pad2)"}
 IR_NETS = {"IR_DRAIN", "EXT_IR_A", "/EXT_IR_A", "Net-(D2-A)", "Net-(D3-A)",
            "Net-(D4-A)", "Net-(D5-A)"}
+# Keep B.Cu as a near-solid ground plane: signals are pushed to F.Cu via a
+# per-cell B penalty, reserving B for unavoidable crossings only. The EMI-
+# critical nets (receiver in/filter, USB pair, IR drive return) are pinned
+# hardest so they stay over continuous ground. (SI review, 2026-06-14.)
+F_PREFER = {n.lstrip("/") for n in
+            {"IR_RX", "IR_RX_VS", "USB_D+", "USB_D-", "IR_DRAIN"}}
 
 def net_widths(name):
     """(track half-width, via diameter, via drill) in mm."""
@@ -254,10 +260,12 @@ def main():
         name = net_names[nc]
         pads = net_pads[nc]
         hw, via_d, via_drill = net_widths(name)
-        if name in POWER_NETS:
-            LAYER_PENALTY = {F: 0.30, B: 0.0}   # power distributes on B
+        if name.lstrip("/") in F_PREFER:
+            LAYER_PENALTY = {F: 0.0, B: 1.0}    # critical: keep over ground
+        elif name in POWER_NETS:
+            LAYER_PENALTY = {F: 0.0, B: 0.35}   # power prefers F, B if needed
         else:
-            LAYER_PENALTY = {F: 0.0, B: 0.0}   # signals may use B freely
+            LAYER_PENALTY = {F: 0.0, B: 0.5}    # signals prefer F, B for crossings
 
         def build_masks(hw_):
             foreign = occ & (owner != nc)
