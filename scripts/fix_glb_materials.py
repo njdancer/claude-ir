@@ -7,9 +7,12 @@ and washes out to white under model-viewer's neutral lighting. Classify each
 material by colour (gold/copper and silver/grey -> metal, everything else
 dielectric) and write explicit factors.
 
-Translucent board materials (soldermask, silkscreen, board body) render
-milky in model-viewer; force them opaque, deepening the green of the
-strongly-translucent soldermask so it reads as mask rather than mint.
+Translucent board materials (silkscreen, board body) render milky in
+model-viewer; force them opaque. The soldermask is the deliberate exception:
+kicad-cli exports it as a flat sheet sitting just above the copper, so making
+it opaque hides every trace/pad/via. Keep it semi-transparent (BLEND), deepen
+its green so it reads as mask rather than mint, and gloss it up a touch so
+copper traces read through as the familiar darker-green outlines.
 
 KiCad 9 Linux builds additionally fail to read STEP colours entirely:
 component primitives arrive with NO material (renderer default = white).
@@ -119,10 +122,18 @@ def recolor_missing(gltf):
     return fixed
 
 
+# Soldermask transparency in the final viewer. Lower = more see-through
+# (traces read more clearly) but milkier; higher = solider green but the
+# copper starts to disappear again. 0.75 keeps the green reading as mask
+# while letting trace/pad/via outlines show through.
+SOLDERMASK_ALPHA = 0.75
+SOLDERMASK_ROUGHNESS = 0.5  # glossier than generic dielectric -> less haze
+
+
 def main(path):
     chunks = read_glb(path)
     gltf = json.loads(chunks[0][1])
-    n_metal = n_diel = 0
+    n_metal = n_diel = n_mask = 0
     for m in gltf.get("materials", []):
         pbr = m.setdefault("pbrMetallicRoughness", {})
         color = pbr.get("baseColorFactor", [1, 1, 1, 1])
@@ -133,16 +144,24 @@ def main(path):
             n_metal += 1
         else:
             n_diel += 1
-        # translucent board materials render milky in model-viewer; force
-        # opaque. Strongly-translucent green = soldermask: deepen it so it
-        # reads as mask, not mint. (Clamp — the old unclamped 1.1 green
-        # multiplier pushed white silkscreen out of spec and tinted it.)
+        # Translucent board materials render milky in model-viewer, so force
+        # them opaque — EXCEPT the soldermask. It's a flat sheet just above
+        # the copper, so opaque mask hides every trace/pad/via. Identify it
+        # as the strongly-translucent green material, deepen its green (clamp
+        # — the old unclamped 1.1 multiplier pushed white silk out of spec),
+        # and keep it BLEND so copper reads through as darker-green outlines.
         if len(color) > 3 and color[3] < 0.99:
             r, g, b = color[:3]
-            if color[3] < 0.9 and g > r and g > b:
+            is_soldermask = color[3] < 0.9 and g > r and g > b
+            if is_soldermask:
                 r, g, b = r * 0.7, min(g * 1.1, 1.0), b * 0.7
-            pbr["baseColorFactor"] = [r, g, b, 1.0]
-            m["alphaMode"] = "OPAQUE"
+                pbr["baseColorFactor"] = [r, g, b, SOLDERMASK_ALPHA]
+                pbr["roughnessFactor"] = SOLDERMASK_ROUGHNESS
+                m["alphaMode"] = "BLEND"
+                n_mask += 1
+            else:
+                pbr["baseColorFactor"] = [r, g, b, 1.0]
+                m["alphaMode"] = "OPAQUE"
     n_recolored = recolor_missing(gltf)
     chunks[0] = (b"JSON", json.dumps(gltf, separators=(",", ":")).encode())
     write_glb(path, chunks)
@@ -161,7 +180,13 @@ def main(path):
         for p in mesh.get("primitives", [])
         if not mesh.get("name", "").startswith("esp32-ir-remote")
     ), "validation failed: component primitive without material"
+    # The soldermask MUST stay translucent — an opaque mask buries every
+    # copper trace. Guard against a regression silently re-hiding them.
+    assert n_mask > 0 and any(m.get("alphaMode") == "BLEND"
+                              for m in check.get("materials", [])), \
+        "validation failed: no translucent soldermask (traces would be hidden)"
     print(f"fixed {path}: {n_diel} dielectric, {n_metal} metallic, "
+          f"{n_mask} translucent soldermask, "
           f"{n_recolored} primitives recolored by name")
 
 
