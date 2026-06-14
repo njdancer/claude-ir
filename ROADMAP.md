@@ -35,9 +35,10 @@ labels → netlist correct (U3 = 20 nodes), ERC clean, so nothing flagged it
       then revert to A4 if it fits. Do this in the KiCad GUI, not by scripting
       s-expressions (that's what caused this).
 - [x] **Verify USB-C 3D model alignment — DONE 2026-06-14.** It did need a tweak:
-      `offset (0 −2.087 −0.745), rotate (0 0 180)` (was `0 0 0`) seats the
-      C393939 body flat on the board, centered, mouth overhanging the south edge.
-      GLB-mesh verified (see the seated-model note in the Now section above).
+      `offset (0 −1.087 0.765), rotate (0 0 180)` (was `0 0 0`) seats the C393939
+      body on the board top, centered, posts in the THT holes, mouth overhanging
+      the south edge. GLB-mesh + multi-angle render verified (see the seated-model
+      note in the Now section above).
 - [ ] Add an off-sheet-symbol guard to `hardware_validate.py` so this can't
       recur silently (assert every placed symbol's origin is within page extents).
 
@@ -63,17 +64,27 @@ passes (app, **hardware**, bom-report, firmware). State:
   the render-bug fix at the top of this section.)
 
 ✅ **J2 USB-C 3D model SEATED & render-verified (2026-06-14).** Completes the
-"Verify USB-C 3D model alignment" TODO below: the vendored
+"Verify USB-C 3D model alignment" TODO below. The vendored
 `USB_C_XKB_U262-16XN-4BVC11.step` (C393939 SHOU HAN, fetched via JLC MCP) was
-repointed `${KIPRJMOD}`-relative but left at `offset (0 0 0)` — which floats the
-shell 0.745 mm above the board AND parks it ~2 mm too far inboard, so the mouth
-sits *inside* the south edge (a plug couldn't enter). Derived the correct
-seating by exporting the board to GLB and measuring the connector mesh in board
-coords (the proven AM2302 method): **offset (0 −2.087 −0.745), rotate (0 0 180)**
-seats the shell flat (z 0.000–4.10), centered on the pad row (x 130.53–139.47,
-center 135.0), opening overhanging the south edge by ~1.7 mm. Diff is the
-`(model …)` offset only — copper/pads/nets/DRC and pad-driven fab CPL/gerbers all
-unchanged.
+repointed `${KIPRJMOD}`-relative but left at `offset (0 0 0)`, which **sank the
+connector ~1.5 mm through the board** (its bottom flush with the board *bottom*).
+The fix needed a rigorous pass: the trap was the GLB height frame — KiCad places
+the **board-top surface at height 1.510 mm**, not 0 (board spans 0→1.510), so
+seating means putting the connector's contact plane at 1.510, not at 0. Measured
+the board mesh for that datum, then the connector's four mounting-foot centroids,
+and solved against the footprint's actual THT post-holes:
+**offset (0 −1.087 0.765), rotate (0 0 180)** lands the bottom exactly on the
+board top (1.510), centers it on the pad row (x 130.53–139.47, center 135.0),
+seats the mounting posts in the holes (model feet 108.880/113.087 vs holes
+108.895/113.075, ±0.015 mm), contacts over the signal pads, mouth overhanging the
+south edge ~0.7 mm. Verified by front-profile, bottom, and low-angle iso renders
+(not just top-down — the earlier top-only check missed the vertical sink).
+**Lesson:** never judge 3D seating from a top render; always profile/section it,
+and establish the board-top height datum from the board mesh before placing.
+Diff is the `(model …)` offset only — copper/pads/nets/DRC and pad-driven fab
+CPL/gerbers all unchanged. NOTE: this EasyEDA model has no below-board leg
+geometry, so the posts won't be *seen* protruding from the bottom — a model
+limitation, not a placement error.
 
 ---
 
