@@ -44,6 +44,24 @@ is settled. Execute in phases, commit+push each:
       search to re-seat decoupling/pullups/RC against the new anchors.
 - [ ] **Phase C — route + pour + silk.** `pcb_router.py → pcb_pour.py →
       pcb_silk.py`. **Render to Nick before routing commits** (H2.2 rule).
+- [~] **Phase C-rework — from 3 adversarial subagent reviews (2026-06-14).**
+  Round-1 board routes clean (0 DRC) but review found real blockers:
+  - **IR-LED bend geometry (mech, BLOCKER + Nick):** flat `LED_D5.0mm` has an
+    ambiguous bend plane; rotating it doesn't reliably aim the beam. Fix: bent
+    3D model + silk bend-line/arrow defining the fold, footprint rotated so the
+    fold fires at the fan angle. Widen pitch 8→~11mm (bend/finger room). Move
+    TSOP U4 off the LED column (self-blinding / TX reflection).
+  - **Ground-plane fragmentation (SI, BLOCKER):** B.Cu is used as a signal
+    layer, slotting the GND plane; IR_DRAIN return + long IR_RX run past the
+    receiver. Fix: router penalty to keep signals on F.Cu and reclaim B.Cu as
+    near-solid GND; keep IR drive loop tight on F.Cu; stitch antenna+RX corners.
+    (Antenna keepout itself verified CLEAN — the mech reviewer's "antenna
+    off-edge" was a false positive from misreading the board as y60-top.)
+  - **Silk mess (DFM, MAJOR):** 169 silk warnings (RDs over pads/edge,
+    illegible status row). Fix: re-run/extend `pcb_silk.py` for the new board.
+  - **Status LEDs (Nick + DFM):** cluster them (not spread) + clear labels.
+  - Minor: J2 ~0.5mm east (pad-to-edge slack), H1/H2 screw-head vs J4/U4,
+    AMS1117 out-cap closer, stale buck note in layout.md → fix to LDO.
 - [ ] **Phase C2 — underside metadata (B.SilkS).** The Claude spark already
       exists as **8× top-level `gr_poly` on F.SilkS** (bbox ≈126.8–131.0 ×
       98.9–103.1, added in `d37cee9`); the matching "designed by Claude"
