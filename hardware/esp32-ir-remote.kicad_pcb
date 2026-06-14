@@ -6052,7 +6052,7 @@
 		(descr "IR Receiver Vishay TSOP-xxxx, MINICAST package, see https://www.vishay.com/docs/82669/tsop32s40f.pdf")
 		(tags "IR Receiver Vishay TSOP-xxxx MINICAST")
 		(property "Reference" "U4"
-			(at -2.045001 4.395 180)
+			(at -5.5 0.5 180)
 			(layer "F.SilkS")
 			(uuid "550eae09-da59-4e7c-a876-a3d0bb529706")
 			(effects
