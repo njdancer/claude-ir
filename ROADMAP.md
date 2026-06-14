@@ -142,22 +142,43 @@ strapping GPIO2/8 left NC to keep boot deterministic):
       AHT20 VDD is `unspecified` type). Then: **J2 → SMD USB-C footprint**
       (verify pad names vs C393939 — pad-map risk), **un-DNP R28/R29** (I2C
       pull-ups now fitted).
-- [~] **PCB re-layout ~97% DONE (autonomous, 2026-06-14).** Tooling:
-      `scripts/pcb_sync.py` (pcbnew ECO on the v10 app-python + a numpy venv
-      `/tmp/kv10`) removed the 20 deleted footprints, swapped U1→AMS1117/
-      U3→C3/U5→AHT20/LEDs→0805, reassigned 167 pads + metadata from the
-      netlist. Routed with the repo's own grid-A* (`pcb_router.py`, **no
-      freerouting needed**) + GND pour (`pcb_pour.py`, v10 API fixed). State:
-      **549 tracks, GND poured (3 zones, 99 stitch vias), DRC 5 minor**
-      (2 antenna-keepout, 1 track-crossing, 1 accepted U3/H1 courtyard, 1
-      starved-thermal). **7 unconnected remain** — 4 long cross-board nets
-      (CC1 R1↔J2, I2C_SDA U5↔U3, USB-C A5/A6/A7 edge, the C3 strap/boot legs)
-      the router can't close through congestion, + IR_RX_VS track-join + 2
-      GND thermal. These need **placement optimization** (move the C3's
-      I2C/CC/strap partners adjacent to it, then re-route) — crude
-      fixed-offset nudges traded gaps for clearance violations, so it wants
-      a real placement pass. Helper venv: `python3 -m venv --system-site-packages`
-      off the app python + `pip install numpy`.
+- [~] **PCB re-layout — clean reproducible pipeline + placement fix
+      (autonomous, 2026-06-14 session 2).** Diagnosed the root causes of the
+      stuck routes and built a deterministic, re-runnable pipeline:
+      **rip → `pcb_place_v2.py` → `pcb_router.py` → `pcb_stub_heal.py` →
+      `pcb_pour.py`**.
+      - **`scripts/pcb_place_v2.py`** (new): collision-checked greedy placer
+        that re-seats the C3-support parts (R5/R6/R7/R8/R28/R29/C6 +
+        decoupling) at the nearest free slot to their C3 pin, highest-priority
+        pin-pullups first. The v1.4→v2 swap had left them ~45mm from the new
+        C3 pins; this closed **IO8_STRAP + I2C_SDA** (router went 7→4 unrouted).
+      - **`scripts/pcb_stub_heal.py`** (rewritten): the grid router targets
+        each pad's bounding *box*; for round THT pads the bbox corners are
+        outside the copper, so legs stop ~1mm shy → DRC unconnected. This
+        reads the DRC report and adds ONE short bridge from the pad anchor to
+        the nearest same-net track **vertex** (never a mid-segment point →
+        no dangling), with a **foreign-clearance guard** that rejects any
+        bridge that would short. Closed 6 THT shortfalls cleanly, correctly
+        *refused* 2 that would short (IR_RX_VS, SPARE_IO1 — dense sensor/header
+        corners). NOTE: earlier blind/geometric heal variants caused real
+        shorts — the targeted+guarded version is the keeper.
+      - **State: no shorts**, DRC non-cosmetic = 2 antenna-keepout (accepted),
+        1 U3/H1 courtyard (accepted), 2 starved-thermal, 5 track_dangling,
+        3 holes_co_located, 1 hole_to_hole. **8 unconnected**, all now
+        characterised:
+        * **STRUCTURAL (need design changes):** CC1 (R1↔J2.A5), USB_D±
+          (A6↔B6, A7↔B7) — all three are the **THT USB-C escape problem**
+          (0.85mm-pitch through-holes can't fan the inner data/CC pins out).
+          → **fix = the SMD-16P USB-C swap (item 4 above)**, which the BOM
+          plan already calls for. ESP_BOOT (R6↔U3.8) — pin 8 is boxed in by
+          the **D1 TVS** sitting under the C3 south pins → **fix = relocate
+          the power-entry cluster (D1/F1/U1) out from under C3**.
+        * **LOCAL rework:** IR_RX_VS + SPARE_IO1 (rip the bad stub, re-route),
+          2 GND zone islands (stitching), 5 track_dangling (stub cleanup).
+      - Helper venv `/tmp/kv10` persists (app python + numpy). silk_overlap is
+        ~90 (baseline 44) — a silk pass is still owed before CI green.
+      **Next placement step:** SMD USB-C swap + power-cluster relocation, then
+      one more rip→route→heal→pour cycle should reach 0 real unconnected.
 - [ ] **Validation rebuild + green CI (remaining):** rewrite the POLARITY
       table in `hardware_validate.py` for the v2 netlist (currently all v1.4
       parts — D8/D9/Q1/Q2/Q4/Q5/U2 buck/CH340/AM2302/L1); update
