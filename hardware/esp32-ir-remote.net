@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-14T11:03:06")
+		(date "2026-06-14T11:28:55")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -2766,9 +2766,6 @@
 				(value "esp32-ir-remote.kicad_sch")
 			)
 			(property
-				(name "dnp")
-			)
-			(property
 				(name "ki_keywords")
 				(value "R res resistor")
 			)
@@ -2827,9 +2824,6 @@
 			(property
 				(name "Sheetfile")
 				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "dnp")
 			)
 			(property
 				(name "ki_keywords")
