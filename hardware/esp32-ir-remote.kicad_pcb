@@ -182,6 +182,7 @@
 		(property "LCSC" "C27834"
 			(at 0 0 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "56d34bcb-5ce1-4a2e-b8ab-03fcef0cc480")
 			(effects
 				(font
@@ -1467,6 +1468,7 @@
 		(property "LCSC" "C55528"
 			(at 0 0 187)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "de89286f-4b05-427a-943b-1a47c58e3581")
 			(effects
 				(font
@@ -2277,6 +2279,7 @@
 		(property "LCSC" "C17513"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "a1688222-7403-4c00-9885-94b996ab9f74")
 			(effects
 				(font
@@ -2464,6 +2467,7 @@
 		(property "LCSC" "C17710"
 			(at 0 0 270)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "dcba4d2c-f643-4023-ac54-9dc70051514c")
 			(effects
 				(font
@@ -3048,6 +3052,7 @@
 		(property "LCSC" "C2296"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "e74be1d5-a4fa-4e4c-b367-d9bbecfe811b")
 			(effects
 				(font
@@ -3353,6 +3358,7 @@
 		(property "LCSC" "C84256"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "454aed1c-7226-4954-8a04-5528e54c4dfe")
 			(effects
 				(font
@@ -3745,6 +3751,7 @@
 		(property "LCSC" "C318884"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "18dad4c3-64a2-4cce-a456-fd018ff72131")
 			(effects
 				(font
@@ -3978,6 +3985,7 @@
 		(property "LCSC" "C142747"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "17486c2d-68ca-4838-8f1b-a7e4c95a1125")
 			(effects
 				(font
@@ -4141,7 +4149,7 @@
 		(descr "Resistor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor")
 		(property "Reference" "R30"
-			(at -2.975 0 0)
+			(at -4.975 0 0)
 			(layer "F.SilkS")
 			(uuid "87b04100-76d1-4356-aab0-144b296cc950")
 			(effects
@@ -4190,6 +4198,7 @@
 		(property "LCSC" "C17922"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "5c56c0de-74a5-4fc8-9aa6-f302036ceddb")
 			(effects
 				(font
@@ -4389,6 +4398,7 @@
 		(property "LCSC" "C55528"
 			(at 0 0 202)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "175a451c-e45e-4d15-a417-e36c655b423e")
 			(effects
 				(font
@@ -4620,6 +4630,7 @@
 		(property "LCSC" "C17936"
 			(at 0 0 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "e6de838c-17df-4293-bc85-2aa1adf91208")
 			(effects
 				(font
@@ -5000,6 +5011,7 @@
 		(property "LCSC" "C17901"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "f88673de-df13-441e-a116-4bfe54c421cc")
 			(effects
 				(font
@@ -5441,6 +5453,7 @@
 		(property "LCSC" "C84256"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "0d7ab69f-45df-4e1e-9024-beb9f80bccf5")
 			(effects
 				(font
@@ -6387,6 +6400,7 @@
 		(property "LCSC" "C83333"
 			(at 0 0 180)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "907308dd-bf46-4755-b7e7-3503ae57741d")
 			(effects
 				(font
@@ -6683,6 +6697,7 @@
 		(property "LCSC" "C2296"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "2c7a1c28-225b-4ce0-bc0e-a17e6ec6551f")
 			(effects
 				(font
@@ -6883,6 +6898,7 @@
 		(property "LCSC" "C2934560"
 			(at 0 0 270)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "2b58a9e9-aebe-4253-a26b-44138e8e51cd")
 			(effects
 				(font
@@ -7935,6 +7951,7 @@
 		(property "LCSC" "C27834"
 			(at 0 0 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "3116dc5e-ceab-44b5-b88f-9cba962a7632")
 			(effects
 				(font
@@ -8123,6 +8140,7 @@
 		(property "LCSC" "C318884"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "d4f21ff0-be12-4bfb-a2ff-ac1daad14592")
 			(effects
 				(font
@@ -8366,6 +8384,7 @@
 		(property "LCSC" "C84256"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "24f36aab-3b51-4c72-addd-95fb57dfe530")
 			(effects
 				(font
@@ -8566,6 +8585,7 @@
 		(property "LCSC" "C6186"
 			(at 0 0 180)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "7e2d9d32-50fc-4fba-8667-6c5ec116eaf2")
 			(effects
 				(font
@@ -9687,6 +9707,7 @@
 		(property "LCSC" "C17710"
 			(at 0 0 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "a445b7c4-1f60-4a11-88a2-8b8c18f726cd")
 			(effects
 				(font
@@ -10262,6 +10283,7 @@
 		(property "LCSC" "C17936"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "4627b6e5-66e3-4c1d-b017-7fd8a88a9ac4")
 			(effects
 				(font
@@ -11082,6 +11104,7 @@
 		(property "LCSC" "C17710"
 			(at 0 0 270)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "1cfe6e5a-3e33-486e-8822-5357696a6d85")
 			(effects
 				(font
@@ -11220,7 +11243,7 @@
 		(descr "Resistor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor")
 		(property "Reference" "R20"
-			(at 0 -1.645 0)
+			(at 2.875 0 0)
 			(layer "F.SilkS")
 			(uuid "341886fd-4aea-4a18-b2d6-fb2561c584ce")
 			(effects
@@ -11269,6 +11292,7 @@
 		(property "LCSC" "C17513"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "29362d56-f552-47d3-aaf6-93499aaebd0c")
 			(effects
 				(font
@@ -12227,6 +12251,7 @@
 		(property "LCSC" "C19702"
 			(at 0 0 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "da5bf587-9c7e-41df-90cb-f41adf17ae5d")
 			(effects
 				(font
@@ -12559,14 +12584,14 @@
 	)
 	(footprint "Claude_Spark_Logo"
 		(layer "B.Cu")
-		(uuid "e520f295-0a89-4712-bf79-be4aac2ae871")
-		(at 118 92)
+		(uuid "0792c804-3b96-4409-b210-efe493f2f15e")
+		(at 152 84.3)
 		(property "Reference" "REF**"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "9da45755-d840-4698-96e0-bd41631f25d6")
+			(uuid "4f29837b-c5ef-4ed7-b403-3907aa73d1dc")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12580,7 +12605,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "f3a12a0a-8641-47f6-bd54-8ed75f1ea275")
+			(uuid "cfecb956-04b8-499c-ab4f-2ba18742fdca")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12593,7 +12618,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "7a3731e4-affa-4ea1-93c8-7f6f11710c04")
+			(uuid "109dcab8-6015-4183-8c88-6b19180654ff")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12604,7 +12629,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "965db6c0-85a2-4aa3-9220-80d4454abc83")
+			(uuid "96822137-d1ec-4508-ba54-b074af3cacc0")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12755,7 +12780,7 @@
 			)
 			(fill yes)
 			(layer "B.SilkS")
-			(uuid "10c0671c-1ead-43dd-8e82-765c67f42590")
+			(uuid "37d1f8e0-d71c-426f-90cc-7d84f618072b")
 		)
 		(embedded_fonts no)
 	)
@@ -12800,9 +12825,9 @@
 		(uuid "6a6a80b6-6120-4820-8d17-8871469af3e8")
 	)
 	(gr_text "STATUS"
-		(at 151 99.5 0)
+		(at 151 110 0)
 		(layer "F.SilkS")
-		(uuid "fb69e2d4-fd5c-4da1-9482-5ddb2dfb0fd8")
+		(uuid "d6b7d9ff-4d15-43f3-8aee-31cc3dbbabbe")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12813,7 +12838,7 @@
 	(gr_text "ESP32-C3 IR REMOTE"
 		(at 150 73.5 0)
 		(layer "F.SilkS")
-		(uuid "202b9422-cdc7-48db-ad1c-0dc5fe87bddd")
+		(uuid "1da13c8d-55bc-4c4b-9c36-e6ae53bb7e0d")
 		(effects
 			(font
 				(size 1 1)
@@ -12824,7 +12849,7 @@
 	(gr_text "ESP32-C3 IR Remote  rev v2"
 		(at 152 89.7 0)
 		(layer "B.SilkS")
-		(uuid "459584ed-9840-4f67-8d05-ab905a1f5d42")
+		(uuid "d3dbec64-1271-46bf-a268-1bca8de44025")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12833,10 +12858,10 @@
 			(justify mirror)
 		)
 	)
-	(gr_text "2026-06-14  git da357bd-dirty"
+	(gr_text "2026-06-15  git f7d6d02-dirty"
 		(at 152 91.4 0)
 		(layer "B.SilkS")
-		(uuid "bcab9223-070c-4194-a387-9554f6884d35")
+		(uuid "93c7ac43-a213-42d0-a7b2-93ccedbc5740")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12848,7 +12873,7 @@
 	(gr_text "njdancer.github.io/claude-ir"
 		(at 152 93.1 0)
 		(layer "B.SilkS")
-		(uuid "f2dcb4de-67e5-4370-9672-865243ab01d8")
+		(uuid "cbe43486-6de9-42d9-9230-1b64ada912a1")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12860,7 +12885,7 @@
 	(gr_text "Non-commercial hobby project"
 		(at 152 94.8 0)
 		(layer "B.SilkS")
-		(uuid "2ec9cc28-ec70-4c81-8e13-0497cea0971f")
+		(uuid "a4811c2c-0dc3-4675-8aff-c9baa94465cd")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12872,7 +12897,7 @@
 	(gr_text "Designed by Claude"
 		(at 152 88 0)
 		(layer "B.SilkS")
-		(uuid "ca3d8b58-c7c3-4642-8954-eead43c07534")
+		(uuid "a720ddb0-3a6a-4fc7-899d-09783d1f5382")
 		(effects
 			(font
 				(size 0.95 0.95)

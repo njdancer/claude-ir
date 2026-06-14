@@ -56,8 +56,22 @@ rev/commit/date/URL). **Remaining (blocked or polish):**
 - [ ] **CI baseline refresh** — every count drifted (full restructure); must
       run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
       (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
-- [ ] **Silk polish** — 46 silk_overlap + RD-over-copper; tune `pcb_silk.py`
-      RD placement (back-silk-over-pour warnings are cosmetic/expected).
+- [x] **Silk polish DONE (2026-06-14).** Nick: "the silkscreen's a bit shit."
+      Root cause of the front mess: the BOM workflow left each footprint's
+      **LCSC part-number field visible on F.SilkS** at full 1.27mm — 25 part
+      codes (C2934560, C6186, …) piled on the designators → illegible. Fixes
+      in `pcb_silk.py`: (a) hide *every* footprint field except Reference (not
+      just Value) — kills the LCSC codes; (b) 0.2mm separation margin in the
+      ref placer so adjacent refs can't pack edge-to-edge (was colliding
+      R20/R29); (c) `STATUS` caption moved below the D6–D12 LED row (was
+      overlapping R19); (d) back-silk Claude logo re-seated as a header above
+      the attribution block (was stranded 34mm east over the IR array).
+      **Result (kicad-cli DRC): silk_overlap 44→0, silk_over_copper 53→0**;
+      remaining 2 silk_edge_clearance are J2 (USB-C) silk vs the board edge —
+      inherent to the edge-overhang connector, cosmetic. Diff is silk-only
+      (25 `hide yes` + a few text moves); **zero copper/pad/net/zone lines
+      touched → electrically identical, netlist/parity unaffected.** Front
+      now fully legible; back logo grouped with its caption.
 - [ ] **Phase E schematic split** — GUI-bound, still pending.
 - [ ] check_models() flags the bent .wrl "missing" though it exists — likely a
       ${KIPRJMOD} path-resolution quirk in the validator; verify on Pages.

@@ -26,12 +26,14 @@ STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
 # parts), plus a caption over the status-LED cluster (S of the MCU).
 LABELS = [
     ("ESP32-C3 IR REMOTE", 150.0, 73.5, 1.0),
-    ("STATUS", 151.0, 99.5, 0.8),
+    # caption sits below the D6..D12 LED row (clear of the dense resistor refs
+    # at y~99 that label the same cluster).
+    ("STATUS", 151.0, 110.0, 0.8),
 ]
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
 LOGO_LIB = "hardware/libraries/Branding.pretty"
 LOGO_FP = "Claude_Spark_Logo"
-LOGO_AT = (118.0, 92.0)   # free back area over the GND pour, W-central
+LOGO_AT = (152.0, 84.3)   # header centred above the back-silk text block
 # Old front-silk spark = a single top-level gr_poly on F.SilkS near here.
 OLD_SPARK_BBOX = (126.0, 98.0, 132.0, 104.0)
 
@@ -119,7 +121,13 @@ def phase2():
         ref.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(REF_SIZE), pcbnew.FromMM(REF_SIZE)))
         ref.SetTextThickness(pcbnew.FromMM(0.1))
         ref.SetTextAngle(pcbnew.EDA_ANGLE(0))
-        fp.Value().SetVisible(False)
+        # Hide every footprint field except the reference. The BOM workflow
+        # left the LCSC part-number field (and others) visible on F.SilkS at
+        # full 1.27mm, so 25 part codes piled on top of the designators ->
+        # illegible. Silk should carry only the curated ref + our labels.
+        for f in fp.GetFields():
+            if f.GetName() != "Reference":
+                f.SetVisible(False)
         txt = ref.GetText()
         w = max(0.6, len(txt) * REF_SIZE * 0.75)
         h = REF_SIZE
@@ -139,7 +147,10 @@ def phase2():
                     continue
                 if any(overlaps(rb, o) for o in obst):
                     continue
-                if any(overlaps(rb, o) for o in placed):
+                # keep a small gap between adjacent refs so they can't pack
+                # edge-to-edge (which reads as a collision and trips DRC).
+                if any(overlaps(rb, (o[0] - 0.2, o[1] - 0.2,
+                                     o[2] + 0.2, o[3] + 0.2)) for o in placed):
                     continue
                 best = (px, py, rb)
                 break
