@@ -3178,7 +3178,7 @@
 			(uuid "aff9dd54-8806-42ac-9ad0-68937441c7ec")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/LED_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -3483,7 +3483,7 @@
 			(uuid "032b1b20-02cb-4991-b07c-093b2b0deeb4")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/LED_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -5571,7 +5571,7 @@
 			(uuid "5ad780ca-f76a-4407-9955-5478beb01e9a")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/LED_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -6813,7 +6813,7 @@
 			(uuid "c49381d5-6fe9-4bbd-9428-e153f38f70c6")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/LED_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -7673,7 +7673,7 @@
 			)
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/RF_Module.3dshapes/ESP32-C3-WROOM-02.step"
+		(model "${KIPRJMOD}/lib/3dshapes/ESP32-C3-WROOM-02.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8496,7 +8496,7 @@
 			(uuid "9dc9ca86-5b61-4645-9be0-76568d72da9a")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/LED_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8763,7 +8763,7 @@
 			(uuid "f5598a48-c243-496e-912f-6188c54d3b33")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-223.step"
+		(model "${KIPRJMOD}/lib/3dshapes/SOT-223.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -9231,7 +9231,7 @@
 			(uuid "f247d651-ad15-4481-956c-9f6ba9c5a043")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/R_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -11760,7 +11760,7 @@
 			(uuid "70411854-c67a-4458-9a68-5b1afbfce9c4")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0805_2012Metric.step"
+		(model "${KIPRJMOD}/lib/3dshapes/R_0805_2012Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -12159,7 +12159,7 @@
 			(uuid "fb1be93f-b4e2-4062-ad23-6f754d754484")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_XKB_U262-16XN-4BVC11.step"
+		(model "${KIPRJMOD}/lib/3dshapes/USB_C_XKB_U262-16XN-4BVC11.step"
 			(offset
 				(xyz 0 0 0)
 			)

@@ -1,5 +1,12 @@
 # ESP32 MCU
 
+> ⚠️ **v2 (as-built): ESP32-C3-WROOM-02-N4** (LCSC C2934560), swapped in during
+> the v2 cost-down redesign — see the v2 change set in
+> [`ROADMAP.md`](../../ROADMAP.md). The C3 has a **native USB-Serial-JTAG**
+> controller, so the CH340C bridge + auto-reset FETs were deleted (flash/monitor
+> run straight over USB-C). The WROOM-32E rationale below is retained for v1
+> history; where it disagrees with the schematic, the schematic wins.
+
 ESP32-WROOM-32E-N4 module (WiFi+BT, 4MB flash) used directly rather than as a
 dev board — the module integrates antenna, crystal, and RF matching, so the
 board only needs to supply power, boot configuration, and GPIO breakout.

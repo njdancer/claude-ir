@@ -412,6 +412,58 @@ def check_polarity(fresh_net):
                          f"{n} invariants / {len(POLARITY)} parts"))
 
 
+# KiCad page sizes (landscape mm). The schematic plotter crops to the sheet,
+# so a symbol parked beyond these extents silently vanishes from the exported
+# PDF/SVG while staying electrically valid (wired by net labels) — ERC has no
+# rule for it. That's exactly how the v2 IC-swap scripts hid U3/U1/U5 off the
+# A4 right edge (2026-06-14). This check is the missing gate.
+PAGE_MM = {
+    "A0": (1189, 841), "A1": (841, 594), "A2": (594, 420),
+    "A3": (420, 297), "A4": (297, 210), "A5": (210, 148),
+    "A": (279.4, 215.9), "B": (431.8, 279.4),
+    "USLetter": (279.4, 215.9), "USLegal": (355.6, 215.9),
+}
+
+
+def check_page_extents():
+    print("\n== schematic page extents ==")
+    text = open(SCH).read()
+    m = re.search(r'\(paper "([^"]+)"(\s+portrait)?\)', text)
+    if not m:
+        print("  SKIP: no (paper ...) directive found")
+        return
+    size, portrait = m.group(1), bool(m.group(2))
+    if size not in PAGE_MM:
+        print(f"  SKIP: unknown paper size {size!r}")
+        return
+    w, h = PAGE_MM[size]
+    if portrait:
+        w, h = h, w
+    tol = 1.0  # mm: allow a hair of overhang for label/symbol body
+    off = []
+    for sm in re.finditer(r'\(symbol\s*\(lib_id "[^"]+"\)\s*\(at '
+                          r'(-?[\d.]+) (-?[\d.]+)', text):
+        x, y = float(sm.group(1)), float(sm.group(2))
+        tail = text[sm.end():sm.end() + 1500]
+        rm = re.search(r'\(property "Reference" "([^"]+)"', tail)
+        ref = rm.group(1) if rm else "?"
+        if ref.startswith("#"):   # power/flag pseudo-symbols
+            continue
+        if x < -tol or x > w + tol or y < -tol or y > h + tol:
+            off.append((ref, x, y))
+    if off:
+        detail = ", ".join(f"{r}({x:.0f},{y:.0f})" for r, x, y in sorted(off))
+        failures.append(("page", f"{len(off)} symbol(s) off the {size} sheet "
+                         f"({w:.0f}x{h:.0f}mm) — cropped from the exported "
+                         f"PDF/SVG: {detail}"))
+        print(f"  FAIL: {len(off)} symbol(s) off-sheet: {detail}")
+    else:
+        print(f"  OK: all placed symbols within the {size} sheet "
+              f"({w:.0f}x{h:.0f}mm)")
+    summary_rows.append(("page extents", "FAIL" if off else "PASS",
+                         f"{len(off)} off-sheet ({size})"))
+
+
 def check_models():
     print("\n== 3D model paths (WARN-only) ==")
     text = open(PCB).read()
@@ -466,6 +518,7 @@ def main():
         fresh = check_netlist(tmp)
         check_bom(fresh)
         check_polarity(fresh)
+        check_page_extents()
         check_models()
 
         candidate = {**erc_base, **drc_base}

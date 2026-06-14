@@ -1,5 +1,11 @@
 # Hardware Engineering Notes
 
+> ⚠️ **The board is now the v2 ESP32-C3 cost-down redesign** (ESP32-C3-WROOM-02,
+> AMS1117 LDO, AHT20 sensor, SMD USB-C; CH340C/JTAG/buck removed). Several notes
+> below still describe the v1 WROOM-32E architecture and are being updated. The
+> as-built description is the v2 change set in [`ROADMAP.md`](../../ROADMAP.md);
+> where a note disagrees with the schematic, the schematic wins.
+
 Design rationale for the ESP32 IR Remote Control Development Board (v1.1).
 
 **Source of truth: the KiCad project** (`hardware/esp32-ir-remote.kicad_sch` /
