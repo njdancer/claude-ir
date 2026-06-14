@@ -19,15 +19,11 @@ Restructure approach (full rationale + zone table in
 [`hardware/notes/layout.md`](hardware/notes/layout.md) "v2 enclosure-driven
 floorplan"):
 
-- **Enclosure decided:** standard Hammond ABS box, **end-panel 1591 series**
-  (IR out one end panel, USB-C out the other; shelf-sitting facing the AC).
-  KiCad's bundled 1593K template is too small (PCB pattern only ~28×28 mm).
-- [ ] **DECISION GATE (Nick — purchase + fixes board size):** confirm exact
-      Hammond part. Recommend **1591A-class (~100×50×21 mm ext → ~90×44 mm
-      board)** for a long-thin layout that also separates the noisy power/USB
-      end from the EMI-sensitive IR-RX/sensor end. 1551-series if he wants
-      smaller (tighter for the 2×5 headers + bent 5 mm LEDs).
-- [ ] Set Edge.Cuts + mounting holes to the chosen box's PCB envelope.
+- **Enclosure decided (Nick, 2026-06-14):** **custom 3D-printed, tailored to
+  the board** — no stock box, no purchase gate. Free outline: shape it to the
+  component layout; place 4× M3 holes wherever the floorplan makes convenient
+  (the print adapts). Long-thin still preferred for EMF separation.
+- [ ] **Free outline + 4 M3 holes** sized to the zoned floorplan (Edge.Cuts).
 - [ ] **Schematic → 6 hierarchical sheets** (power / mcu / ir-tx / ir-rx /
       sensor / io), zones 1:1 with the floorplan. KiCad GUI, **not** s-expr
       scripting (that caused the off-sheet render bug). Gate: empty `.net`
@@ -36,6 +32,10 @@ floorplan"):
       re-run `pcb_router.py → pcb_pour.py → pcb_silk.py`. **Render to Nick
       before routing** (H2.2 exit criterion). Wins: shorter traces, smaller
       footprint, cleaner IR-drive return, better EMF.
+- [ ] **Underside metadata block (B.SilkS)** via `pcb_silk.py`: Claude
+      starburst logo footprint (author via `bitmap2component` — not in tree
+      yet) + "Designed by Claude" + board rev `v2` + auto-stamped git
+      short-hash + gen date + URL. See layout.md "Underside metadata block".
 - Note: v1 order package (`order/v2.0` tagging) is paused behind this — no
   point freezing an outline we're about to change.
 

@@ -101,14 +101,31 @@ cluster, and ~⅓ of the 80×55 mm board empty. This restructure reverses that:
 place + route within each zone.** The zones below are 1:1 with the planned
 hierarchical schematic sheets, so the schematic split *is* the floorplan.
 
-**Enclosure:** Hammond ABS project box, **end-panel family (1591 series)** —
-TBD exact part (purchase, pending Nick). The board sits on a shelf facing the
-AC; IR fires horizontally out one short **end panel**, USB-C exits the
-opposite end. Board outline = the chosen box's internal PCB envelope;
-mounting holes = the box's molded standoff pattern. Long-thin form factor
-(≈90×44 for a 1591A-class box) also physically separates the noisy
-power/USB end from the EMI-sensitive IR-RX/sensor end — better EMF, shorter
-returns.
+**Enclosure (decided 2026-06-14, Nick):** assume a **custom 3D-printed
+enclosure tailored to the board** — so the board is NOT constrained to a
+stock box. Shape the outline to suit the component layout (the zones below),
+and place **4× M3 mounting holes wherever the floorplan makes them
+convenient** (≥2.5 mm from edges/copour, clear of courtyards); the printed
+enclosure adapts to wherever they land. Free outline removes the prior
+purchase/size gate entirely. Still target a tidy, compact shape — long-thin
+remains attractive because it separates the noisy power/USB end from the
+EMI-sensitive IR-RX/sensor end (better EMF, shorter returns) — but it is now
+a design choice, not a box constraint.
+
+**Underside metadata block (B.SilkS, new requirement):** the board carries no
+branding today (front has only the title + URL; `pcb_silk.py` phase-1 strips
+all board texts). Add a back-silk block in a free region of the GND pour:
+- **Claude starburst icon** + **"Designed by Claude"** (orange on the
+  website; mono silk here). Icon must be authored as a B.SilkS logo footprint
+  (`bitmap2component` from a mono starburst) — it does not exist in the
+  hardware tree yet.
+- **Board rev** (`v2`), **git short-hash + dirty flag** of the generating
+  commit (auto-stamped by the silk step via `git rev-parse --short HEAD`, so
+  it never goes stale — it trails its own commit by one, which is
+  conventional and fine), **generation date**, project URL, and the
+  non-commercial/"directed by Nick Dancer" line to match the site.
+Implement inside `pcb_silk.py` (extend `LABELS` with a B.SilkS group +
+a stamping helper) so it regenerates with every pipeline run.
 
 **Functional zones (long-thin board, IR end = "front"):**
 
