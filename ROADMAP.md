@@ -53,6 +53,20 @@ verified: D2..D5 fire +67.5/+22.5/−22.5/−67.5° around east), TSOP off the L
 column, ground plane reclaimed (B-signal 40%→24%, critical nets F-pinned),
 status LEDs clustered + captioned, underside metadata block (logo + stamped
 rev/commit/date/URL). **Remaining (blocked or polish):**
+- [ ] **Relocate IR-RX off the TX corner (Mac/KiCad, decided 2026-06-14 w/
+      Nick).** U4 (TSOP) is currently at (175,73), ~11 mm from D2 and ~19 mm
+      from Q3 — near-field, so it saturates during self-TX (clipped, not clean
+      loopback timing) and the most EMI-sensitive part sits in the 400 mA/38 kHz
+      drive loop. **Move U4 + R27/C9 to the south long edge, target ~(150,111),
+      lens facing south (+y), ≥20 mm from Q3 and every IR LED**, keeping the
+      RC filter within ~3 mm of the Vs pin (full rationale: `layout.md`
+      constraint 6 + `notes/ir-receiver.md`). This breaks U4's existing routes,
+      so it's a re-run of the PCB pipeline (rip U4/R27/C9 + their tracks →
+      `pcb_place_v2` re-seat → `pcb_router` → `pcb_stub_heal` → `pcb_pour` →
+      DRC), then ERC + netlist freshness via CI. Also: add an enclosure optical
+      baffle rib between the TX (east) and RX (south) windows; route IR_RX_OUT
+      back to U3 clear of the IR drive loop. Schematic is unaffected (placement
+      only); netlist diff should be electrically empty.
 - [ ] **CI baseline refresh** — every count drifted (full restructure); must
       run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
       (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
