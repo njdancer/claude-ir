@@ -36,6 +36,14 @@ IR_NETS = {"IR_DRAIN", "EXT_IR_A", "/EXT_IR_A", "Net-(D2-A)", "Net-(D3-A)",
 # hardest so they stay over continuous ground. (SI review, 2026-06-14.)
 F_PREFER = {n.lstrip("/") for n in
             {"IR_RX", "IR_RX_VS", "USB_D+", "USB_D-", "IR_DRAIN"}}
+# The USB differential pair is HARD-forbidden from B.Cu (not merely penalised):
+# any B.Cu segment slots the ground it references, and the pair routes cleanly
+# on F.Cu. The receiver nets get a STRONG penalty instead of a hard ban — the
+# status-LED cluster sits between U4 (S edge) and U3, so IR_RX needs the option
+# of one short crossing; the high penalty makes it take the shortest possible
+# F.Cu route and only dip to B.Cu where genuinely blocked. (SI review.)
+HARD_F = {n.lstrip("/") for n in {"USB_D+", "USB_D-"}}
+STRONG_F = {n.lstrip("/") for n in {"IR_RX", "IR_RX_VS"}}
 
 def net_widths(name):
     """(track half-width, via diameter, via drill) in mm."""
@@ -47,15 +55,16 @@ def net_widths(name):
 
 # short, position-locked local families first; long flexible transit last
 ROUTE_ORDER_HEAD = [
-    "Net-(U1-SW)", "Net-(U1-BST)",
-    "Net-(Q1-B)", "Net-(Q2-B)", "Net-(Q1-E)", "Net-(Q2-E)",
-    "Net-(U2-~{DTR})", "Net-(U2-~{RTS})",
+    # SI-critical first: the USB pair + receiver win clean, short F.Cu paths
+    # over solid ground before the board congests (SI review, 2026-06-14).
+    # (v1 buck/CH340/dropped-LED nets removed — they no longer exist.)
+    "USB_D-", "USB_D+", "IR_RX", "IR_RX_VS",
     "Net-(Q3-G)", "Net-(D10-A)",
     "Net-(D11-K)", "Net-(D11-A)", "Net-(D12-K)", "Net-(D12-A)",
-    "Net-(D6-A)", "Net-(D7-A)", "Net-(D8-A)", "Net-(D9-A)",
-    "Net-(J2-CC1)", "Net-(J2-CC2)", "Net-(JP1-B)", "IR_RX_VS",
+    "Net-(D6-A)", "Net-(D7-A)",
+    "Net-(J2-CC1)", "Net-(J2-CC2)", "Net-(JP1-B)",
     "Net-(D2-A)", "Net-(D3-A)", "Net-(D4-A)", "Net-(D5-A)", "EXT_IR_A",
-    "USB_D-", "USB_D+", "Net-(F1-Pad2)", "+5V", "IR_DRAIN",
+    "Net-(F1-Pad2)", "+5V", "IR_DRAIN",
     "ESP_EN",
 ]
 ROUTE_ORDER_TAIL = ["+3.3V"]
@@ -260,7 +269,9 @@ def main():
         name = net_names[nc]
         pads = net_pads[nc]
         hw, via_d, via_drill = net_widths(name)
-        if name.lstrip("/") in F_PREFER:
+        if name.lstrip("/") in STRONG_F:
+            LAYER_PENALTY = {F: 0.0, B: 20.0}   # shortest-possible crossing only
+        elif name.lstrip("/") in F_PREFER:
             LAYER_PENALTY = {F: 0.0, B: 1.0}    # critical: keep over ground
         elif name in POWER_NETS:
             LAYER_PENALTY = {F: 0.0, B: 0.35}   # power prefers F, B if needed
@@ -282,6 +293,8 @@ def main():
             return blocked, vb
 
         blocked, viabad = build_masks(hw)
+        if name.lstrip("/") in HARD_F:
+            blocked[B][:, :] = True      # F.Cu only — keep over solid ground
 
         # connect pads greedily: blob starts at pad 0
         blob = set(net_pads[nc][0][1]) | net_seed_cells.get(nc, set())

@@ -52,9 +52,9 @@ ANCHORS = {
     # --- North edge (clear apart from the central antenna keepout x136-164) ---
     "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
     "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
-    # --- TSOP receiver: NORTH edge, far from the LED column (anti-blind);
-    #     faces north/room, rotation tuned by render ---
-    "U4":  (175.0, 73.0, 0),
+    # --- TSOP receiver: SOUTH long edge (relocated off the TX corner, 1fc1f68);
+    #     lens fires south/room, isolated from the 38kHz drive loop ---
+    "U4":  (153.0, 110.5, 180),
     # --- South / west: power jumper, buttons, sensor ---
     "JP1": (110.0, 110.0, 0),    # LDO-disable jumper near U1
     "SW1": (120.0, 109.0, 0),    # RESET
