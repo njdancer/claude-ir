@@ -654,6 +654,27 @@ separately:
    (`esp32-ir-remote_bom.csv`, with DNP column); `BOM.md` demoted to
    rationale-only.
 
+### Tooling: sticky PR comment with renders + stats (2026-06-14)
+
+Every PR now gets one auto-updating sticky comment (`pr-comment` job in
+`ci.yml`, non-gating). It shows board renders (top/bottom/iso) plus
+hardware (ERC/DRC vs baseline, board dimensions/layers, netlist comp/net
+counts, BOM LCSC coverage), BOM cost/stock, firmware flash/RAM per env, and
+app unit-test counts. Each section degrades to a "—" row if its facts file
+is missing, and it runs even when an upstream job failed (`always()`) so a
+red PR still shows the board. Pieces:
+- `scripts/ci/pr_report.py` assembles the Markdown from facts JSONs +
+  parses the PCB Edge.Cuts bbox for dimensions (reuses `hardware_validate`'s
+  sexp parser). `hardware_validate.py --json` emits the hardware facts;
+  `firmware_size.py` / `app_facts.py` parse the build/test logs.
+- GitHub markdown can't inline workflow artifacts, so renders are pushed to
+  a long-lived **`pr-assets`** orphan branch (`publish_pr_assets.sh`, one
+  `pr-<N>/` subdir per PR, overwritten each run) and embedded via
+  raw.githubusercontent. Cache-busted by `?<sha>`. Repo is public so this
+  works without auth. Comment posted by `marocchino/sticky-pull-request-comment`.
+- Caveat: fork PRs get a read-only token, so the branch push + comment would
+  fail there; fine for this repo's same-repo `claude/*` branches.
+
 ### Tooling: 3D viewer now shows real STEP colors (2026-06-11)
 
 The flat one-color-per-component look of the Pages 3D viewer was a KiCad 9
