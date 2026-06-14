@@ -28,8 +28,25 @@ passes (app, **hardware**, bom-report, firmware). State:
 - **Next (Nick's bench / $$):** order-time JLC-preview verification of the
   flagged rotations (U3 ESP32-C3 MCU especially, U5 AHT20, J2 USB-C datum),
   then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
-  place the 5-board JLCPCB assembly order. Optional polish: vendor the 5
-  missing 3D STEP models (USB-C/LED_0805/SOT-223/ESP32-C3/R_0805 — WARN-only).
+  place the 5-board JLCPCB assembly order. Optional polish: vendor the 4
+  remaining missing 3D STEP models (LED_0805/SOT-223/ESP32-C3/R_0805 —
+  WARN-only).
+
+✅ **J2 USB-C 3D model vendored + seated (2026-06-14).** The XKB U262 footprint
+referenced a stock-library STEP (`${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/
+…U262-16XN-4BVC11.step`) that doesn't ship in the macOS KiCad bundle and isn't
+`${KIPRJMOD}`-relative → J2 dropped from the 3D viewer/renders ("Could not add
+3D model for J2"), the same broken-path class as the "only the inductor
+rendered" lesson. Fix: pulled the XKB U262 EasyEDA STEP (C319148) via the jlcpcb
+MCP, vendored it to `hardware/lib/3dshapes/USB_C_Receptacle_XKB_U262-16XN-4BVC11.step`,
+repointed J2 `${KIPRJMOD}`-relative, and aligned it by exporting the board to GLB
+and measuring the connector mesh in board coords (the proven AM2302 method):
+**offset (0 −2.087 −0.745), rotate (0 0 180)** seats the shell flat on the board
+(z 0.000–4.10), centered on the pad row (x 130.53–139.47, center 135.0), opening
+overhanging the south edge. Diff is the `(model …)` block only — copper/pads/
+nets/DRC and fab CPL/gerbers (pad-driven) all unchanged. NOTE: the fitted part is
+the cheaper SHOU HAN TYPE-C16PIN (C393939, the BOM's cost-down pick) on the same
+standard 16P land pattern; the XKB U262 body is a correct dimensional 3D proxy.
 
 ---
 

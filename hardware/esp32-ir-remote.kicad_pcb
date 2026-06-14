@@ -12159,15 +12159,15 @@
 			(uuid "fb1be93f-b4e2-4062-ad23-6f754d754484")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_XKB_U262-16XN-4BVC11.step"
+		(model "${KIPRJMOD}/lib/3dshapes/USB_C_Receptacle_XKB_U262-16XN-4BVC11.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -2.087 -0.745)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz 0 0 180)
 			)
 		)
 	)
