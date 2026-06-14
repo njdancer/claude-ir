@@ -53,6 +53,22 @@ verified: D2..D5 fire +67.5/+22.5/−22.5/−67.5° around east), TSOP off the L
 column, ground plane reclaimed (B-signal 40%→24%, critical nets F-pinned),
 status LEDs clustered + captioned, underside metadata block (logo + stamped
 rev/commit/date/URL). **Remaining (blocked or polish):**
+- [x] **Relocated IR-RX off the TX corner (2026-06-14, done w/ Nick).** U4
+      (TSOP) was at (175,73), ~11 mm from D2 and ~19 mm from Q3 — near-field,
+      so it saturated during self-TX (clipped, not clean loopback timing) and
+      the most EMI-sensitive part sat in the 400 mA/38 kHz drive loop. **Moved
+      U4 → south long edge (153.0, 110.5), rot 180 (lens fires south/outward);
+      Vs filter in-line west: C9 (144.5, 110.5), R27 (140.0, 110.5).**
+      Separation now **31 mm to Q3, 34–46 mm to D2–D5** (rationale: `layout.md`
+      constraint 6 + `notes/ir-receiver.md`). Done in a fresh KiCad 10.0.3
+      install in this remote container (apt + kicad-10 PPA), full pipeline
+      re-run (rip → `pcb_router` → `pcb_stub_heal` → `pcb_pour`); **DRC = 0
+      errors**, 1 unconnected = the pre-existing accepted USB_D+ J2/A6 item
+      (unrelated to U4). Schematic untouched → netlist unchanged. **Still owed:
+      enclosure optical baffle rib between TX (east) and RX (south) windows;
+      CI baseline refresh (below) since the full re-route + silk drifted
+      counts — must run in `kicad/kicad:10.0.2` (this env lacks the global libs
+      → inflates lib_footprint_issues, so don't refresh the baseline here).**
 - [ ] **CI baseline refresh** — every count drifted (full restructure); must
       run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
       (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
@@ -76,11 +92,18 @@ rev/commit/date/URL). **Remaining (blocked or polish):**
       - **Per-LED captions** — the single "STATUS" word was useless. Replaced
         with abbreviated function captions under each status LED, anchored to
         the footprint (`STATUS_FN` in `pcb_silk.py`, tracks re-layout):
-        D6=`5V`, D7=`3V3`, D10=`IR`, D11=`USR1`, D12=`USR2` (mapping verified
+        D6=`5V`, D7=`3V3`, D10=`TX`, D11=`USR1`, D12=`USR2` (mapping verified
         against the netlist: D6/D7 = +5V/+3V3 rails, D10 = IR_TX/GPIO5,
         D11/D12 = USER_LED1/2 on GPIO3/4). `status-leds.md` rewritten v1→v2
         (was still documenting the deleted serial + blue-MOSFET LEDs). DRC
         still 0 silk_overlap / 0 silk_over_copper.
+      - **Merged main (PR #22, IR-RX relocation) into this branch:** the new
+        U4 (IR receiver) at (153,110.5) sits directly below the LED-caption
+        row, so the silk was regenerated against main's board (took main's
+        electrical state verbatim — diff vs main is silk-only, 0 electrical
+        lines — and re-ran `pcb_silk.py`). Caught in review: D10's `IR` caption
+        would read as if it labelled the adjacent receiver, so **D10 → `TX`**
+        (transmit activity; the serial-TX LED that could've clashed is gone).
       - **Git "-dirty" stamp on published assets** — root cause: `pcb_silk.py`
         bakes the silk git line on a dirty tree, so the committed board (which
         CI renders) always reads "-dirty" + the *parent* hash. Fix:

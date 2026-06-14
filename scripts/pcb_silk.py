@@ -32,8 +32,9 @@ LABELS = [
 # Anchored to the footprint position, not hardcoded x, so they track re-layout.
 #   D6  +5V rail / USB power present      D11 user LED 1 (GPIO3)
 #   D7  +3.3V rail present                D12 user LED 2 (GPIO4)
-#   D10 IR-TX activity (GPIO5)
-STATUS_FN = {"D6": "5V", "D7": "3V3", "D10": "IR", "D11": "USR1", "D12": "USR2"}
+#   D10 IR-TX activity (GPIO5)  -> "TX": U4 (the IR *receiver*) now sits right
+#       below this row, so "IR" would read as if it labelled the receiver.
+STATUS_FN = {"D6": "5V", "D7": "3V3", "D10": "TX", "D11": "USR1", "D12": "USR2"}
 STATUS_FN_DY = 4.0       # mm below the LED centre (clear of the ref below it)
 STATUS_FN_SIZE = 0.7
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
