@@ -10,7 +10,32 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-🟢 **BOARD v2 — ESP32-C3 cost-down redesign IN PROGRESS (2026-06-13, Nick:
+✅ **BOARD v2 — ESP32-C3 cost-down redesign COMPLETE & CI-GREEN
+(2026-06-14).** Schematic + PCB + validation all done on PR #11; every CI job
+passes (app, **hardware**, bom-report, firmware). State:
+- **Schematic:** ESP32-C3 + AMS1117 LDO + AHT20 + SMD USB-C (XKB U262), all
+  the deletes/swaps done. `golden_netlist_v2.py` GOLDEN OK (36/36), ERC
+  0err/1warn.
+- **PCB:** fully routed (grid A* router, no freerouting), **0 unconnected**,
+  GND poured both layers with per-pad solid connection + stitched/island-tied
+  vias. DRC = only the 3 baseline-accepted (H1-in-C3-antenna-keepout). Silk
+  auto-placed (overlap 44→35). Reproducible pipeline:
+  `rip → pcb_place_v2 → pcb_router → pcb_pour` (+ `pcb_silk`, `pcb_swap_usbc`).
+- **Validation:** POLARITY truth table rebuilt for v2 (43 invariants/16 parts,
+  verified live); `fab-outputs.py` HAND_SOLDER kit (4×IR LED + TSOP + headers)
+  + JLC_ROTATION/OFFSET (incl. USB-C +1.44mm datum) refreshed; `ci-baseline.json`
+  regenerated in kicad:10.0.2 (`hardware_validate.py` EXIT 0 in-container).
+- **Next (Nick's bench / $$):** order-time JLC-preview verification of the
+  flagged rotations (U3 ESP32-C3 MCU especially, U5 AHT20, J2 USB-C datum),
+  then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
+  place the 5-board JLCPCB assembly order. Optional polish: vendor the 5
+  missing 3D STEP models (USB-C/LED_0805/SOT-223/ESP32-C3/R_0805 — WARN-only).
+
+---
+
+### v2 change set + cost rationale (reference, as-built)
+
+🟢 **BOARD v2 — ESP32-C3 cost-down redesign (2026-06-13, Nick:
 "build it as cheaply as possible, any redesign OK").** The v1.4 BOM is
 **$16.2/board**, 65% of it just two parts: AM2302 ($6.83) + WROOM-32E
 ($3.78). v2 attacks the architecture, not just parts. Target **~$7.3/board
