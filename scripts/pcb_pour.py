@@ -34,9 +34,20 @@ def main():
     gnd = board.FindNet("GND")
     assert gnd, "GND net missing"
 
-    # drop pre-existing zones (idempotent reruns)
-    for z in list(board.Zones()):
+    # drop pre-existing zones AND prior GND stitching vias (idempotent reruns —
+    # GND is never routed, only poured + stitched, so every GND via is ours;
+    # leaving them means each rerun double-stitches and the headless filler
+    # eventually segfaults).
+    gnd_code0 = gnd.GetNetCode()
+    # snapshot BOTH lists before any Remove() — removing a zone corrupts the
+    # SWIG iterator so a later board.GetTracks() returns an untyped object.
+    old_zones = list(board.Zones())
+    old_gnd_vias = [t for t in board.GetTracks()
+                    if isinstance(t, pcbnew.PCB_VIA) and t.GetNetCode() == gnd_code0]
+    for z in old_zones:
         board.Remove(z)
+    for v in old_gnd_vias:
+        board.Remove(v)
 
     # --- antenna keepout rule areas (both layers) -----------------------
     ko = pcbnew.ZONE(board)
