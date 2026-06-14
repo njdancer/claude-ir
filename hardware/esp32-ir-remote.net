@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-14T10:14:09")
+		(date "2026-06-14T11:03:06")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -1835,13 +1835,13 @@
 		(comp
 			(ref "R6")
 			(value "10kΩ")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(description "Resistor")
 			(fields
 				(field
-					(name "LCSC") "C17902")
+					(name "LCSC") "C17414")
 				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1855,7 +1855,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17902")
+				(value "C17414")
 			)
 			(property
 				(name "Sheetname")
@@ -1895,12 +1895,12 @@
 		(comp
 			(ref "R7")
 			(value "10kΩ")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
-					(name "LCSC") "C17902")
+					(name "LCSC") "C17414")
 				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -1915,7 +1915,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C17902")
+				(value "C17414")
 			)
 			(property
 				(name "Sheetname")
