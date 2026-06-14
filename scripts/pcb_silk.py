@@ -77,15 +77,21 @@ def phase1():
         for g in fp.GraphicalItems():
             if isinstance(g, pcbnew.PCB_SHAPE) and g.GetLayer() == pcbnew.F_SilkS:
                 rm.append((fp, g))
+    # existing logo footprint(s) — remove so phase2 re-adds exactly one
+    # (idempotent; otherwise re-runs duplicate it and the placer drifts a copy)
+    old_logos = [fp for fp in b.GetFootprints()
+                 if "Claude_Spark" in fp.GetValue()]
     for t in texts:
         b.Remove(t)
     for d in spark:
         b.Remove(d)
+    for fp in old_logos:
+        b.Remove(fp)
     for fp, g in rm:
         fp.Remove(g)
     pcbnew.SaveBoard(BOARD_PATH, b)
     print(f"phase1: removed {len(texts)} texts, {len(spark)} spark polys, "
-          f"{len(rm)} passive outlines")
+          f"{len(old_logos)} old logos, {len(rm)} passive outlines")
 
 
 def phase2():

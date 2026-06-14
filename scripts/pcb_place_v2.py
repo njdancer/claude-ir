@@ -84,7 +84,9 @@ def main():
             net_anchor.setdefault(pad.GetNetCode(), []).append(
                 (ref, pcbnew.ToMM(p.x), pcbnew.ToMM(p.y)))
 
-    movable = [f for r, f in fps.items() if r not in FIXED_REFS]
+    # the back-silk logo (added by pcb_silk) is a fixed graphic, never re-seated
+    movable = [f for r, f in fps.items()
+               if r not in FIXED_REFS and "Claude_Spark" not in f.GetValue()]
 
     # anchor degree = how many distinct nets each anchor touches (hub vs leaf).
     # A series element bridging two single-anchor nets (e.g. an LED's current-
