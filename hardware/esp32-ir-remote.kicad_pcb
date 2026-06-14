@@ -12584,14 +12584,14 @@
 	)
 	(footprint "Claude_Spark_Logo"
 		(layer "B.Cu")
-		(uuid "32dfbc6d-5951-4413-8a8a-1340c9d33dd4")
+		(uuid "e16da952-0d25-421c-a11a-d8f7bf1b36f5")
 		(at 152 84.3)
 		(property "Reference" "REF**"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "143b5aaf-0803-4ca5-9608-03b5fe83635c")
+			(uuid "95d29663-8879-4eee-8092-647f739409b7")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12605,7 +12605,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "8079d289-0ed0-4ea5-9710-41f580399305")
+			(uuid "c7a1f7d4-e2f1-4d01-abda-2457372a63cc")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12618,7 +12618,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "12432a22-cdcc-460b-aaff-7ccb3c3e8b81")
+			(uuid "926bbdff-4660-479b-b2b1-cbf579755c29")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12629,7 +12629,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "427872b8-ffd9-4da2-a804-f148c6729ae6")
+			(uuid "3407df75-bc57-453d-afb6-763a23645142")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12780,7 +12780,7 @@
 			)
 			(fill yes)
 			(layer "B.SilkS")
-			(uuid "00fa1400-3ed2-4833-a808-466753095220")
+			(uuid "8b51ebb8-2cf0-42bd-a5b7-925cbfe68bf4")
 		)
 		(embedded_fonts no)
 	)
@@ -12827,62 +12827,62 @@
 	(gr_text "5V"
 		(at 141 108 0)
 		(layer "F.SilkS")
-		(uuid "f8320fc3-8711-4760-9d85-04bbfbaa1c51")
+		(uuid "8722b4a9-60dd-49cd-a79e-cb35d7d4b87c")
 		(effects
 			(font
-				(size 0.7 0.7)
-				(thickness 0.116666)
+				(size 0.8 0.8)
+				(thickness 0.133333)
 			)
 		)
 	)
 	(gr_text "3V3"
 		(at 146 108 0)
 		(layer "F.SilkS")
-		(uuid "f5d7df22-157d-4e8b-a254-a539f5ecd10c")
+		(uuid "c59036c5-546a-4a9b-ba35-bf059b90e978")
 		(effects
 			(font
-				(size 0.7 0.7)
-				(thickness 0.116666)
+				(size 0.8 0.8)
+				(thickness 0.133333)
 			)
 		)
 	)
 	(gr_text "TX"
 		(at 151 108 0)
 		(layer "F.SilkS")
-		(uuid "24bc9471-b8fd-4a32-bbe6-719174a2154d")
+		(uuid "b83ccee0-9277-4bbe-acfa-b6e092f2f1df")
 		(effects
 			(font
-				(size 0.7 0.7)
-				(thickness 0.116666)
+				(size 0.8 0.8)
+				(thickness 0.133333)
 			)
 		)
 	)
 	(gr_text "USR1"
 		(at 156 108 0)
 		(layer "F.SilkS")
-		(uuid "b5fcfe1e-70d9-4e11-995b-40299cbae83c")
+		(uuid "349fc7e4-de90-4514-a0b9-f020b766ee6f")
 		(effects
 			(font
-				(size 0.7 0.7)
-				(thickness 0.116666)
+				(size 0.8 0.8)
+				(thickness 0.133333)
 			)
 		)
 	)
 	(gr_text "USR2"
 		(at 161 108 0)
 		(layer "F.SilkS")
-		(uuid "ddc6320a-916f-4cb7-9df3-1c8a12a01254")
+		(uuid "b43d3aea-f963-417a-aa96-60cc5510d3b6")
 		(effects
 			(font
-				(size 0.7 0.7)
-				(thickness 0.116666)
+				(size 0.8 0.8)
+				(thickness 0.133333)
 			)
 		)
 	)
 	(gr_text "ESP32-C3 IR REMOTE"
 		(at 150 73.5 0)
 		(layer "F.SilkS")
-		(uuid "1bfaeb43-ea20-4109-8565-e96ba8a1f57a")
+		(uuid "35d3eafd-4b74-4b3d-85c0-6581920cc133")
 		(effects
 			(font
 				(size 1 1)
@@ -12893,7 +12893,7 @@
 	(gr_text "ESP32-C3 IR Remote  rev v2"
 		(at 152 89.7 0)
 		(layer "B.SilkS")
-		(uuid "dfe4a4e8-fadb-4cd2-b90b-079e4c75d554")
+		(uuid "44e79495-3c04-4570-8882-c377fe1ce8b2")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12902,10 +12902,10 @@
 			(justify mirror)
 		)
 	)
-	(gr_text "2026-06-14  git ed8e97e-dirty"
+	(gr_text "2026-06-14  git b1f41e0-dirty"
 		(at 152 91.4 0)
 		(layer "B.SilkS")
-		(uuid "dcae71ed-5a23-4acf-a302-486a04e6cd96")
+		(uuid "08d18475-ad0d-415f-9924-5a27f2aef13d")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12917,7 +12917,7 @@
 	(gr_text "njdancer.github.io/claude-ir"
 		(at 152 93.1 0)
 		(layer "B.SilkS")
-		(uuid "60e7ab14-8bc0-4f88-ba13-0dabcd1967d3")
+		(uuid "a582ddc5-1e53-4f2a-af5e-35474675e1c3")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12929,7 +12929,7 @@
 	(gr_text "Non-commercial hobby project"
 		(at 152 94.8 0)
 		(layer "B.SilkS")
-		(uuid "82afe16f-52d8-4e64-86a8-49ad4622eec8")
+		(uuid "dbfa702b-8b44-46ca-bdc8-bc1bd91083f0")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12941,7 +12941,7 @@
 	(gr_text "Designed by Claude"
 		(at 152 88 0)
 		(layer "B.SilkS")
-		(uuid "82131af4-cccc-4eb5-b9c1-aa660e58140c")
+		(uuid "65642592-4bf1-437c-acc7-389ac074b830")
 		(effects
 			(font
 				(size 0.95 0.95)

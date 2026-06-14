@@ -36,7 +36,7 @@ LABELS = [
 #       below this row, so "IR" would read as if it labelled the receiver.
 STATUS_FN = {"D6": "5V", "D7": "3V3", "D10": "TX", "D11": "USR1", "D12": "USR2"}
 STATUS_FN_DY = 4.0       # mm below the LED centre (clear of the ref below it)
-STATUS_FN_SIZE = 0.7
+STATUS_FN_SIZE = 0.8     # min legible silk; <0.8 trips the text_height DRC rule
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
 LOGO_LIB = "hardware/libraries/Branding.pretty"
 LOGO_FP = "Claude_Spark_Logo"
