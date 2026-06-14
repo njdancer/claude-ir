@@ -27,8 +27,8 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (110.0, 74.0), "H2": (176.5, 80.5),
-         "H3": (110.0, 105.0), "H4": (182.5, 109.5)}
+HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
+         "H3": (110.0, 105.0), "H4": (177.5, 109.5)}
 
 # Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
 # render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
@@ -44,11 +44,11 @@ ANCHORS = {
     #     ±15/±45° around it. (x,y) here is the desired pad-CENTROID; main()
     #     shifts each LED so it pivots about its true centre and the row stays
     #     aligned while the beams fan. ---
-    "Q3":  (182.0, 88.0, 0),     # IR MOSFET driver, inboard of the LED column
-    "D2":  (191.0, 76.0, 315),   # +45° (N-most, fires NE)
-    "D3":  (191.0, 87.0, 285),   # +15°
-    "D4":  (191.0, 98.0, 255),   # -15°
-    "D5":  (191.0, 109.0, 225),  # -45° (S-most, fires SE)
+    "Q3":  (178.0, 92.0, 0),     # IR MOSFET driver, W of the LED row
+    "D2":  (186.0, 79.0, 315),  # +45 NE
+    "D3":  (186.0, 88.0, 285),  # +15
+    "D4":  (186.0, 97.0, 255),  # -15
+    "D5":  (186.0, 106.0, 225), # -45 SE
     # --- North edge (clear apart from the central antenna keepout x136-164) ---
     "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
     "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
