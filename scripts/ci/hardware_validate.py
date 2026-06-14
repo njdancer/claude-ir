@@ -21,6 +21,7 @@ on increase only; a decrease prints a reminder to refresh.
 Usage:
   python3 scripts/ci/hardware_validate.py                  # validate
   python3 scripts/ci/hardware_validate.py --update-baseline
+  python3 scripts/ci/hardware_validate.py --json facts.json  # PR-comment rollup
   KICAD_CLI=/path/to/kicad-cli ...                         # override CLI
 
 Exit codes: 0 ok, 1 violations/diffs found, 2 baseline missing (candidate
@@ -99,6 +100,7 @@ POLARITY = {
 failures = []  # list of (check, message)
 warnings = []
 summary_rows = []  # (check, status, detail) for the GitHub step summary
+facts = {}  # machine-readable rollup for the PR comment (--json)
 
 
 def find_kicad_cli():
@@ -340,6 +342,7 @@ def check_netlist(tmp):
     if ok:
         print(f"  OK: {len(cc)} components, {len(cp)} nets — committed netlist"
               " is electrically identical to the schematic")
+    facts["netlist"] = {"components": len(cc), "nets": len(cp), "fresh": ok}
     summary_rows.append(("netlist freshness", "PASS" if ok else "FAIL",
                          f"{len(fc)} comps / {len(fp)} nets"))
     return fresh
@@ -354,13 +357,14 @@ def check_bom(fresh_net):
             continue
         if not c["fields"].get("LCSC"):
             missing.append(f"{ref} ({c['value']})")
+    n_fitted = sum(1 for c in comps.values() if not c["dnp"])
     if missing:
         failures.append(("bom", "fitted parts without LCSC field: "
                          + ", ".join(missing)))
     else:
-        n = sum(1 for c in comps.values() if not c["dnp"])
-        print(f"  OK: all {n} fitted parts have LCSC codes"
+        print(f"  OK: all {n_fitted} fitted parts have LCSC codes"
               f" (allowlisted: {', '.join(sorted(NO_LCSC_OK))})")
+    facts["bom"] = {"fitted": n_fitted, "missing": missing}
     summary_rows.append(("BOM LCSC coverage", "FAIL" if missing else "PASS",
                          f"{len(missing)} missing"))
 
@@ -556,6 +560,19 @@ def main():
             details(erc_viol)
         if not drc_ok:
             details(drc_viol)
+
+        facts["erc"] = {"pass": erc_ok, "counts": candidate["erc"]}
+        facts["drc"] = {"pass": drc_ok, "counts": candidate["drc"],
+                        "unconnected": candidate["drc_unconnected"],
+                        "parity": candidate["drc_parity"]}
+
+    json_out = None
+    if "--json" in sys.argv:
+        i = sys.argv.index("--json")
+        json_out = sys.argv[i + 1] if i + 1 < len(sys.argv) else None
+    if json_out:
+        json.dump(facts, open(json_out, "w"), indent=1)
+        print(f"Wrote PR-comment facts to {json_out}")
 
     write_summary()
     print()

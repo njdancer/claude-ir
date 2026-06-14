@@ -11,6 +11,10 @@
 #   firmware  PlatformIO: native unit tests + ESP8266/ESP32 builds.
 #   app       Web UI: typecheck, unit tests, build, Playwright e2e.
 #   bom-report  Cost/stock telemetry from the JLCPCB API (non-gating).
+#   pr-comment  Non-gating: one sticky comment per PR with board renders +
+#             hardware/firmware/app/BOM stats, assembled from the facts
+#             artifacts the jobs above upload. Renders are hosted on the
+#             pr-assets branch so they embed in the comment.
 name: ci
 
 on:
@@ -52,7 +56,32 @@ jobs:
       - name: Validate design (ERC, DRC, netlist, BOM, models)
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          python3 scripts/ci/hardware_validate.py
+          python3 scripts/ci/hardware_validate.py --json hardware-facts.json
+      - name: Render board for PR comment
+        # Always, so a PR that fails ERC/DRC still shows the reviewer the
+        # board. Default (non-raytraced) render at a comment-friendly size;
+        # the high-quality fab renders live in the Pages deploy.
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        run: |
+          mkdir -p renders
+          PCB=hardware/esp32-ir-remote.kicad_pcb
+          kicad-cli pcb render --side top    -w 900 -h 700 -o renders/top.png    "$PCB"
+          kicad-cli pcb render --side bottom -w 900 -h 700 -o renders/bottom.png "$PCB"
+          kicad-cli pcb render --perspective --rotate ' -25,0,35' \
+            -w 900 -h 700 -o renders/iso.png "$PCB"
+      - name: Stage PR-comment inputs
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        run: |
+          mkdir -p _pr/renders
+          cp hardware-facts.json _pr/ 2>/dev/null || true
+          cp renders/*.png _pr/renders/ 2>/dev/null || true
+      - name: Upload PR-comment inputs
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-hardware
+          path: _pr/
+          if-no-files-found: warn
       - name: Regenerate fab package
         run: python3 scripts/fab-outputs.py --skip-renders
       - name: Upload fab package
@@ -83,7 +112,18 @@ jobs:
       - name: Native unit tests
         run: pio test -e native
       - name: Build ESP8266 + ESP32-C3 firmware
-        run: pio run -e nodemcuv2 -e esp32-c3
+        run: pio run -e nodemcuv2 -e esp32-c3 2>&1 | tee pio-build.log
+      - name: Firmware size facts for PR comment
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        run: |
+          python3 scripts/ci/firmware_size.py pio-build.log firmware-facts.json || true
+      - name: Upload firmware facts
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-facts
+          path: firmware-facts.json
+          if-no-files-found: warn
       - name: Python scripts compile check
         run: python3 -m compileall -q scripts analysis
 
@@ -107,9 +147,20 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
       - name: Unit tests
-        run: pnpm test
+        run: pnpm test 2>&1 | tee vitest.log
       - name: Build
         run: pnpm build
+      - name: App facts for PR comment
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        run: |
+          python3 ../scripts/ci/app_facts.py vitest.log build/client app-facts.json || true
+      - name: Upload app facts
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-facts
+          path: app/app-facts.json
+          if-no-files-found: warn
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
       - name: E2E tests
@@ -139,3 +190,53 @@ jobs:
         with:
           name: bom-report
           path: _bom/
+
+  # Assemble a single sticky comment on every PR: board renders + hardware /
+  # firmware / app / BOM stats, pulled from the facts artifacts the jobs above
+  # upload. Runs even when an upstream job failed (always()) so reviewers still
+  # get the board picture and whatever facts were produced. Each section
+  # degrades to a "—" row if its facts file is missing.
+  pr-comment:
+    needs: [hardware, firmware, app, bom-report]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # push renders to the pr-assets branch
+      pull-requests: write      # create/update the sticky comment
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download facts + renders
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          path: _artifacts
+      - name: Publish renders to pr-assets branch
+        id: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          RENDER_DIR: _artifacts/pr-hardware/renders
+        run: bash scripts/ci/publish_pr_assets.sh
+      - name: Assemble comment
+        run: |
+          python3 scripts/ci/pr_report.py \
+            --pcb hardware/esp32-ir-remote.kicad_pcb \
+            --hardware _artifacts/pr-hardware/hardware-facts.json \
+            --bom _artifacts/bom-report/bom-report.json \
+            --firmware _artifacts/firmware-facts/firmware-facts.json \
+            --app _artifacts/app-facts/app-facts.json \
+            --renders-url "${{ steps.publish.outputs.renders_url }}" \
+            --sha "${{ github.event.pull_request.head.sha }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > comment.md
+          cat comment.md
+      - name: Post sticky comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-board-report
+          path: comment.md
