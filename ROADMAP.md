@@ -10,6 +10,35 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🏗️ **BOARD RESTRUCTURE — enclosure-driven re-floorplan + schematic split
+(NEW TOP PRIORITY, 2026-06-14, Nick's call).** The current board is
+structurally sound but was placed by dumping parts and nudging for DRC: no
+functional zoning, spider-web traces radiating from the MCU/power cluster,
+~⅓ of the 80×55 mm board empty, and a single flat A3 schematic sheet.
+Restructure approach (full rationale + zone table in
+[`hardware/notes/layout.md`](hardware/notes/layout.md) "v2 enclosure-driven
+floorplan"):
+
+- **Enclosure decided:** standard Hammond ABS box, **end-panel 1591 series**
+  (IR out one end panel, USB-C out the other; shelf-sitting facing the AC).
+  KiCad's bundled 1593K template is too small (PCB pattern only ~28×28 mm).
+- [ ] **DECISION GATE (Nick — purchase + fixes board size):** confirm exact
+      Hammond part. Recommend **1591A-class (~100×50×21 mm ext → ~90×44 mm
+      board)** for a long-thin layout that also separates the noisy power/USB
+      end from the EMI-sensitive IR-RX/sensor end. 1551-series if he wants
+      smaller (tighter for the 2×5 headers + bent 5 mm LEDs).
+- [ ] Set Edge.Cuts + mounting holes to the chosen box's PCB envelope.
+- [ ] **Schematic → 6 hierarchical sheets** (power / mcu / ir-tx / ir-rx /
+      sensor / io), zones 1:1 with the floorplan. KiCad GUI, **not** s-expr
+      scripting (that caused the off-sheet render bug). Gate: empty `.net`
+      diff proves it was purely structural.
+- [ ] Rewrite `scripts/pcb_place_v2.py` with explicit per-zone coordinates;
+      re-run `pcb_router.py → pcb_pour.py → pcb_silk.py`. **Render to Nick
+      before routing** (H2.2 exit criterion). Wins: shorter traces, smaller
+      footprint, cleaner IR-drive return, better EMF.
+- Note: v1 order package (`order/v2.0` tagging) is paused behind this — no
+  point freezing an outline we're about to change.
+
 🐞 **SCHEMATIC RENDER BUG FOUND & FIXED (2026-06-14, Nick caught it).** The
 published schematic PDF was missing the three v2-swapped ICs — **U3 (ESP32-C3),
 U1 (AMS1117 LDO), U5 (AHT20)**. Root cause: the v2 IC-swap scripts dropped the
