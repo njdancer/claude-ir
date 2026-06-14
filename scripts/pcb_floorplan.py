@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Restructure pass: new long-thin outline + zone-anchor placement.
+
+The v2 board was placed by dump-and-nudge: no zoning, spider-web traces, ~1/3
+empty. This re-floorplans into functional zones along a long-thin board so
+the noisy power/USB end is physically separated from the EMI-sensitive
+IR-RX/sensor end (see hardware/notes/layout.md "v2 enclosure-driven
+floorplan"):
+
+    WEST end .............. CENTER ............... EAST end (front)
+    power + USB-C         MCU (antenna N)        IR-TX fan + IR-RX + sensor
+
+Only the zone ANCHORS are placed here (the big parts that define the zones).
+Support parts (decoupling/pullups/RC) are re-seated against these anchors by
+scripts/pcb_place_v2.py (Phase B). Mounting holes go wherever the zones leave
+room (3D-printed enclosure adapts). Iterate: edit ANCHORS, rerun, render.
+
+  /tmp/kv10/bin/python scripts/pcb_floorplan.py
+"""
+import pcbnew
+
+PCB = "hardware/esp32-ir-remote.kicad_pcb"
+
+# New board outline (mm). Long-thin: ~92 x 44.
+BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
+
+# 4x M3 mounting holes — corners, inset from edge.
+HOLES = {"H1": (110.0, 74.0), "H2": (194.0, 74.0),
+         "H3": (110.0, 110.0), "H4": (194.0, 110.0)}
+
+# Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
+# render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
+ANCHORS = {
+    # --- WEST end: power + USB ---
+    "J2":  (113.0, 92.0, 90),    # USB-C, mouth west (back of unit) - verify
+    "U1":  (126.0, 86.0, 0),     # AMS1117 LDO
+    "F1":  (122.0, 95.0, 90),    # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
+    "D1":  (130.0, 95.0, 90),    # TVS
+    # --- CENTER: MCU, antenna overhanging NORTH long edge ---
+    "U3":  (150.0, 88.5, 0),   # ESP32-C3 module; rot for antenna north - verify
+    # --- EAST end (front): IR-TX fan firing east ---
+    "Q3":  (181.0, 92.0, 0),     # IR MOSFET driver
+    "D2":  (191.0, 80.0, 68),    # TSAL6200 fan: N-most, tilt north
+    "D3":  (191.0, 88.0, 23),
+    "D4":  (191.0, 96.0, 337),   # -23
+    "D5":  (191.0, 104.0, 292),  # -67.5
+    # --- EAST: IR-RX + sensor, isolated from the TX drive loop ---
+    "U4":  (191.0, 73.0, 0),     # TSOP receiver, faces east (room), N corner
+    "U5":  (160.0, 110.0, 0),    # AHT20 sensor, S edge away from LDO heat
+    # --- South edge: buttons, status LEDs, IO headers ---
+    "SW1": (139.0, 109.0, 0),    # RESET
+    "SW2": (149.0, 109.0, 0),    # BOOT
+    "D6":  (135.0, 111.0, 90),   # status LEDs row
+    "D7":  (141.0, 111.0, 90),
+    "D10": (165.0, 111.0, 90),
+    "D11": (171.0, 111.0, 90),
+    "D12": (177.0, 111.0, 90),
+    "J4":  (186.0, 108.0, 0),    # spare-GPIO 2x5 header
+    "J5":  (185.0, 84.0, 0),     # ext-IR header near the IR array
+    "JP1": (120.0, 110.0, 0),    # LDO-disable jumper near U1
+}
+
+
+def set_outline(b):
+    # drop existing Edge.Cuts graphics
+    for d in list(b.GetDrawings()):
+        if d.GetLayer() == pcbnew.Edge_Cuts:
+            b.Remove(d)
+    pts = [(BX0, BY0), (BX1, BY0), (BX1, BY1), (BX0, BY1)]
+    for i in range(4):
+        seg = pcbnew.PCB_SHAPE(b, pcbnew.SHAPE_T_SEGMENT)
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % 4]
+        seg.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(x0), pcbnew.FromMM(y0)))
+        seg.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(x1), pcbnew.FromMM(y1)))
+        seg.SetLayer(pcbnew.Edge_Cuts)
+        seg.SetWidth(pcbnew.FromMM(0.1))
+        b.Add(seg)
+
+
+def main():
+    b = pcbnew.LoadBoard(PCB)
+    fps = {f.GetReference(): f for f in b.GetFootprints()}
+    set_outline(b)
+    moved = 0
+    for ref, (x, y, rot) in {**HOLES_AS_ANCHORS(), **ANCHORS}.items():
+        f = fps.get(ref)
+        if not f:
+            print(f"  ! {ref} not found")
+            continue
+        f.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
+        if rot is not None:
+            f.SetOrientationDegrees(rot)
+        moved += 1
+    pcbnew.SaveBoard(PCB, b)
+    print(f"outline {BX1-BX0:.0f}x{BY1-BY0:.0f}mm, moved {moved} parts")
+
+
+def HOLES_AS_ANCHORS():
+    return {ref: (x, y, 0) for ref, (x, y) in HOLES.items()}
+
+
+if __name__ == "__main__":
+    main()

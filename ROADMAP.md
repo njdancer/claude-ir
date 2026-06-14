@@ -30,6 +30,11 @@ schematic-edit MCP and s-expr scripting is banned (it caused the off-sheet
 render bug), so it's a separate focused KiCad-GUI effort, done after the PCB
 is settled. Execute in phases, commit+push each:
 
+- ⚠️ **Hardcoded old bounds (100,60,180,115) in `pcb_router.py`,
+  `pcb_pour.py`, `pcb_place_v2.py`, `pcb_silk.py`** must be updated to the new
+  outline (106,70,198,114) before Phase C, or the east IR zone (x180–198) is
+  off-grid. Spark is **1 gr_poly (600 pts)**, not 8 — logo footprint already
+  extracted to `hardware/libraries/Branding.pretty/Claude_Spark_Logo.kicad_mod`.
 - [~] **Phase A — outline + anchor placement.** New long-thin Edge.Cuts;
       place zone anchors (U3 center w/ antenna over a long edge; U1+J2+F1+D1
       power/USB one short end; Q3+D2–D5 IR-TX other short end; U4 IR-RX near
