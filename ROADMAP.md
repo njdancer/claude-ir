@@ -34,9 +34,10 @@ labels → netlist correct (U3 = 20 nodes), ERC clean, so nothing flagged it
       support cluster into a clean position on the canvas (or go hierarchical),
       then revert to A4 if it fits. Do this in the KiCad GUI, not by scripting
       s-expressions (that's what caused this).
-- [ ] **Verify USB-C 3D model alignment** — `USB_C_XKB_U262-16XN-4BVC11.step` is
-      the EasyEDA-derived C393939 model on KiCad's native XKB footprint; its
-      origin/rotation may need an `(offset)/(rotate)` tweak. Eyeball in KiCad.
+- [x] **Verify USB-C 3D model alignment — DONE 2026-06-14.** It did need a tweak:
+      `offset (0 −2.087 −0.745), rotate (0 0 180)` (was `0 0 0`) seats the
+      C393939 body flat on the board, centered, mouth overhanging the south edge.
+      GLB-mesh verified (see the seated-model note in the Now section above).
 - [ ] Add an off-sheet-symbol guard to `hardware_validate.py` so this can't
       recur silently (assert every placed symbol's origin is within page extents).
 
@@ -60,6 +61,19 @@ passes (app, **hardware**, bom-report, firmware). State:
   then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
   place the 5-board JLCPCB assembly order. (3D STEP models now vendored — see
   the render-bug fix at the top of this section.)
+
+✅ **J2 USB-C 3D model SEATED & render-verified (2026-06-14).** Completes the
+"Verify USB-C 3D model alignment" TODO below: the vendored
+`USB_C_XKB_U262-16XN-4BVC11.step` (C393939 SHOU HAN, fetched via JLC MCP) was
+repointed `${KIPRJMOD}`-relative but left at `offset (0 0 0)` — which floats the
+shell 0.745 mm above the board AND parks it ~2 mm too far inboard, so the mouth
+sits *inside* the south edge (a plug couldn't enter). Derived the correct
+seating by exporting the board to GLB and measuring the connector mesh in board
+coords (the proven AM2302 method): **offset (0 −2.087 −0.745), rotate (0 0 180)**
+seats the shell flat (z 0.000–4.10), centered on the pad row (x 130.53–139.47,
+center 135.0), opening overhanging the south edge by ~1.7 mm. Diff is the
+`(model …)` offset only — copper/pads/nets/DRC and pad-driven fab CPL/gerbers all
+unchanged.
 
 ---
 

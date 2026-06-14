@@ -12161,7 +12161,7 @@
 		(embedded_fonts no)
 		(model "${KIPRJMOD}/lib/3dshapes/USB_C_XKB_U262-16XN-4BVC11.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -2.087 -0.745)
 			)
 			(scale
 				(xyz 1 1 1)
