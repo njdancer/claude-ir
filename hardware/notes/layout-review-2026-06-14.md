@@ -3,7 +3,17 @@
 > **RESOLVED (2026-06-14, same day):** the Major findings were actioned via an
 > SI re-layout (commits `68e2410` LDO pour, `19e86f3` re-route). Net result,
 > DRC-validated on KiCad 10.0.3: USB pair 100 % F.Cu (off B.Cu), IR_RX 5.5→2.7 mm,
-> LDO tab copper ~20→69 mm², unconnected 1→0, silk_overlap 44→0. Decoupling
+> LDO tab copper ~20→69 mm², unconnected 1→0, silk_overlap 44→0.
+>
+> **LDO thermal — second pass (2026-06-14):** the top-only 69 mm² pour left no
+> worst-case margin (T_J ≈ 120 °C at 0.85 W), so `pcb_ldo_pour.py` now also
+> lays a **B.Cu /LDO_OUT island (43.8 mm²) + 6 thermal vias** under the tab
+> (≈112 mm² two-sided, FR-4 bypassed). θ_JA ≈ 110→90 °C/W ⇒ T_J ≈ 101 °C at
+> 25 °C (24 °C margin), ~116 °C in a 40 °C enclosure — now **under the 125 °C
+> limit at the rated load**. Still short of the 1-in² ideal (the dense west
+> power zone caps the island size); relocating U1 to open board copper is the
+> remaining lever if more margin is wanted. DRC 0 / unconnected 0,
+> `hardware_validate.py` clean (no baseline drift). Decoupling
 > (~7 mm) is a module-courtyard limit and accepted; a 4-layer board is the
 > proper lever for a fully solid ground + coupled USB pair. See ROADMAP "Now".
 > The findings below are the original as-reviewed snapshot.
