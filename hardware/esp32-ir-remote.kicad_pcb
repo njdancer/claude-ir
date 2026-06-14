@@ -12584,14 +12584,14 @@
 	)
 	(footprint "Claude_Spark_Logo"
 		(layer "B.Cu")
-		(uuid "0792c804-3b96-4409-b210-efe493f2f15e")
+		(uuid "2558c74c-a03f-47d1-87e1-951ac8ea33d9")
 		(at 152 84.3)
 		(property "Reference" "REF**"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "4f29837b-c5ef-4ed7-b403-3907aa73d1dc")
+			(uuid "718a3a09-863c-4374-a318-f41bc2b3d50a")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12605,7 +12605,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "cfecb956-04b8-499c-ab4f-2ba18742fdca")
+			(uuid "954daf70-bd03-4b61-ac68-563db1ad3b35")
 			(effects
 				(font
 					(size 0.5 0.5)
@@ -12618,7 +12618,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "109dcab8-6015-4183-8c88-6b19180654ff")
+			(uuid "59ffb1af-30ef-4247-98f9-2d221c9736ee")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12629,7 +12629,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "96822137-d1ec-4508-ba54-b074af3cacc0")
+			(uuid "90577574-d8eb-47d3-873c-a45c3e64440d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12780,7 +12780,7 @@
 			)
 			(fill yes)
 			(layer "B.SilkS")
-			(uuid "37d1f8e0-d71c-426f-90cc-7d84f618072b")
+			(uuid "78f76e22-2a43-44e9-bc5f-850e31fe3db6")
 		)
 		(embedded_fonts no)
 	)
@@ -12824,21 +12824,65 @@
 		(layer "Edge.Cuts")
 		(uuid "6a6a80b6-6120-4820-8d17-8871469af3e8")
 	)
-	(gr_text "STATUS"
-		(at 151 110 0)
+	(gr_text "5V"
+		(at 141 108 0)
 		(layer "F.SilkS")
-		(uuid "d6b7d9ff-4d15-43f3-8aee-31cc3dbbabbe")
+		(uuid "2a875ebf-ab04-4854-a958-7c9fad07ee66")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.133333)
+				(size 0.7 0.7)
+				(thickness 0.116666)
+			)
+		)
+	)
+	(gr_text "3V3"
+		(at 146 108 0)
+		(layer "F.SilkS")
+		(uuid "477ff3bf-5785-4208-83ec-c03b730bcf33")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.116666)
+			)
+		)
+	)
+	(gr_text "IR"
+		(at 151 108 0)
+		(layer "F.SilkS")
+		(uuid "e23be271-c48b-4975-9750-87d2e11cade6")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.116666)
+			)
+		)
+	)
+	(gr_text "USR1"
+		(at 156 108 0)
+		(layer "F.SilkS")
+		(uuid "b03e1b0c-2e9d-45e2-b5a1-4d08ca6054db")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.116666)
+			)
+		)
+	)
+	(gr_text "USR2"
+		(at 161 108 0)
+		(layer "F.SilkS")
+		(uuid "4efbc011-c31c-470c-a17b-98d01c31511c")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.116666)
 			)
 		)
 	)
 	(gr_text "ESP32-C3 IR REMOTE"
 		(at 150 73.5 0)
 		(layer "F.SilkS")
-		(uuid "1da13c8d-55bc-4c4b-9c36-e6ae53bb7e0d")
+		(uuid "d13c2b8d-c56a-423b-92b8-059966c44361")
 		(effects
 			(font
 				(size 1 1)
@@ -12849,7 +12893,7 @@
 	(gr_text "ESP32-C3 IR Remote  rev v2"
 		(at 152 89.7 0)
 		(layer "B.SilkS")
-		(uuid "d3dbec64-1271-46bf-a268-1bca8de44025")
+		(uuid "f76b635f-4eb8-4f3b-ae67-c7bb421898c5")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12858,10 +12902,10 @@
 			(justify mirror)
 		)
 	)
-	(gr_text "2026-06-15  git f7d6d02-dirty"
+	(gr_text "2026-06-14  git d27d8c5-dirty"
 		(at 152 91.4 0)
 		(layer "B.SilkS")
-		(uuid "93c7ac43-a213-42d0-a7b2-93ccedbc5740")
+		(uuid "9b16ef48-6568-44ca-8989-03ad406aa9f4")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12873,7 +12917,7 @@
 	(gr_text "njdancer.github.io/claude-ir"
 		(at 152 93.1 0)
 		(layer "B.SilkS")
-		(uuid "cbe43486-6de9-42d9-9230-1b64ada912a1")
+		(uuid "071fbfdd-0e6e-4383-ab59-89cf566f9892")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12885,7 +12929,7 @@
 	(gr_text "Non-commercial hobby project"
 		(at 152 94.8 0)
 		(layer "B.SilkS")
-		(uuid "a4811c2c-0dc3-4675-8aff-c9baa94465cd")
+		(uuid "066441e1-edbb-435a-bfa2-0fd22c774ab9")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -12897,7 +12941,7 @@
 	(gr_text "Designed by Claude"
 		(at 152 88 0)
 		(layer "B.SilkS")
-		(uuid "a720ddb0-3a6a-4fc7-899d-09783d1f5382")
+		(uuid "b44bf824-ebd0-4954-9ff7-290897d312e7")
 		(effects
 			(font
 				(size 0.95 0.95)

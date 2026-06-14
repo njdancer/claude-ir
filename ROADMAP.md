@@ -72,6 +72,25 @@ rev/commit/date/URL). **Remaining (blocked or polish):**
       (25 `hide yes` + a few text moves); **zero copper/pad/net/zone lines
       touched → electrically identical, netlist/parity unaffected.** Front
       now fully legible; back logo grouped with its caption.
+- [x] **Silk follow-up (2026-06-14, Nick's review of the above).** Two asks:
+      - **Per-LED captions** — the single "STATUS" word was useless. Replaced
+        with abbreviated function captions under each status LED, anchored to
+        the footprint (`STATUS_FN` in `pcb_silk.py`, tracks re-layout):
+        D6=`5V`, D7=`3V3`, D10=`IR`, D11=`USR1`, D12=`USR2` (mapping verified
+        against the netlist: D6/D7 = +5V/+3V3 rails, D10 = IR_TX/GPIO5,
+        D11/D12 = USER_LED1/2 on GPIO3/4). `status-leds.md` rewritten v1→v2
+        (was still documenting the deleted serial + blue-MOSFET LEDs). DRC
+        still 0 silk_overlap / 0 silk_over_copper.
+      - **Git "-dirty" stamp on published assets** — root cause: `pcb_silk.py`
+        bakes the silk git line on a dirty tree, so the committed board (which
+        CI renders) always reads "-dirty" + the *parent* hash. Fix:
+        `scripts/stamp_silk.py` re-stamps that one line (text-only, idempotent,
+        non-fatal) from the CURRENT commit; wired into the CI hardware job
+        (after validation, before render + fab) and `build-site.sh` (Pages,
+        CI-guarded so local previews don't dirty the tree). CI checkout is
+        clean at the build SHA → published renders/GLB/gerbers show the exact
+        commit, no "-dirty". Committed file's own stamp is now a placeholder
+        CI overwrites at publish (resolves the bake-then-commit fixed point).
 - [ ] **Phase E schematic split** — GUI-bound, still pending.
 - [ ] check_models() flags the bent .wrl "missing" though it exists — likely a
       ${KIPRJMOD} path-resolution quirk in the validator; verify on Pages.

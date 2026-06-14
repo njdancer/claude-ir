@@ -57,6 +57,12 @@ jobs:
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           python3 scripts/ci/hardware_validate.py --json hardware-facts.json
+      - name: Stamp silk metadata from build commit
+        # The committed board's silk git-stamp is baked on a dirty tree by
+        # pcb_silk.py, so it reads "-dirty". Re-stamp from this clean checkout
+        # so the rendered/fab assets show the exact build commit. Runs after
+        # validation (which gates the committed file) and before any render.
+        run: python3 scripts/stamp_silk.py
       - name: Render board for PR comment
         # Always, so a PR that fails ERC/DRC still shows the reviewer the
         # board. Default (non-raytraced) render at a comment-friendly size;

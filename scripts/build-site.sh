@@ -67,6 +67,12 @@ echo "Exporting BOM CSV..."
 
 echo "Exporting PCB renders + 3D model..."
 PCB="hardware/esp32-ir-remote.kicad_pcb"
+# Re-stamp the silk git line from this (clean) commit so published renders/GLB
+# and the fab package don't read "-dirty". CI only — skip locally so a dev
+# preview build never dirties the tracked board file.
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    python3 scripts/stamp_silk.py || true
+fi
 mkdir -p "$OUT/hardware/pcb"
 "$KICAD_CLI_BIN" pcb render --side top -w 1600 -h 1200 \
     -o "$OUT/hardware/pcb/board-top.png" "$PCB"
