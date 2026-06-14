@@ -16,6 +16,8 @@ ANTENNA_X = 104.2
 ANTENNA_Y_MAX = 102.3   # WROOM courtyard wedge south extent
 VIA_PITCH = 4.0         # stitching grid
 VIA_D, VIA_DRILL = 0.6, 0.3
+TIE_VIA_D, TIE_DRILL = 0.5, 0.3    # smaller body for island ties in tight spots
+                                   # (0.5/0.3 = the router's signal via, annular-OK)
 CLEAR = 0.35            # via-to-foreign-copper margin for stitching
 
 
@@ -219,12 +221,15 @@ def tie_islands(board, gnd_code):
         return math.hypot(x0 + u * dx - px, y0 + u * dy - py)
 
     def clear_of_foreign(xmm, ymm):
-        r = VIA_D / 2 + CLEAR
+        # tie vias use a smaller body + DRC-min clearance so they fit the tight
+        # congested spots (USB-C / C3 pins) where islands form
+        r = TIE_VIA_D / 2 + 0.16
         if any(abs(fx - xmm) < fr + r and abs(fy - ymm) < fr + r for fx, fy, fr in fpads):
             return False
         if any(seg_d(xmm, ymm, *s[:4]) < s[4] + r for s in fsegs):
             return False
-        if any(math.hypot(vx - xmm, vy - ymm) < VIA_D + 0.5 for vx, vy in allvias):
+        if any(math.hypot(vx - xmm, vy - ymm) < (TIE_VIA_D + VIA_D) / 2 + 0.5
+               for vx, vy in allvias):
             return False  # hole-to-hole
         return True
 
@@ -260,8 +265,8 @@ def tie_islands(board, gnd_code):
                             and clear_of_foreign(pcbnew.ToMM(int(xx)), pcbnew.ToMM(int(yy)))):
                         v = pcbnew.PCB_VIA(board)
                         v.SetPosition(pt)
-                        v.SetWidth(pcbnew.FromMM(VIA_D))
-                        v.SetDrill(pcbnew.FromMM(VIA_DRILL))
+                        v.SetWidth(pcbnew.FromMM(TIE_VIA_D))
+                        v.SetDrill(pcbnew.FromMM(TIE_DRILL))
                         v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
                         v.SetNetCode(gnd_code)
                         board.Add(v)

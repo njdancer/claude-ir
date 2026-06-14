@@ -408,7 +408,15 @@ def main():
         t.SetWidth(pcbnew.FromMM(w))
         t.SetNetCode(nc)
         board.Add(t)
+    # dedup vias: the greedy per-leg routing can drop two vias on (or within a
+    # hole-pitch of) the same spot -> holes_co_located / hole_to_hole. Keep the
+    # first; skip any later via within 0.4mm of one already placed.
+    kept_vias = []
     for nc, x, y, dia, drill in vias_out:
+        if any(knc == nc and abs(kx - x) < 0.4 and abs(ky - y) < 0.4
+               for knc, kx, ky in kept_vias):
+            continue
+        kept_vias.append((nc, x, y))
         v = pcbnew.PCB_VIA(board)
         v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
         v.SetWidth(pcbnew.FromMM(dia))
