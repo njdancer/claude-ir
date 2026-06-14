@@ -36,28 +36,28 @@ ANCHORS = {
     "U1":  (126.0, 86.0, 0),     # AMS1117 LDO
     "F1":  (122.0, 95.0, 90),    # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
     "D1":  (130.0, 95.0, 90),    # TVS
-    # --- CENTER: MCU, antenna overhanging NORTH long edge ---
-    "U3":  (150.0, 88.5, 0),   # ESP32-C3 module; rot for antenna north - verify
-    # --- EAST end (front): IR-TX fan firing east ---
-    "Q3":  (181.0, 92.0, 0),     # IR MOSFET driver
-    "D2":  (191.0, 80.0, 68),    # TSAL6200 fan: N-most, tilt north
-    "D3":  (191.0, 88.0, 23),
-    "D4":  (191.0, 96.0, 337),   # -23
-    "D5":  (191.0, 104.0, 292),  # -67.5
-    # --- EAST: IR-RX + sensor, isolated from the TX drive loop ---
-    "U4":  (191.0, 73.0, 0),     # TSOP receiver, faces east (room), N corner
-    "U5":  (160.0, 110.0, 0),    # AHT20 sensor, S edge away from LDO heat
-    # --- South edge: buttons, status LEDs, IO headers ---
-    "SW1": (139.0, 109.0, 0),    # RESET
-    "SW2": (149.0, 109.0, 0),    # BOOT
-    "D6":  (135.0, 111.0, 90),   # status LEDs row
-    "D7":  (141.0, 111.0, 90),
-    "D10": (165.0, 111.0, 90),
-    "D11": (171.0, 111.0, 90),
-    "D12": (177.0, 111.0, 90),
-    "J4":  (186.0, 108.0, 0),    # spare-GPIO 2x5 header
-    "J5":  (185.0, 84.0, 0),     # ext-IR header near the IR array
-    "JP1": (120.0, 110.0, 0),    # LDO-disable jumper near U1
+    # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
+    "U3":  (150.0, 88.5, 0),
+    # --- EAST end (front): IR-TX fan firing east, Q3 just inboard ---
+    "Q3":  (181.0, 96.0, 0),     # IR MOSFET driver
+    "D2":  (191.0, 84.0, 68),    # TSAL6200 fan: N-most, tilt north
+    "D3":  (191.0, 92.0, 23),
+    "D4":  (191.0, 100.0, 337),  # -23
+    "D5":  (191.0, 108.0, 292),  # -67.5
+    # --- North edge (clear apart from the central antenna keepout x136-164) ---
+    "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
+    "J5":  (170.0, 74.0, 0),     # ext-IR header, NE (near the IR array)
+    "U4":  (191.0, 74.0, 0),     # TSOP receiver, faces east (room), NE corner
+    # --- South edge: power jumper, sensor, buttons, status LEDs ---
+    "JP1": (112.0, 110.0, 0),    # LDO-disable jumper near U1
+    "U5":  (123.0, 110.0, 0),    # AHT20 sensor (away from IR-LED heat at east)
+    "SW1": (136.0, 109.0, 0),    # RESET
+    "SW2": (147.0, 109.0, 0),    # BOOT
+    "D6":  (156.0, 110.0, 90),   # status LEDs, S row
+    "D7":  (163.0, 110.0, 90),
+    "D10": (170.0, 110.0, 90),
+    "D11": (177.0, 110.0, 90),
+    "D12": (184.0, 110.0, 90),
 }
 
 
