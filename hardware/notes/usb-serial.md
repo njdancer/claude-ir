@@ -1,63 +1,49 @@
-# USB-to-Serial Bridge
+# USB & serial (v2: native USB, no bridge)
 
-CH340C USB-UART bridge with auto-reset circuit for ESP32 programming. The
-CH340C has a built-in oscillator (no external crystal) and the SOP-16 package
-is hand-solderable.
+> The v1 CH340C USB-UART bridge and its cross-coupled 2N7002 auto-reset
+> circuit were **deleted** in the v2 ESP32-C3 redesign (see the v2 change set
+> in [`ROADMAP.md`](../../ROADMAP.md)). The ESP32-C3 has a **native
+> USB-Serial-JTAG** controller, so the console, firmware download, and reset/
+> boot sequencing all run over the USB-C data lines directly — no bridge chip,
+> no auto-reset FETs, no DTR/RTS links. `./scripts/flash.sh` and
+> `./scripts/monitor.sh` talk straight to the C3 over USB-C.
 
-## Power configuration
+## Data path
 
-Operating at 3.3V: VCC and V3 are tied together, which bypasses the chip's
-internal regulator. V3 needs a 100nF decoupling capacitor close to the pin.
+USB-C D+/D- connect straight to the C3's native USB pins: **D+ → IO19
+(U3 pin 14)**, **D- → IO18 (U3 pin 13)**. CC1/CC2 each pull down through a
+5.1 kΩ resistor (R1 on A5, R2 on B5) — standard UFP/sink config so a host
+supplies VBUS. VBUS (A4/A9) feeds the input fuse F1 → +5 V rail → AMS1117 LDO.
 
-**Critical:** the R232 pin must be tied LOW for TTL-level output. Tied HIGH it
-outputs RS232 levels, which would damage the ESP32.
+## USB-C connector (J2) — assembly / DFM
 
-## UART wiring
+J2 is the **XKB U262-16XN-4BVC11** (LCSC C393939), a 16-pin **SMD** Type-C
+receptacle that also has through-board features. Three distinct kinds of
+terminal, three different handling rules:
 
-TX/RX are crossed: CH340C TXD → ESP32 RXD (GPIO3), CH340C RXD ← ESP32 TXD
-(GPIO1).
+| Terminal | Qty | Pad type | Paste aperture | How it's soldered |
+|----------|----:|----------|:--------------:|-------------------|
+| Signal/power pads (A1…B12) | 12 | SMD (`F.Cu F.Mask F.Paste`) | yes | JLC machine paste + reflow |
+| Shield legs `S1` (on GND) | 4 | plated THT (`*.Cu *.Mask`) | **no** | **hand-solder after assembly** |
+| Locating pegs | 2 | non-plated `np_thru_hole` | no | mechanical only — not soldered |
 
-## Auto-reset circuit
+**The four `S1` shield legs MUST be hand-soldered.** They bond the shell to
+GND (EMI/ESD return) and are the primary mechanical anchor that takes cable
+insertion/extraction loads — the loads that would otherwise fatigue and peel
+the 12 small SMD pads. They are deliberately **not** on the paste layer: at
+our JLCPCB tier there is no pin-in-paste / intrusive-reflow option, so giving
+the stencil an aperture over a plated THT barrel would just smear paste
+without forming a sound joint. No paste → JLC reflows the 12 SMD pads and
+leaves the four GND legs bare → we hand-solder them (easy: all GND, generous
+plated holes, lots of finger room). This is a post-assembly touch-up, not a
+loose "hand-solder kit" part.
 
-Enables automatic bootloader entry when programming tools (esptool,
-cargo-espflash) toggle DTR and RTS. Two cross-coupled 2N7002 N-channel
-MOSFETs form an XOR-like gate that prevents the chip from being held in
-reset when both DTR and RTS assert — which is exactly what happens when a
-serial terminal opens the port.
+The two locating pegs are non-plated and need nothing — they only locate the
+connector and resist lateral movement.
 
-*(Rev 1.2: Q1/Q2 changed from S8050 NPN BJTs to 2N7002 MOSFETs. The SOT-23
-pinouts map 1:1 — B→G, E→S, C→D on the same pads — so the swap is layout-
-neutral and consolidates Q1/Q2/Q4/Q5 onto one BOM line. Trade-off: each FET's
-body diode adds a path from its source line into its output (RTS→EN, DTR→
-GPIO0) that conducts only if the output is forced ~0.6V below the source
-line — in practice only while RESET/BOOT is held with the port idle. The
-follow-up change below limits that current; desolder R21/R26 to break the
-path entirely if it ever matters.)*
-
-| DTR | RTS | EN   | GPIO0 | Result               |
-|-----|-----|------|-------|----------------------|
-| 0   | 0   | HIGH | HIGH  | normal operation     |
-| 0   | 1   | HIGH | LOW   | boot mode select     |
-| 1   | 0   | LOW  | HIGH  | reset                |
-| 1   | 1   | HIGH | HIGH  | normal operation     |
-
-The key insight: the transistor sources are **not** grounded. Each source
-connects to the *opposite* input signal (Q1: gate←DTR via 10kΩ, drain→EN,
-source→RTS; Q2: gate←RTS via 10kΩ, drain→GPIO0, source→DTR). With both
-inputs asserted, neither transistor sees a gate-source voltage, so neither
-can pull its output low. The 10kΩ resistors (R3/R4) were the BJT base
-resistors; for the FETs they're unnecessary but harmless (the gate draws no
-DC current), so they stay to keep the layout untouched.
-
-**Bypass links (R21/R26, 470Ω):** in series on the DTR and RTS lines (R21 on
-DTR→Q2 source, R26 on RTS→Q1 source), so auto-reset can be disconnected when
-debugging serial without spurious resets — desolder either to break it.
-Originally 0Ω; changed to **470Ω** with the FET swap so they also limit the
-2N7002 body-diode current into the CH340C to ~5mA while RESET/BOOT is held
-with the port idle (with 0Ω links a held button shorted a CH340 pin through
-the diode at ~25mA — the one regression vs the BJT circuit). 470Ω is
-transparent to auto-reset: EN/GPIO0 still settle at ~0.15V against their
-10kΩ pull-ups, 5× below the 0.825V V_IL, and the 470Ω×1µF EN-cap discharge
-(~0.5ms) is far inside esptool's ~100ms pulses. Implemented as SMD resistors
-rather than through-hole header+shunt jumpers so JLCPCB places them at
-assembly. Default: both populated (auto-reset enabled).
+> **Order-time checklist:** confirm in the JLC preview that no solder paste is
+> placed on the four J2 `S1` legs (it shouldn't be — the footprint has no
+> `F.Paste` there), and remember to hand-solder those four GND legs after the
+> board comes back. (3D-model note: the J2 STEP is the EasyEDA-derived C393939
+> model on KiCad's native footprint — rotated 180° to face correctly; verify
+> its offset visually.)

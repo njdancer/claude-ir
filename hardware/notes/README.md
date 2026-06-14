@@ -32,7 +32,7 @@ what changed electrically, since `.kicad_sch` diffs are dominated by graphics.
 | Note | Scope |
 |------|-------|
 | [power-supply.md](./power-supply.md) | USB-C input, protection, AP63203 buck regulation |
-| [usb-serial.md](./usb-serial.md) | CH340C bridge and ESP32 auto-reset circuit |
+| [usb-serial.md](./usb-serial.md) | v2 native USB (no bridge); USB-C connector data path + hand-solder note |
 | [esp32-mcu.md](./esp32-mcu.md) | WROOM-32E module, strapping pins, buttons, breakout header |
 | [ir-transmitter.md](./ir-transmitter.md) | 4× TSAL6200 array with MOSFET driver |
 | [ir-receiver.md](./ir-receiver.md) | TSOP38238 development receiver |
