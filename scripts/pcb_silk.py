@@ -26,12 +26,21 @@ STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
 # parts), plus a caption over the status-LED cluster (S of the MCU).
 LABELS = [
     ("ESP32-C3 IR REMOTE", 150.0, 73.5, 1.0),
-    ("STATUS", 151.0, 99.5, 0.8),
 ]
+# Per-LED function captions, abbreviated, placed just below each status LED so
+# the cluster is self-documenting (a single "STATUS" word told you nothing).
+# Anchored to the footprint position, not hardcoded x, so they track re-layout.
+#   D6  +5V rail / USB power present      D11 user LED 1 (GPIO3)
+#   D7  +3.3V rail present                D12 user LED 2 (GPIO4)
+#   D10 IR-TX activity (GPIO5)  -> "TX": U4 (the IR *receiver*) now sits right
+#       below this row, so "IR" would read as if it labelled the receiver.
+STATUS_FN = {"D6": "5V", "D7": "3V3", "D10": "TX", "D11": "USR1", "D12": "USR2"}
+STATUS_FN_DY = 4.0       # mm below the LED centre (clear of the ref below it)
+STATUS_FN_SIZE = 0.8     # min legible silk; <0.8 trips the text_height DRC rule
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
 LOGO_LIB = "hardware/libraries/Branding.pretty"
 LOGO_FP = "Claude_Spark_Logo"
-LOGO_AT = (118.0, 92.0)   # free back area over the GND pour, W-central
+LOGO_AT = (152.0, 84.3)   # header centred above the back-silk text block
 # Old front-silk spark = a single top-level gr_poly on F.SilkS near here.
 OLD_SPARK_BBOX = (126.0, 98.0, 132.0, 104.0)
 
@@ -110,6 +119,20 @@ def phase2():
             obst.append((mm(bb.GetLeft()), mm(bb.GetTop()),
                          mm(bb.GetRight()), mm(bb.GetBottom())))
 
+    # Reserve the per-LED caption boxes as obstacles so the designator placer
+    # dodges them, then emit the captions after placement.
+    fn_labels = []
+    for fp in board.GetFootprints():
+        t = STATUS_FN.get(fp.GetReference())
+        if not t:
+            continue
+        p = fp.GetPosition()
+        lx, ly = mm(p.x), mm(p.y) + STATUS_FN_DY
+        lw = max(0.6, len(t) * STATUS_FN_SIZE * 0.75)
+        obst.append((lx - lw / 2, ly - STATUS_FN_SIZE / 2,
+                     lx + lw / 2, ly + STATUS_FN_SIZE / 2))
+        fn_labels.append((t, lx, ly, STATUS_FN_SIZE))
+
     placed = []
     hidden = 0
     order = sorted(board.GetFootprints(),
@@ -119,7 +142,13 @@ def phase2():
         ref.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(REF_SIZE), pcbnew.FromMM(REF_SIZE)))
         ref.SetTextThickness(pcbnew.FromMM(0.1))
         ref.SetTextAngle(pcbnew.EDA_ANGLE(0))
-        fp.Value().SetVisible(False)
+        # Hide every footprint field except the reference. The BOM workflow
+        # left the LCSC part-number field (and others) visible on F.SilkS at
+        # full 1.27mm, so 25 part codes piled on top of the designators ->
+        # illegible. Silk should carry only the curated ref + our labels.
+        for f in fp.GetFields():
+            if f.GetName() != "Reference":
+                f.SetVisible(False)
         txt = ref.GetText()
         w = max(0.6, len(txt) * REF_SIZE * 0.75)
         h = REF_SIZE
@@ -139,7 +168,10 @@ def phase2():
                     continue
                 if any(overlaps(rb, o) for o in obst):
                     continue
-                if any(overlaps(rb, o) for o in placed):
+                # keep a small gap between adjacent refs so they can't pack
+                # edge-to-edge (which reads as a collision and trips DRC).
+                if any(overlaps(rb, (o[0] - 0.2, o[1] - 0.2,
+                                     o[2] + 0.2, o[3] + 0.2)) for o in placed):
                     continue
                 best = (px, py, rb)
                 break
@@ -154,7 +186,7 @@ def phase2():
         ref.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(px), pcbnew.FromMM(py)))
         placed.append(rb)
 
-    for text, x, y, size in LABELS:
+    for text, x, y, size in LABELS + fn_labels:
         t = pcbnew.PCB_TEXT(board)
         t.SetText(text)
         t.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
@@ -200,8 +232,10 @@ def phase2():
         print("  logo place failed:", e)
 
     pcbnew.SaveBoard(BOARD_PATH, board)
-    print(f"phase2: refs placed, {hidden} hidden, {len(LABELS)} front labels, "
-          f"{len(meta)} back-meta lines, {n_logo} logo")
+    print(f"phase2: refs placed, {hidden} hidden, "
+          f"{len(LABELS) + len(fn_labels)} front labels "
+          f"({len(fn_labels)} per-LED), {len(meta)} back-meta lines, "
+          f"{n_logo} logo")
 
 
 if __name__ == "__main__":
