@@ -24,15 +24,17 @@ PCB = "hardware/esp32-ir-remote.kicad_pcb"
 # New board outline (mm). Long-thin: ~92 x 44.
 BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 
-# 4x M3 mounting holes — corners, inset from edge.
-HOLES = {"H1": (110.0, 74.0), "H2": (194.0, 74.0),
-         "H3": (110.0, 110.0), "H4": (194.0, 110.0)}
+# 4x M3 mounting holes — placed in the clearest well-spread spots the dense
+# layout leaves (3D-printed enclosure adapts to wherever they land). The east
+# end is packed by the IR fan, so the E holes sit inboard of the corners.
+HOLES = {"H1": (110.0, 74.0), "H2": (184.0, 74.0),
+         "H3": (110.0, 105.0), "H4": (178.5, 104.5)}
 
 # Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
 # render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
 ANCHORS = {
     # --- WEST end: power + USB ---
-    "J2":  (113.0, 92.0, 90),    # USB-C, mouth west (back of unit) - verify
+    "J2":  (109.7, 92.0, 270),   # USB-C, mouth overhangs west edge ~0.5mm, pads on-board
     "U1":  (126.0, 86.0, 0),     # AMS1117 LDO
     "F1":  (122.0, 95.0, 90),    # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
     "D1":  (130.0, 95.0, 90),    # TVS

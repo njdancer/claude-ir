@@ -86,9 +86,21 @@ def main():
 
     movable = [f for r, f in fps.items() if r not in FIXED_REFS]
 
-    # choose a target pin for each movable part: most-specific reachable net
+    # anchor degree = how many distinct nets each anchor touches (hub vs leaf).
+    # A series element bridging two single-anchor nets (e.g. an LED's current-
+    # limit R, which sees the MCU pin on one net and the LED on the other)
+    # should seat at the LEAF (the LED, low degree), not the hub (U3, high
+    # degree). Only used to break ties among specificity-1 candidates.
+    anchor_deg = {}
+    for nc, lst in net_anchor.items():
+        for ref, _, _ in lst:
+            anchor_deg.setdefault(ref, set()).add(nc)
+    anchor_deg = {r: len(s) for r, s in anchor_deg.items()}
+
+    # choose a target pin for each movable part: most-specific reachable net,
+    # ties broken toward the leaf anchor, then nearest.
     def target_of(f):
-        best = None  # (specificity, dist, x, y)
+        best = None  # (spec, leaf_pref, dist, x, y)
         fp = f.GetPosition()
         fx, fy = pcbnew.ToMM(fp.x), pcbnew.ToMM(fp.y)
         for pad in f.Pads():
@@ -97,9 +109,10 @@ def main():
                 continue
             anchors = net_anchor[nc]
             spec = len(anchors)
-            for _, ax, ay in anchors:
+            for ref, ax, ay in anchors:
                 d = math.hypot(ax - fx, ay - fy)
-                cand = (spec, d, ax, ay)
+                leaf = anchor_deg.get(ref, 99) if spec == 1 else 0
+                cand = (spec, leaf, d, ax, ay)
                 if best is None or cand < best:
                     best = cand
         return best
@@ -109,8 +122,8 @@ def main():
     for f in movable:
         t = target_of(f)
         (targeted if t else deferred).append((f, t))
-    # most-specific first so signal parts claim the prime pin-side slots
-    targeted.sort(key=lambda ft: (ft[1][0], ft[1][1]))
+    # most-specific + nearest first so signal parts claim the prime pin slots
+    targeted.sort(key=lambda ft: (ft[1][0], ft[1][2]))
 
     placed = [court_bbox(fps[r]) for r in FIXED_REFS if r in fps]
     ko = keepout_box(b)
@@ -147,7 +160,7 @@ def main():
         return None
 
     for f, t in targeted:
-        _, _, tx, ty = t
+        _, _, _, tx, ty = t   # (spec, leaf, dist, x, y)
         r = seat(f, tx, ty)
         results[f.GetReference()] = r
 
