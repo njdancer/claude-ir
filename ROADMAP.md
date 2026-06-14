@@ -53,6 +53,22 @@ verified: D2..D5 fire +67.5/+22.5/−22.5/−67.5° around east), TSOP off the L
 column, ground plane reclaimed (B-signal 40%→24%, critical nets F-pinned),
 status LEDs clustered + captioned, underside metadata block (logo + stamped
 rev/commit/date/URL). **Remaining (blocked or polish):**
+- [x] **Relocated IR-RX off the TX corner (2026-06-14, done w/ Nick).** U4
+      (TSOP) was at (175,73), ~11 mm from D2 and ~19 mm from Q3 — near-field,
+      so it saturated during self-TX (clipped, not clean loopback timing) and
+      the most EMI-sensitive part sat in the 400 mA/38 kHz drive loop. **Moved
+      U4 → south long edge (153.0, 110.5), rot 180 (lens fires south/outward);
+      Vs filter in-line west: C9 (144.5, 110.5), R27 (140.0, 110.5).**
+      Separation now **31 mm to Q3, 34–46 mm to D2–D5** (rationale: `layout.md`
+      constraint 6 + `notes/ir-receiver.md`). Done in a fresh KiCad 10.0.3
+      install in this remote container (apt + kicad-10 PPA), full pipeline
+      re-run (rip → `pcb_router` → `pcb_stub_heal` → `pcb_pour`); **DRC = 0
+      errors**, 1 unconnected = the pre-existing accepted USB_D+ J2/A6 item
+      (unrelated to U4). Schematic untouched → netlist unchanged. **Still owed:
+      enclosure optical baffle rib between TX (east) and RX (south) windows;
+      CI baseline refresh (below) since the full re-route + silk drifted
+      counts — must run in `kicad/kicad:10.0.2` (this env lacks the global libs
+      → inflates lib_footprint_issues, so don't refresh the baseline here).**
 - [ ] **CI baseline refresh** — every count drifted (full restructure); must
       run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
       (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
