@@ -10,6 +10,92 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🏗️ **BOARD RESTRUCTURE — enclosure-driven re-floorplan + schematic split
+(NEW TOP PRIORITY, 2026-06-14, Nick's call).** The current board is
+structurally sound but was placed by dumping parts and nudging for DRC: no
+functional zoning, spider-web traces radiating from the MCU/power cluster,
+~⅓ of the 80×55 mm board empty, and a single flat A3 schematic sheet.
+Restructure approach (full rationale + zone table in
+[`hardware/notes/layout.md`](hardware/notes/layout.md) "v2 enclosure-driven
+floorplan"):
+
+- **Enclosure decided (Nick, 2026-06-14):** **custom 3D-printed, tailored to
+  the board** — no stock box, no purchase gate. Free outline: shape it to the
+  component layout; place 4× M3 holes wherever the floorplan makes convenient
+  (the print adapts). Long-thin still preferred for EMF separation.
+**Sequencing reality:** the PCB floorplan is fully scriptable (pcbnew via the
+`/tmp/kv10` env, confirmed present) so it goes FIRST and is where the visible
+win is. The **schematic hierarchical split is GUI-bound** — there's no
+schematic-edit MCP and s-expr scripting is banned (it caused the off-sheet
+render bug), so it's a separate focused KiCad-GUI effort, done after the PCB
+is settled. Execute in phases, commit+push each:
+
+- ⚠️ **Hardcoded old bounds (100,60,180,115) in `pcb_router.py`,
+  `pcb_pour.py`, `pcb_place_v2.py`, `pcb_silk.py`** must be updated to the new
+  outline (106,70,198,114) before Phase C, or the east IR zone (x180–198) is
+  off-grid. Spark is **1 gr_poly (600 pts)**, not 8 — logo footprint already
+  extracted to `hardware/libraries/Branding.pretty/Claude_Spark_Logo.kicad_mod`.
+- [~] **Phase A — outline + anchor placement.** New long-thin Edge.Cuts;
+      place zone anchors (U3 center w/ antenna over a long edge; U1+J2+F1+D1
+      power/USB one short end; Q3+D2–D5 IR-TX other short end; U4 IR-RX near
+      front but EMI-isolated; U5 sensor far corner; D6–D12+J4+J5 status/IO
+      edge) + 4× M3 holes wherever clean. Render, iterate.
+- [ ] **Phase B — support re-seat + holes.** Extend `pcb_place_v2.py` spiral
+      search to re-seat decoupling/pullups/RC against the new anchors.
+- [ ] **Phase C — route + pour + silk.** `pcb_router.py → pcb_pour.py →
+      pcb_silk.py`. **Render to Nick before routing commits** (H2.2 rule).
+**STATUS 2026-06-14 (end of autonomous PCB session):** the restructure is
+substantively DONE and pushed. Board: long-thin 92×44, zoned (power/USB W,
+MCU+antenna N-centre, IR fan E, status cluster + buttons S), USB mouth
+overhanging the W edge, 4 M3 holes clear, **0 DRC errors** (kicad-cli). All
+review blockers addressed: bent-LED model + east-firing fan (geometry
+verified: D2..D5 fire +67.5/+22.5/−22.5/−67.5° around east), TSOP off the LED
+column, ground plane reclaimed (B-signal 40%→24%, critical nets F-pinned),
+status LEDs clustered + captioned, underside metadata block (logo + stamped
+rev/commit/date/URL). **Remaining (blocked or polish):**
+- [ ] **CI baseline refresh** — every count drifted (full restructure); must
+      run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
+      (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
+- [ ] **Silk polish** — 46 silk_overlap + RD-over-copper; tune `pcb_silk.py`
+      RD placement (back-silk-over-pour warnings are cosmetic/expected).
+- [ ] **Phase E schematic split** — GUI-bound, still pending.
+- [ ] check_models() flags the bent .wrl "missing" though it exists — likely a
+      ${KIPRJMOD} path-resolution quirk in the validator; verify on Pages.
+
+- [x] **Phase C-rework — from 3 adversarial subagent reviews (2026-06-14).**
+  Round-1 board routes clean (0 DRC) but review found real blockers:
+  - **IR-LED bend geometry (mech, BLOCKER + Nick):** flat `LED_D5.0mm` has an
+    ambiguous bend plane; rotating it doesn't reliably aim the beam. Fix: bent
+    3D model + silk bend-line/arrow defining the fold, footprint rotated so the
+    fold fires at the fan angle. Widen pitch 8→~11mm (bend/finger room). Move
+    TSOP U4 off the LED column (self-blinding / TX reflection).
+  - **Ground-plane fragmentation (SI, BLOCKER):** B.Cu is used as a signal
+    layer, slotting the GND plane; IR_DRAIN return + long IR_RX run past the
+    receiver. Fix: router penalty to keep signals on F.Cu and reclaim B.Cu as
+    near-solid GND; keep IR drive loop tight on F.Cu; stitch antenna+RX corners.
+    (Antenna keepout itself verified CLEAN — the mech reviewer's "antenna
+    off-edge" was a false positive from misreading the board as y60-top.)
+  - **Silk mess (DFM, MAJOR):** 169 silk warnings (RDs over pads/edge,
+    illegible status row). Fix: re-run/extend `pcb_silk.py` for the new board.
+  - **Status LEDs (Nick + DFM):** cluster them (not spread) + clear labels.
+  - Minor: J2 ~0.5mm east (pad-to-edge slack), H1/H2 screw-head vs J4/U4,
+    AMS1117 out-cap closer, stale buck note in layout.md → fix to LDO.
+- [ ] **Phase C2 — underside metadata (B.SilkS).** The Claude spark already
+      exists as **8× top-level `gr_poly` on F.SilkS** (bbox ≈126.8–131.0 ×
+      98.9–103.1, added in `d37cee9`); the matching "designed by Claude"
+      `gr_text` was stripped by `pcb_silk.py` phase-1 (explains lost-text /
+      kept-icon). Plan: extract those 8 polys into a **B.SilkS logo
+      footprint** (reuse geometry — identical mark), **delete the stray
+      F.SilkS polys**, and have `pcb_silk.py` place the footprint + a stamped
+      text block (rev `v2` + `git rev-parse --short HEAD`[-dirty] + date +
+      URL + attribution). See layout.md "Underside metadata block".
+- [ ] **Phase D — validate.** `hardware_validate.py`, open PR, watch CI
+      (ERC/DRC/parity/freshness), refresh baseline only if counts legit-change.
+- [ ] **Phase E — schematic → 6 hierarchical sheets** (GUI; gate: empty
+      `.net` diff). Last, since it's GUI-bound and PCB-independent.
+- Note: v1 order package (`order/v2.0` tagging) is paused behind this — no
+  point freezing an outline we're about to change.
+
 🐞 **SCHEMATIC RENDER BUG FOUND & FIXED (2026-06-14, Nick caught it).** The
 published schematic PDF was missing the three v2-swapped ICs — **U3 (ESP32-C3),
 U1 (AMS1117 LDO), U5 (AHT20)**. Root cause: the v2 IC-swap scripts dropped the

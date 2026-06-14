@@ -18,17 +18,24 @@ import pcbnew
 
 BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 GRID = 0.1  # mm
-X0, Y0, X1, Y1 = 100.0, 60.0, 180.0, 115.0
+# grid extent = the board edge exactly, so EDGE_MARGIN is measured from the
+# real edge (a grid larger than the board lets copper sit at the edge).
+X0, Y0, X1, Y1 = 106.0, 70.0, 198.0, 114.0
 NX = int(round((X1 - X0) / GRID)) + 1
 NY = int(round((Y1 - Y0) / GRID)) + 1
 CLEAR = 0.128        # working clearance, just above JLCPCB 0.127 floor
 EDGE_MARGIN = 0.45   # copper-to-edge (board rule 0.3 + margin)
-ANTENNA_X = 104.6    # no copper west of this (WROOM antenna strip)
 F, B = 0, 1
 
 POWER_NETS = {"+5V", "+3.3V", "Net-(U1-SW)", "Net-(F1-Pad2)"}
 IR_NETS = {"IR_DRAIN", "EXT_IR_A", "/EXT_IR_A", "Net-(D2-A)", "Net-(D3-A)",
            "Net-(D4-A)", "Net-(D5-A)"}
+# Keep B.Cu as a near-solid ground plane: signals are pushed to F.Cu via a
+# per-cell B penalty, reserving B for unavoidable crossings only. The EMI-
+# critical nets (receiver in/filter, USB pair, IR drive return) are pinned
+# hardest so they stay over continuous ground. (SI review, 2026-06-14.)
+F_PREFER = {n.lstrip("/") for n in
+            {"IR_RX", "IR_RX_VS", "USB_D+", "USB_D-", "IR_DRAIN"}}
 
 def net_widths(name):
     """(track half-width, via diameter, via drill) in mm."""
@@ -82,6 +89,10 @@ def main():
     board = pcbnew.LoadBoard(BOARD_PATH)
     assert isinstance(board, pcbnew.BOARD), "LoadBoard failed"
 
+    # Full re-route assumes a ripped board (no prior tracks/vias) — run
+    # scripts/pcb_rip.py first. Removing tracks in THIS process corrupts the
+    # SWIG footprint iterator below, so the rip lives in its own process.
+
     # --- static blocks -------------------------------------------------
     static = np.zeros((2, NX, NY), dtype=bool)
     em = int(math.ceil(EDGE_MARGIN / GRID))
@@ -89,9 +100,20 @@ def main():
     static[:, NX - em:, :] = True
     static[:, :, :em] = True
     static[:, :, NY - em:] = True
-    ax = int(math.ceil((ANTENNA_X - X0) / GRID))
-    ay = int(math.ceil((102.3 - Y0) / GRID))
-    static[:, :ax, :ay] = True
+    # antenna keepout: read live from U3's footprint rule-area so it tracks the
+    # floorplan (central-north strip), extended up to the board's north edge.
+    for f in board.GetFootprints():
+        if f.GetReference() != "U3":
+            continue
+        for z in f.Zones():
+            if not z.GetIsRuleArea():
+                continue
+            zb = z.GetBoundingBox()
+            kx0, _ = mm2c(pcbnew.ToMM(zb.GetLeft()), 0)
+            kx1, _ = mm2c(pcbnew.ToMM(zb.GetRight()), 0)
+            _, ky1 = mm2c(0, pcbnew.ToMM(zb.GetBottom()))
+            km = int(math.ceil(1.0 / GRID))   # margin so no copper hugs it
+            static[:, max(kx0 - km, 0):kx1 + 1 + km, :ky1 + 1 + km] = True
 
     # --- copper model from pads ----------------------------------------
     occ = np.zeros((2, NX, NY), dtype=bool)
@@ -225,11 +247,9 @@ def main():
     # F.Cu penalty regions: [x0,y0,x1,y1,penalty] - corridors stay clear for
     # perpendicular escapes; east-west bus traffic prefers B.Cu there
     REGION = np.zeros((2, NX, NY), dtype=np.float32)
-    for rx0, ry0, rx1, ry1, pen in ((105, 60.5, 162, 71.5, 1.2),
-                                    (123.5, 71.5, 137, 96.0, 0.5),
-                                    (125, 83, 145, 90, 0.9)):
-        i0, j0 = mm2c(rx0, ry0); i1, j1 = mm2c(rx1, ry1)
-        REGION[F, max(i0,0):min(i1,NX), max(j0,0):min(j1,NY)] = pen
+    # (old hand-tuned F.Cu penalty corridors were specific to the v2 dump-and-
+    # nudge layout; cleared for the re-floorplan. Re-add per-zone if routing
+    # quality needs steering after the first pass.)
 
     SQRT2 = math.sqrt(2)
     DIRS = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0),
@@ -240,10 +260,12 @@ def main():
         name = net_names[nc]
         pads = net_pads[nc]
         hw, via_d, via_drill = net_widths(name)
-        if name in POWER_NETS:
-            LAYER_PENALTY = {F: 0.30, B: 0.0}   # power distributes on B
+        if name.lstrip("/") in F_PREFER:
+            LAYER_PENALTY = {F: 0.0, B: 1.0}    # critical: keep over ground
+        elif name in POWER_NETS:
+            LAYER_PENALTY = {F: 0.0, B: 0.35}   # power prefers F, B if needed
         else:
-            LAYER_PENALTY = {F: 0.0, B: 0.0}   # signals may use B freely
+            LAYER_PENALTY = {F: 0.0, B: 0.5}    # signals prefer F, B for crossings
 
         def build_masks(hw_):
             foreign = occ & (owner != nc)

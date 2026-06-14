@@ -39,12 +39,14 @@ constraints that rules can't express.
    radius, rotated to their fan angle, with silkscreen aim guides. Each LED
    is an independent string (own 18Ω resistor from +3.3V, all cathodes to
    `IR_DRAIN`) — they are NOT series pairs. Hand-soldered; leave finger room.
-3. **AP63203 buck (U1) switching loop tight:** C1 (input cap) hard
-   against VIN/GND pins; L1 adjacent to SW; C2/C3 (output) close to L1 return
-   with short GND back to U1. Keep the SW node (`Net-(U1-SW)`) copper area
-   minimal — it's the noisy node. No signal traces under the buck loop.
-4. **USB-C (J2) + CH340C (U2) short data traces:** J2 on board edge;
-   U2 close to J2; route D+/D− as a loosely coupled pair, < 30 mm, no layer
+3. **AMS1117 LDO (U1) caps tight (v2 — no buck):** the v2 board uses a
+   SOT-223 AMS1117-3.3 linear LDO, NOT the v1 AP63203 buck — there is no
+   inductor or SW node. Place the input cap (C1) hard against VIN/GND and the
+   **10 µF output cap within ~3 mm of VOUT** (PSRR/transient for the C3 WiFi
+   bursts — SI review). No switching loop / SW-keepout applies any more.
+4. **USB-C (J2) native USB (v2 — no CH340C):** v2 uses the C3's native USB
+   PHY (the CH340C bridge is gone). J2 on the board edge; route D+/D− as a
+   tight pair on F.Cu over continuous ground, < 30 mm, no layer
    change if possible. ESD/TVS (D1) and fuse (F1) sit between J2 and the
    rest: order on VBUS must be J2 → F1 → D1 → U1 (fuse before TVS,
    per H1.4).
@@ -92,13 +94,64 @@ constraints that rules can't express.
 - Strapping nets (GPIO0/2/12/15, EN) are short and local: buttons + R-C
   near U3.
 
-## Board outline (to decide at H2.2 placement)
+## v2 enclosure-driven floorplan (restructure, 2026-06-14)
 
-Not yet drawn (Edge.Cuts empty). Drivers: IR LED fan on one edge, USB-C +
-buttons on the opposite/adjacent edge, antenna overhang on a third, DHT22
-in the far corner from the buck. Mounting: 4× M3 holes (add via
-`add_mounting_hole`), ≥2.5 mm from edges. Target compact 2-layer —
-roughly 60×45 mm first attempt, grow only if routing demands it.
+The first PCB was placed by dumping all parts and nudging to clear DRC — no
+functional zoning, a spider-web of long traces radiating from the MCU/power
+cluster, and ~⅓ of the 80×55 mm board empty. This restructure reverses that:
+**pick the enclosure → fix the outline → floorplan into functional zones →
+place + route within each zone.** The zones below are 1:1 with the planned
+hierarchical schematic sheets, so the schematic split *is* the floorplan.
+
+**Enclosure (decided 2026-06-14, Nick):** assume a **custom 3D-printed
+enclosure tailored to the board** — so the board is NOT constrained to a
+stock box. Shape the outline to suit the component layout (the zones below),
+and place **4× M3 mounting holes wherever the floorplan makes them
+convenient** (≥2.5 mm from edges/copour, clear of courtyards); the printed
+enclosure adapts to wherever they land. Free outline removes the prior
+purchase/size gate entirely. Still target a tidy, compact shape — long-thin
+remains attractive because it separates the noisy power/USB end from the
+EMI-sensitive IR-RX/sensor end (better EMF, shorter returns) — but it is now
+a design choice, not a box constraint.
+
+**Underside metadata block (B.SilkS, new requirement):** the board carries no
+branding today (front has only the title + URL; `pcb_silk.py` phase-1 strips
+all board texts). Add a back-silk block in a free region of the GND pour:
+- **Claude starburst icon** + **"Designed by Claude"** (orange on the
+  website; mono silk here). Icon must be authored as a B.SilkS logo footprint
+  (`bitmap2component` from a mono starburst) — it does not exist in the
+  hardware tree yet.
+- **Board rev** (`v2`), **git short-hash + dirty flag** of the generating
+  commit (auto-stamped by the silk step via `git rev-parse --short HEAD`, so
+  it never goes stale — it trails its own commit by one, which is
+  conventional and fine), **generation date**, project URL, and the
+  non-commercial/"directed by Nick Dancer" line to match the site.
+Implement inside `pcb_silk.py` (extend `LABELS` with a B.SilkS group +
+a stamping helper) so it regenerates with every pipeline run.
+
+**Functional zones (long-thin board, IR end = "front"):**
+
+| Zone | Edge / region | Parts | Schematic sheet |
+|------|---------------|-------|-----------------|
+| IR-TX | front end panel | Q3, R9–R12, D2–D5 (5 mm, fanned ±67.5/±22.5°) | `ir-tx` |
+| IR-RX | front, EMI-isolated from TX loop | U4 TSOP, R27/C9 | `ir-rx` |
+| MCU core | center; C3 antenna overhangs a long edge | U3 ESP32-C3, decoupling, strapping R's, SW1/SW2, EN/boot RC | `mcu` |
+| Sensor | corner away from LDO heat, over a vent slot | U5 AHT20 | `sensor` |
+| Power | rear end panel | J2 USB-C, F1, D1 TVS, U1 AMS1117, C1/2/3 | `power` |
+| Status/IO | top-visible row + service edge | D6–D12, J4 spare, J5 ext-IR | `io` |
+
+VBUS order on the power end stays J2 → F1 → D1 → U1 (fuse before TVS, H1.4).
+All hard constraints in the "Placement constraints" section above still
+apply *within* each zone (antenna keepout, IR-LED bend room, tight LDO loop,
+sensor heat isolation, TSOP RC filter at the Vs pin).
+
+**Execution path (all behind existing machine validators):**
+1. Pin exact Hammond part → set Edge.Cuts + mounting holes to its template.
+2. Schematic → 6 hierarchical sheets (KiCad GUI; netlist-invariant — the
+   `.net` diff MUST be empty, that is the proof it was purely structural).
+3. Rewrite `scripts/pcb_place_v2.py` with explicit per-zone coordinates
+   against the new outline; re-run `pcb_router.py` → `pcb_pour.py` →
+   `pcb_silk.py`. Render to Nick **before routing** (H2.2 exit criterion).
 
 ## H2.2 exit criteria
 

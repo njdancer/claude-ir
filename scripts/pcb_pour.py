@@ -11,9 +11,8 @@ import sys
 import pcbnew
 
 BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
-X0, Y0, X1, Y1 = 100.0, 60.0, 180.0, 115.0
-ANTENNA_X = 104.2
-ANTENNA_Y_MAX = 102.3   # WROOM courtyard wedge south extent
+# new long-thin outline
+X0, Y0, X1, Y1 = 106.0, 70.0, 198.0, 114.0
 VIA_PITCH = 4.0         # stitching grid
 VIA_D, VIA_DRILL = 0.6, 0.3
 TIE_VIA_D, TIE_DRILL = 0.5, 0.3    # smaller body for island ties in tight spots
@@ -35,6 +34,17 @@ def main():
     assert isinstance(board, pcbnew.BOARD)
     gnd = board.FindNet("GND")
     assert gnd, "GND net missing"
+
+    # antenna keepout rect from U3's footprint rule-area (central-north strip),
+    # extended to the north board edge. Used for the pour keepout + via skip.
+    kx0, ky0, kx1, ky1 = 136.0, Y0, 164.0, 81.5   # fallback
+    for fp in board.GetFootprints():
+        if fp.GetReference() == "U3":
+            for z in fp.Zones():
+                if z.GetIsRuleArea():
+                    zb = z.GetBoundingBox()
+                    kx0, kx1 = pcbnew.ToMM(zb.GetLeft()), pcbnew.ToMM(zb.GetRight())
+                    ky0, ky1 = Y0, pcbnew.ToMM(zb.GetBottom())
 
     # drop pre-existing zones AND prior GND stitching vias (idempotent reruns —
     # GND is never routed, only poured + stitched, so every GND via is ours;
@@ -70,7 +80,7 @@ def main():
     ls.AddLayer(pcbnew.F_Cu)
     ls.AddLayer(pcbnew.B_Cu)
     ko.SetLayerSet(ls)
-    ko.AddPolygon(rect_chain(X0 - 1, Y0 - 1, ANTENNA_X, ANTENNA_Y_MAX))
+    ko.AddPolygon(rect_chain(kx0, Y0 - 1, kx1, ky1))
     ko.SetZoneName("antenna_keepout")
     board.Add(ko)
 
@@ -79,12 +89,17 @@ def main():
         z = pcbnew.ZONE(board)
         z.SetLayer(layer)
         z.SetNetCode(gnd.GetNetCode())
-        z.AddPolygon(rect_chain(X0 + 0.3, Y0 + 0.3, X1 - 0.3, Y1 - 0.3))
+        z.AddPolygon(rect_chain(X0 + 0.4, Y0 + 0.4, X1 - 0.4, Y1 - 0.4))
         z.SetLocalClearance(pcbnew.FromMM(0.3))
         z.SetMinThickness(pcbnew.FromMM(0.2))
         z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
         z.SetThermalReliefGap(pcbnew.FromMM(0.3))
         z.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.5))
+        # drop fill islands that can't be stitched into the plane (otherwise
+        # they read as unconnected-zone DRC items); keep >2mm^2 so the tie pass
+        # can still rescue the ones worth keeping.
+        z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_AREA)
+        z.SetMinIslandArea(int(2.0 * 1e6 * 1e6))   # 2 mm^2 in nm^2
         z.SetAssignedPriority(0)
         z.SetZoneName(f"gnd_pour_{'F' if layer == pcbnew.F_Cu else 'B'}")
         board.Add(z)
@@ -93,12 +108,18 @@ def main():
     # occupancy check against pads/tracks/vias of non-GND nets
     pads_l = []   # (x, y, halfsize, netcode)
     segs_l = []   # (x0, y0, x1, y1, halfwidth, netcode)
+    drills = []   # (x, y, drill_radius) for EVERY drilled hole (any net) —
+                  # hole-to-hole spacing applies regardless of net, incl. GND
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             bb = pad.GetBoundingBox()
             pads_l.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
                            max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2,
                            pad.GetNetCode()))
+            if pad.GetAttribute() in (pcbnew.PAD_ATTRIB_PTH, pcbnew.PAD_ATTRIB_NPTH):
+                pp = pad.GetPosition()
+                drills.append((pcbnew.ToMM(pp.x), pcbnew.ToMM(pp.y),
+                               pcbnew.ToMM(pad.GetDrillSizeX()) / 2))
     for t in board.GetTracks():
         if isinstance(t, pcbnew.PCB_VIA):
             pads_l.append((pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
@@ -120,7 +141,7 @@ def main():
     while y < Y1 - 2.0:
         x = X0 + 3.0
         while x < X1 - 2.0:
-            ok = not (x < ANTENNA_X + 1 and y < ANTENNA_Y_MAX + 1)
+            ok = not (kx0 - 1 < x < kx1 + 1 and y < ky1 + 1)
             if ok:
                 r = VIA_D / 2 + CLEAR
                 for (ix, iy, ihs, inc) in pads_l:
@@ -134,6 +155,14 @@ def main():
                         if inc == gnd_code:
                             continue
                         if seg_dist(x, y, x0s, y0s, x1s, y1s) < hw + r:
+                            ok = False
+                            break
+                if ok:
+                    # hole-to-hole spacing vs EVERY drilled hole (incl. GND THT
+                    # pads — net doesn't matter for drill spacing). board min
+                    # 0.25mm; keep margin.
+                    for (hx, hy, hr) in drills:
+                        if math.hypot(hx - x, hy - y) < VIA_D / 2 + hr + 0.3:
                             ok = False
                             break
             if ok:
