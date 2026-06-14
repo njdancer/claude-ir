@@ -10,6 +10,38 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** Re-ran the
+deterministic pipeline (`rip → place → router → pour → pcb_ldo_pour → silk →
+stamp`) with the hand-tuned **anchors fixed** (IR fan + U4 south-edge
+relocation synced into `pcb_floorplan.py`, so all that work is preserved) and
+the router taught real SI rules. Validated locally on KiCad 10.0.3 (installed
+in this container; global lib-tables wired so `hardware_validate.py` counts are
+trustworthy). **Every metric improved or held — nothing regressed:**
+- **USB D+/D− pair fully off B.Cu** (was D+ 5.3 mm on B.Cu + 4 vias): both now
+  100 % F.Cu, 0 vias, no plane crossing — `pcb_router.HARD_F` forbids B.Cu for
+  the pair. (D+ 62 mm vs D− 50 mm = 12.7 mm skew is electrically irrelevant at
+  full-speed USB, ~76 ps vs an 83 ns bit period — return-path continuity >
+  length-match here.)
+- **IR_RX 5.5 → 2.7 mm** single short B.Cu crossing; **IR_RX_VS 0 mm** —
+  `STRONG_F` penalty + routing the SI-critical nets first.
+- **LDO thermal pour** (`pcb_ldo_pour.py`): /LDO_OUT tab copper ~20 → ~69 mm².
+- **0 unconnected** (was 1: the USB-C A6↔B6 reversibility tie now routes →
+  reversible USB works); **silk_overlap 44 → 0, silk_over_copper 53 → 0**;
+  DRC 0 errors. Baseline refreshed (`ci-baseline.json`).
+- **Decoupling left ~7 mm** — bounded by the WROOM module courtyard (caps
+  can't sit <3 mm from a module edge; module has internal decoupling), so this
+  is an accepted module-design reality, not placer-fixable without collision
+  risk.
+- ⚠️ Baseline generated on **10.0.3**; CI uses **10.0.2** — counts should match
+  but watch the first CI run and refresh from the container if a silk count
+  differs by 1–2. Open a PR and let CI gate (ERC/DRC/parity/freshness/silk).
+- Note: true USB diff-pair coupling + a fully solid 2-layer ground are
+  physically limited on 2 layers; a **4-layer board** (dedicated GND plane,
+  coupled D+/D−) is the proper next-rev lever if SI ever matters more.
+
+🔧 **Earlier this session:** LDO thermal pour first landed standalone
+(`68e2410`); now folded into the pipeline above.
+
 🔍 **LAYOUT REVIEW DONE (2026-06-14) — see
 [`hardware/notes/layout-review-2026-06-14.md`](hardware/notes/layout-review-2026-06-14.md).**
 Objective parse (`scripts/pcb_metrics.py` + `scripts/pcb_checks.py`, no
