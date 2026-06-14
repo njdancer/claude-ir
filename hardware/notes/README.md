@@ -1,5 +1,11 @@
 # Hardware Engineering Notes
 
+> ⚠️ **The board is now the v2 ESP32-C3 cost-down redesign** (ESP32-C3-WROOM-02,
+> AMS1117 LDO, AHT20 sensor, SMD USB-C; CH340C/JTAG/buck removed). Several notes
+> below still describe the v1 WROOM-32E architecture and are being updated. The
+> as-built description is the v2 change set in [`ROADMAP.md`](../../ROADMAP.md);
+> where a note disagrees with the schematic, the schematic wins.
+
 Design rationale for the ESP32 IR Remote Control Development Board (v1.1).
 
 **Source of truth: the KiCad project** (`hardware/esp32-ir-remote.kicad_sch` /
@@ -26,7 +32,7 @@ what changed electrically, since `.kicad_sch` diffs are dominated by graphics.
 | Note | Scope |
 |------|-------|
 | [power-supply.md](./power-supply.md) | USB-C input, protection, AP63203 buck regulation |
-| [usb-serial.md](./usb-serial.md) | CH340C bridge and ESP32 auto-reset circuit |
+| [usb-serial.md](./usb-serial.md) | v2 native USB (no bridge); USB-C connector data path + hand-solder note |
 | [esp32-mcu.md](./esp32-mcu.md) | WROOM-32E module, strapping pins, buttons, breakout header |
 | [ir-transmitter.md](./ir-transmitter.md) | 4× TSAL6200 array with MOSFET driver |
 | [ir-receiver.md](./ir-receiver.md) | TSOP38238 development receiver |

@@ -10,6 +10,37 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🐞 **SCHEMATIC RENDER BUG FOUND & FIXED (2026-06-14, Nick caught it).** The
+published schematic PDF was missing the three v2-swapped ICs — **U3 (ESP32-C3),
+U1 (AMS1117 LDO), U5 (AHT20)**. Root cause: the v2 IC-swap scripts dropped the
+new symbols at a constant **off-sheet column (x≈330mm, past the A4 297mm edge)**,
+so `kicad-cli sch export pdf/svg` cropped them out. They were still wired by net
+labels → netlist correct (U3 = 20 nodes), ERC clean, so nothing flagged it
+(**ERC has no "symbol off the page" rule** — gap in our gate). Fixes this commit:
+- **Schematic:** page A4 → **A3** so the off-sheet cluster (max x≈377) falls
+  inside the page and renders. Pure paper-size change → netlist-invariant by
+  construction (paper size isn't in the `.net`); CI freshness check will confirm.
+- **3D models:** vendored the missing STEP files into `hardware/lib/3dshapes/`
+  and repointed every `(model …)` from `${KICAD10_3DMODEL_DIR}` (didn't resolve
+  in the Pages render / local lint) to `${KIPRJMOD}`: ESP32-C3-WROOM-02, SOT-223,
+  LED_0805 (×5), R_0805 (R6/R7 → existing bundled copy), and USB-C (C393939
+  TYPE-C16PIN, fetched via JLC MCP). **`check_models()` now 0 missing.**
+- ⚠️ **Could not render-verify here (remote session, no kicad-cli).** Needs a
+  PR (CI ERC/DRC/parity/freshness) and/or Pages rebuild to confirm the PDF shows
+  all parts and the GLB renders them.
+
+**Queued (Mac/KiCad):**
+- [ ] **Proper schematic re-layout** — A3 is a stopgap; relocate U3/U1/U5 + their
+      support cluster into a clean position on the canvas (or go hierarchical),
+      then revert to A4 if it fits. Do this in the KiCad GUI, not by scripting
+      s-expressions (that's what caused this).
+- [x] **Verify USB-C 3D model alignment — DONE 2026-06-14.** It did need a tweak:
+      `offset (0 −2.087 −0.745), rotate (0 0 180)` (was `0 0 0`) seats the
+      C393939 body flat on the board, centered, mouth overhanging the south edge.
+      GLB-mesh verified (see the seated-model note in the Now section above).
+- [ ] Add an off-sheet-symbol guard to `hardware_validate.py` so this can't
+      recur silently (assert every placed symbol's origin is within page extents).
+
 ✅ **BOARD v2 — ESP32-C3 cost-down redesign COMPLETE & CI-GREEN
 (2026-06-14).** Schematic + PCB + validation all done on PR #11; every CI job
 passes (app, **hardware**, bom-report, firmware). State:
@@ -28,25 +59,21 @@ passes (app, **hardware**, bom-report, firmware). State:
 - **Next (Nick's bench / $$):** order-time JLC-preview verification of the
   flagged rotations (U3 ESP32-C3 MCU especially, U5 AHT20, J2 USB-C datum),
   then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
-  place the 5-board JLCPCB assembly order. Optional polish: vendor the 4
-  remaining missing 3D STEP models (LED_0805/SOT-223/ESP32-C3/R_0805 —
-  WARN-only).
+  place the 5-board JLCPCB assembly order. (3D STEP models now vendored — see
+  the render-bug fix at the top of this section.)
 
-✅ **J2 USB-C 3D model vendored + seated (2026-06-14).** The XKB U262 footprint
-referenced a stock-library STEP (`${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/
-…U262-16XN-4BVC11.step`) that doesn't ship in the macOS KiCad bundle and isn't
-`${KIPRJMOD}`-relative → J2 dropped from the 3D viewer/renders ("Could not add
-3D model for J2"), the same broken-path class as the "only the inductor
-rendered" lesson. Fix: pulled the XKB U262 EasyEDA STEP (C319148) via the jlcpcb
-MCP, vendored it to `hardware/lib/3dshapes/USB_C_Receptacle_XKB_U262-16XN-4BVC11.step`,
-repointed J2 `${KIPRJMOD}`-relative, and aligned it by exporting the board to GLB
-and measuring the connector mesh in board coords (the proven AM2302 method):
-**offset (0 −2.087 −0.745), rotate (0 0 180)** seats the shell flat on the board
-(z 0.000–4.10), centered on the pad row (x 130.53–139.47, center 135.0), opening
-overhanging the south edge. Diff is the `(model …)` block only — copper/pads/
-nets/DRC and fab CPL/gerbers (pad-driven) all unchanged. NOTE: the fitted part is
-the cheaper SHOU HAN TYPE-C16PIN (C393939, the BOM's cost-down pick) on the same
-standard 16P land pattern; the XKB U262 body is a correct dimensional 3D proxy.
+✅ **J2 USB-C 3D model SEATED & render-verified (2026-06-14).** Completes the
+"Verify USB-C 3D model alignment" TODO below: the vendored
+`USB_C_XKB_U262-16XN-4BVC11.step` (C393939 SHOU HAN, fetched via JLC MCP) was
+repointed `${KIPRJMOD}`-relative but left at `offset (0 0 0)` — which floats the
+shell 0.745 mm above the board AND parks it ~2 mm too far inboard, so the mouth
+sits *inside* the south edge (a plug couldn't enter). Derived the correct
+seating by exporting the board to GLB and measuring the connector mesh in board
+coords (the proven AM2302 method): **offset (0 −2.087 −0.745), rotate (0 0 180)**
+seats the shell flat (z 0.000–4.10), centered on the pad row (x 130.53–139.47,
+center 135.0), opening overhanging the south edge by ~1.7 mm. Diff is the
+`(model …)` offset only — copper/pads/nets/DRC and pad-driven fab CPL/gerbers all
+unchanged.
 
 ---
 
@@ -536,12 +563,31 @@ Pages CI image is bumped `kicad/kicad:9.0.6 → 10.0.2` (kicad-cli 10 reads
 the v9 files without migration; full `build-site.sh` verified in the image).
 The fixer script now only adds the metallic/roughness factors kicad-cli
 still omits (color-classified: gold/silver → metal) and forces translucent
-mask/silk opaque — this also fixed a live bug where white silkscreen was
-tinted green by an unclamped 1.1 multiplier. The recolor-by-name table
+silk/board-body opaque — this also fixed a live bug where white silkscreen was
+tinted green by an unclamped 1.1 multiplier. (The soldermask was *also* forced
+opaque here, which silently buried every copper trace — fixed 2026-06-14, see
+note below.) The recolor-by-name table
 remains as a fallback for KiCad 9 exports (e.g. local Mac builds until the
 bench moves to 10). Note: real *texture maps* (IC markings, FR4 weave) don't
 exist in STEP/GLB sources at all — that would need a Blender-style bake
 pipeline, deliberately out of scope.
+
+### Tooling: 3D viewer now shows copper traces (2026-06-14)
+
+The Pages 3D viewer rendered the board as a featureless green slab — no
+traces, pads, or vias visible. Root cause was *not* the export
+(`kicad-cli pcb export glb --include-tracks` is valid and the copper mesh
+(`esp32-ir-remote_copper`) survives the whole center→optimize→draco
+pipeline). It was `scripts/fix_glb_materials.py` forcing **all** translucent
+board materials opaque, including the soldermask — a flat sheet kicad-cli
+exports just above the copper plane, so an opaque mask hides everything
+beneath it. Fix: the soldermask is now exempted (kept `alphaMode:BLEND`,
+α=`SOLDERMASK_ALPHA`=0.75, glossier roughness to cut model-viewer haze) while
+silk/body still go opaque; copper now reads through as the familiar
+darker-green routing. Verified before/after in model-viewer (side-by-side
+render). A validation assert now fails the build if no translucent soldermask
+survives, so a future refactor can't silently re-bury the traces. Tune
+visibility-vs-milkiness via the two constants near the top of `main()`.
 
 ### Tooling: 3D models are vendored (2026-06-11)
 

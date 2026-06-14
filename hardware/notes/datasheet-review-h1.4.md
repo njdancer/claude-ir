@@ -1,5 +1,10 @@
 # H1.4 — Adversarial datasheet review
 
+> ⚠️ This review covers the **v1 WROOM-32E** board. The board has since moved to
+> the **v2 ESP32-C3 redesign** (see [`ROADMAP.md`](../../ROADMAP.md)); the MCU,
+> LDO, temp sensor, and USB-C parts changed, so the per-part findings below are
+> v1 history. A v2 datasheet review is queued.
+
 Per-subsystem review (2026-06-10): one agent per subsystem independently
 re-derived required connections from the part datasheet, then diffed against the
 exported netlist. The schematic is the source of truth. Findings below are

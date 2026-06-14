@@ -4,6 +4,24 @@
 
 This specification defines the hardware requirements for a development board that enables testing and development of an ESP32-based smart AC remote control system using infrared transmission. The board serves as a transition from the current ESP8266 breadboard proof-of-concept to a manufacturable design suitable for firmware development and eventual production refinement.
 
+> ⚠️ **SUPERSEDED ARCHITECTURE — read this first (v2.0, 2026-06).** The
+> fabricated board is the **v2 ESP32-C3 cost-down redesign**, NOT the
+> ESP32-WROOM-32E architecture described in the body of this document below.
+> The as-built board:
+> - **MCU: ESP32-C3-WROOM-02-N4** (LCSC C2934560), not WROOM-32E. The C3's
+>   native USB-Serial-JTAG let the **entire CH340C USB-serial subsystem be
+>   deleted** (no bridge, no auto-reset FETs).
+> - **Power: AMS1117-3.3 LDO** (U1), not the AP63203 buck + inductor.
+> - **Temp/humidity: AHT20** I2C sensor (U5), not the AM2302/DHT22.
+> - **USB-C: SMD 16P XKB U262** receptacle (J2), not the THT GCT part.
+> - Status LEDs moved to 0805 SMD; JTAG header and TX/RX activity LEDs removed.
+>
+> The **as-built description is the v2 change set in [`ROADMAP.md`](../ROADMAP.md)**
+> (the project state file) and the live schematic/netlist under `hardware/`.
+> The WROOM-32E content below is retained for v1.4 design rationale only and
+> is being rewritten for v2 as a follow-up. Where this spec body and the
+> schematic disagree, **the schematic wins.**
+
 > **Revision note (v1.4):** Pre-order cost/availability pass. The assembly
 > model is now explicitly **SMT-only machine assembly plus a hand-solder
 > kit** (see [Assembly Considerations](#assembly-considerations)): JLCPCB
