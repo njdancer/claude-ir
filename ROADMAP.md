@@ -10,6 +10,34 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔍 **LAYOUT REVIEW DONE (2026-06-14) — see
+[`hardware/notes/layout-review-2026-06-14.md`](hardware/notes/layout-review-2026-06-14.md).**
+Objective parse (`scripts/pcb_metrics.py` + `scripts/pcb_checks.py`, no
+kicad-cli needed) + research-backed benchmarks. Restructure verdict: **solid
+bones** — real zoning, good utilisation, 80 % B.Cu ground, 4 mm via stitching,
+clean net-class widths, all 36 multi-pad nets routed. Action items before fab,
+by severity:
+- [ ] **MAJOR — LDO thermal copper (reliability).** U1 tab `/LDO_OUT` has only
+      ~20–30 mm² copper, no pour → at the rated 0.85 W, θ_JA≈135 °C/W →
+      T_J≈140 °C **>125 °C limit even at 25 °C ambient**. Needs a ~1 in²
+      (≥1000 mm²) top-side pour on the tab net + thermal vias (target θ_JA
+      ≈55 °C/W → T_J≈72 °C). The ROADMAP's own "thermal pour under SOT-223 tab"
+      requirement is currently **unmet**.
+- [ ] **MAJOR — USB D+/D− not a matched pair.** D+ runs F.Cu+B.Cu with 4 vias;
+      D− all F.Cu, 0 vias; 3.5 mm skew, D+ crosses the plane. Re-route both
+      legs together on F.Cu over solid B.Cu, no vias (FS-tolerant but should
+      not pass review).
+- [ ] **MAJOR — reclaim B.Cu as solid ground.** Still slotted by ~211 mm of
+      signal/power across 19 nets incl. `/IR_RX` + `/USB_D+`. Push signals
+      (esp. IR_RX, USB) to F.Cu.
+- [ ] **MOD — decoupling far from pins** (MCU bypass 6.9 mm, LDO in-cap
+      11.5 mm, out-caps ~20 mm on +3.3V w/ none on `/LDO_OUT` → no stability
+      cap when JP1 open). Tighten in the same placement pass.
+- [ ] **MOD — antenna mid-edge not corner** (firing side clean, lateral 15 mm
+      not met). **MINOR — H1 hole 1.5 mm from J4; silk min 0.8 mm → 1.0 mm.**
+- [ ] **Verify on CI** (no kicad-cli here): DRC unconnected/clearance/courtyard,
+      ERC, teardrops, acute angles — open a PR and let the hardware job gate.
+
 🏗️ **BOARD RESTRUCTURE — enclosure-driven re-floorplan + schematic split
 (NEW TOP PRIORITY, 2026-06-14, Nick's call).** The current board is
 structurally sound but was placed by dumping parts and nudging for DRC: no
