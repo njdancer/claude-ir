@@ -1,0 +1,397 @@
+(footprint "SENSOR-SMD_L3.0-W3.0-P1.00-BR"
+	(version 20241209)
+	(generator "ai-eda-jlc-mcp")
+	(layer "F.Cu")
+	(descr "0%RH~100%RH 2.2V~5.5V 20bit 570uA I2C ±0.3℃ ±2%RH SMD Temperature and Humidity Sensor ROHS")
+	(tags "component")
+	(property "Reference" "REF**"
+		(at 0 -3.27 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "AHT20_C2757850"
+		(at 0 3.28 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "0%RH~100%RH 2.2V~5.5V 20bit 570uA I2C ±0.3℃ ±2%RH SMD Temperature and Humidity Sensor ROHS"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "LCSC" "C2757850"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Manufacturer" "广州奥松"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Temperature Tolerance" "±0.3℃"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Voltage - Supply" "2.2V~5.5V"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Humidity" "0%RH~100%RH"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Temperature Range" "-40℃~+120℃"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Features" "Factory calibration"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Current - Supply" "570uA"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Interface" "I2C"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Resolution" "20bit"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Humidity Tolerance" "±2%RH"
+		(at 0 0 0)
+		(layer "F.Fab")
+		hide
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(pad "1" smd roundrect
+		(at 1 1 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(pad "2" smd roundrect
+		(at 1 0 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(pad "3" smd roundrect
+		(at 1 -1 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(pad "4" smd roundrect
+		(at -1 -1 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(pad "5" smd roundrect
+		(at -1 0 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(pad "6" smd roundrect
+		(at -1 1 180)
+		(size 0.8 0.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+	)
+	(fp_line
+		(start 1.5241 -1.3784)
+		(end 1.5241 -1.5241)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start 1.5241 -1.5241)
+		(end -1.5239 -1.5241)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.5239 -1.5241)
+		(end -1.5239 -1.3784)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.5239 1.3782)
+		(end -1.5239 1.5239)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.5239 1.5239)
+		(end 1.5241 1.5239)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.5239 0.3782)
+		(end -1.5239 0.6215)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start -1.5239 -0.6218)
+		(end -1.5239 -0.3785)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start 1.5241 -0.3785)
+		(end 1.5241 -0.6218)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start 1.5241 0.6215)
+		(end 1.5241 0.3782)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_line
+		(start 1.5241 1.5239)
+		(end 1.5241 1.3782)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_circle
+		(center 1.5001 1.4999)
+		(end 1.5301 1.4999)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(layer "F.Fab")
+	)
+	(fp_circle
+		(center 1.778 1.0157)
+		(end 1.8781 1.0157)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "Cmts.User")
+	)
+	(fp_circle
+		(center 1.905 1.016)
+		(end 2.005 1.016)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+	)
+	(fp_poly
+		(pts
+			(xy -0.0315 1.1864)
+			(xy 0.477 1.187)
+			(xy 0.4719 0.7806)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill solid)
+		(layer "Cmts.User")
+	)
+	(fp_poly
+		(pts
+			(xy -0.0279 1.1863)
+			(xy 0.4806 1.1869)
+			(xy 0.4755 0.7805)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill solid)
+		(layer "F.SilkS")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.08)
+			)
+		)
+	)
+	(fp_line
+		(start -1.77 -1.77)
+		(end 2.25 -1.77)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+	)
+	(fp_line
+		(start 2.25 -1.77)
+		(end 2.25 1.78)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+	)
+	(fp_line
+		(start 2.25 1.78)
+		(end -1.77 1.78)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+	)
+	(fp_line
+		(start -1.77 1.78)
+		(end -1.77 -1.77)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/libraries/3dmodels/JLC-MCP.3dshapes/AHT20_C2757850.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 180)
+		)
+	)
+)

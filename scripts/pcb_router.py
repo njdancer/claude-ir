@@ -36,7 +36,7 @@ def net_widths(name):
         return 0.30, 0.6, 0.3
     if name in IR_NETS or name.lstrip("/") in {n.lstrip("/") for n in IR_NETS}:
         return 0.25, 0.6, 0.3
-    return 0.125, 0.45, 0.25
+    return 0.125, 0.5, 0.3
 
 # short, position-locked local families first; long flexible transit last
 ROUTE_ORDER_HEAD = [
@@ -114,7 +114,8 @@ def main():
             on_f = tht or pad.IsOnLayer(pcbnew.F_Cu)
             on_b = tht or pad.IsOnLayer(pcbnew.B_Cu)
             layers = [l for l, on in ((F, on_f), (B, on_b)) if on]
-            cells = []
+            cells = []        # full bbox cells (occupancy / clearance)
+            hit_cells = []    # cells whose centre is actually inside the pad
             for L in layers:
                 occ[L, i0:i1 + 1, j0:j1 + 1] = True
                 if nc > 0:
@@ -122,8 +123,18 @@ def main():
                 for i in range(i0, i1 + 1):
                     for j in range(j0, j1 + 1):
                         cells.append((L, i, j))
+                        cx, cy = c2mm(i, j)
+                        if pad.HitTest(pcbnew.VECTOR2I(pcbnew.FromMM(cx),
+                                                       pcbnew.FromMM(cy))):
+                            hit_cells.append((L, i, j))
             if nc > 0:
-                net_pads.setdefault(nc, []).append((fp.GetReference() + "/" + pad.GetNumber(), cells))
+                # route TO cells genuinely inside the pad shape, not bbox
+                # corners (which sit outside round/oval pads -> the path lands a
+                # cell shy and the pad reads unconnected). Fall back to bbox for
+                # pads smaller than the grid.
+                tcells = hit_cells if hit_cells else cells
+                net_pads.setdefault(nc, []).append(
+                    (fp.GetReference() + "/" + pad.GetNumber(), tcells))
                 net_names[nc] = pad.GetNetname()
 
     gnd_code = board.FindNet("GND").GetNetCode()
@@ -397,7 +408,15 @@ def main():
         t.SetWidth(pcbnew.FromMM(w))
         t.SetNetCode(nc)
         board.Add(t)
+    # dedup vias: the greedy per-leg routing can drop two vias on (or within a
+    # hole-pitch of) the same spot -> holes_co_located / hole_to_hole. Keep the
+    # first; skip any later via within 0.4mm of one already placed.
+    kept_vias = []
     for nc, x, y, dia, drill in vias_out:
+        if any(knc == nc and abs(kx - x) < 0.4 and abs(ky - y) < 0.4
+               for knc, kx, ky in kept_vias):
+            continue
+        kept_vias.append((nc, x, y))
         v = pcbnew.PCB_VIA(board)
         v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
         v.SetWidth(pcbnew.FromMM(dia))

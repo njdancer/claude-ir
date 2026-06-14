@@ -63,6 +63,37 @@ fi
 
 echo -e "${GREEN}✓ Using $KICAD_CLI_BIN${NC} ($("$KICAD_CLI_BIN" version))"
 
+# --- Ensure global library tables ---------------------------------------
+# Without the global sym/fp lib tables, headless ERC drowns in ~170 bogus
+# lib_symbol_issues / footprint_link_issues ("configuration does not include
+# library X"). The app GUI creates them on first run, but a CLI-only bench
+# (or a freshly-upgraded KiCad with a new versioned config dir) has none.
+# This mirrors CI's "Install KiCad global library tables" step. Idempotent.
+ensure_lib_tables() {
+    local ver cfg tpl
+    ver="$("$KICAD_CLI_BIN" version 2>/dev/null | grep -oE '^[0-9]+\.[0-9]+')"
+    [ -n "$ver" ] || return 0
+    if [ "$(uname)" = "Darwin" ]; then
+        cfg="$HOME/Library/Preferences/kicad/$ver"
+    else
+        cfg="${XDG_CONFIG_HOME:-$HOME/.config}/kicad/$ver"
+    fi
+    [ -f "$cfg/sym-lib-table" ] && [ -f "$cfg/fp-lib-table" ] && return 0
+    for tpl in \
+        "$(dirname "$KICAD_CLI_BIN")/../SharedSupport/template" \
+        "/Applications/KiCad/KiCad.app/Contents/SharedSupport/template" \
+        "/usr/share/kicad/template"; do
+        if [ -f "$tpl/sym-lib-table" ]; then
+            mkdir -p "$cfg"
+            [ -f "$cfg/sym-lib-table" ] || cp "$tpl/sym-lib-table" "$cfg/"
+            [ -f "$cfg/fp-lib-table" ] || cp "$tpl/fp-lib-table" "$cfg/"
+            echo -e "${GREEN}✓ Installed global KiCad lib tables → ${cfg/#$HOME/~}${NC}"
+            return 0
+        fi
+    done
+}
+ensure_lib_tables
+
 # --- ERC -----------------------------------------------------------------
 echo ""
 echo "Running ERC..."

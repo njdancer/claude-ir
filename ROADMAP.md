@@ -10,6 +10,235 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **BOARD v2 — ESP32-C3 cost-down redesign COMPLETE & CI-GREEN
+(2026-06-14).** Schematic + PCB + validation all done on PR #11; every CI job
+passes (app, **hardware**, bom-report, firmware). State:
+- **Schematic:** ESP32-C3 + AMS1117 LDO + AHT20 + SMD USB-C (XKB U262), all
+  the deletes/swaps done. `golden_netlist_v2.py` GOLDEN OK (36/36), ERC
+  0err/1warn.
+- **PCB:** fully routed (grid A* router, no freerouting), **0 unconnected**,
+  GND poured both layers with per-pad solid connection + stitched/island-tied
+  vias. DRC = only the 3 baseline-accepted (H1-in-C3-antenna-keepout). Silk
+  auto-placed (overlap 44→35). Reproducible pipeline:
+  `rip → pcb_place_v2 → pcb_router → pcb_pour` (+ `pcb_silk`, `pcb_swap_usbc`).
+- **Validation:** POLARITY truth table rebuilt for v2 (43 invariants/16 parts,
+  verified live); `fab-outputs.py` HAND_SOLDER kit (4×IR LED + TSOP + headers)
+  + JLC_ROTATION/OFFSET (incl. USB-C +1.44mm datum) refreshed; `ci-baseline.json`
+  regenerated in kicad:10.0.2 (`hardware_validate.py` EXIT 0 in-container).
+- **Next (Nick's bench / $$):** order-time JLC-preview verification of the
+  flagged rotations (U3 ESP32-C3 MCU especially, U5 AHT20, J2 USB-C datum),
+  then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
+  place the 5-board JLCPCB assembly order. Optional polish: vendor the 5
+  missing 3D STEP models (USB-C/LED_0805/SOT-223/ESP32-C3/R_0805 — WARN-only).
+
+---
+
+### v2 change set + cost rationale (reference, as-built)
+
+🟢 **BOARD v2 — ESP32-C3 cost-down redesign (2026-06-13, Nick:
+"build it as cheaply as possible, any redesign OK").** The v1.4 BOM is
+**$16.2/board**, 65% of it just two parts: AM2302 ($6.83) + WROOM-32E
+($3.78). v2 attacks the architecture, not just parts. Target **~$7.3/board
+(−55%)** with nearly everything SMD-assembled and a hand-solder kit shrunk
+to only easy through-hole bits (4× IR LED, TSOP, pin headers).
+
+**The change set (Nick approved scope + 3 design calls — keep buck, SMD 0805
+LEDs, Qwiic + small 4-pin spare header):**
+1. **MCU: ESP32-WROOM-32E → ESP32-C3-WROOM-02-N4** (C2934560, $3.11). The C3
+   has a **native USB-Serial-JTAG controller**: USB serial + auto-download/
+   reset over the USB lines, no bridge chip.
+2. **DELETE the whole USB-serial subsystem:** U2 CH340C, Q1/Q2 auto-reset
+   FETs, R3/R4 (cross-couple), R21/R26 (DTR/RTS bypass links), C5 (CH340
+   decoupling). Flash/monitor run straight over USB-C.
+3. **Temp sensor: AM2302 → AHT20** (C2757850, $0.80, I2C, SMD). Kills the
+   single most expensive part AND the 335-unit stock crisis; more accurate
+   (±0.3 °C, factory-cal). Onboard, SMD-assembled. Drops single-wire pullup
+   R22; **un-DNPs the I2C pullups R28/R29** (now real, shared AHT20+Qwiic
+   bus). [[board-v1-macro-direction]]
+4. **USB-C: THT GCT receptacle → SMD 16P** (C393939, $0.065 vs $1.42).
+   Revisited 2026-06-13: at the 5-board minimum the THT part premium
+   ($1.42×5 = $7.10) exceeds the one-time SMD feeder ($0.065×5 + $3 = $3.33)
+   — SMD is ~$3.77 cheaper *and* no hand-soldering. Break-even ≈2.2 boards,
+   below the floor. The 16P SMD has through-hole mounting posts, so it's
+   mechanically sturdy despite SMD signal pads. Vendor C393939's EasyEDA
+   footprint (verify pads vs JLC part) when wiring the schematic.
+5. **Status LEDs: 3mm THT → 0805 SMD** (D6/D7/D10/D11/D12), factory-placed.
+   **Drop the amber TX/RX activity LEDs (D8/D9 + R17/R18)** — meaningless
+   once the console is native USB.
+6. **Delete the JTAG header (J6)** — C3 does JTAG over native USB.
+7. **IR LED resistors 18Ω → 22Ω Basic** (R9-R12, C17958): ~86 mA/LED vs
+   ~108 mA (negligible IR-range loss), and it dodges a feeder fee (no Basic
+   18Ω exists, but 22Ω is Basic). Still machine-placed, no hand-soldering.
+8. **Power: AP63203 buck → AMS1117-3.3 LDO** (C6186, Basic — no feeder).
+   Removes the buck + L1 inductor + bootstrap cap (kit loses the inductor).
+   LDO verified for the load (pt3 below). **User LEDs: yellow 0805** (low-Vf),
+   direct-driven from GPIO → **delete Q4/Q5 + R23/R24**; system LEDs (5V/3V3
+   power, IR-TX) red 0805. **Keep:** IR TX array (Q3/AO3400A + 4× TSAL6200),
+   TSOP38238 RX, USB-C protection (F1 + D1 + R1/R2 CC).
+
+**Refinements (2026-06-13 pt 2, Nick's BOM audit):**
+- **Drop J3 Qwiic** — a 1mm-pitch SMD that's miserable to hand-solder and
+  would otherwise need a 5th feeder. I2C expansion preserved by breaking
+  SDA/SCL out on the spare header. R28/R29 (4.7k I2C pullups) stay fitted
+  for the AHT20 bus.
+- **Spare header J4 → 2×5** carrying **5V, 3V3, 2×GND, SDA(7), SCL(10),
+  GPIO0, GPIO1**: covers I2C expansion (post-Qwiic), 2 spare ADC GPIO, and
+  **external power injection** — a future battery+boost module can feed 5V
+  here (the AP63203 buck can't run off a 1-cell LiPo directly: dropout needs
+  Vin ≳ 3.8V — which is exactly why we dropped it, see below). **JP1
+  repurposed as an LDO-disconnect series jumper on the 3V3 output**: open it
+  to isolate the LDO and run the rail from an external buck/boost/battery
+  prototype fed through the header.
+- **Power: buck → AMS1117-3.3 LDO** (Nick, 2026-06-13): the buck can't run off
+  a 1S LiPo anyway, and on USB power the LDO's ~0.8W of heat is fine. Basic
+  part (no feeder), drops the inductor + bootstrap cap, simpler layout.
+- **LDO load check (Nick: "make sure it can manage our load"):** 3V3 rail
+  worst case = C3 WiFi-TX peak ~345mA + IR array (4×86mA=344mA, but 38kHz-
+  pulsed ~⅓ duty → ~115mA avg, bulk-cap filtered) + misc ~30mA ≈ **~490mA
+  sustained** (~720mA transient). AMS1117 (1A): ~2× current margin; dropout
+  ~0.8V@0.5A vs ~1.4V headroom (USB 4.7V min post-fuse − 3.3V) → regulates
+  even through the WiFi peak at low USB volts. Dissipation (5−3.3)×0.49 ≈
+  **0.83W** → SOT-223 + copper pour (θ_JA ~40°C/W) → ΔT ~35°C, Tj <85°C ≪
+  125°C. **Layout requirement: copper thermal pour under the SOT-223 tab.**
+  Output cap ≥22µF for stability (have C2).
+- **All status LEDs → Basic 0805** (blue dropped — not in JLC Basic in any
+  package). User-LED color TBD from the Basic palette (red/yellow/green/
+  white); a low-Vf pick (red/yellow) also lets us **delete Q4/Q5 + R23/R24**
+  and direct-drive from GPIO (the FETs only existed for blue's 3.4V Vf).
+  3V3 power LED → yellow (green barely lights on 3.3V).
+
+**Assembly split → 3 feeder fees** (~$9/order, one-time not per-board):
+only C3 + AHT20 + SMD USB-C stay machine-placed as Extended; the buck→LDO
+and 18→22Ω swaps each dropped a feeder (AMS1117 + 22Ω are Basic). At the
+5-board minimum, paying to load the SMD USB-C beats the THT part premium
+(see item 4). Hand-solder kit: **4× IR LED, TSOP, pin headers** — all easy
+through-hole (the inductor's gone with the buck). Everything else is Basic +
+machine-placed. Per-board parts ≈ $6.85 (−58% vs v1.4's $16.2).
+
+**New C3 GPIO map** (functional pins avoid all strapping pins; spare/unused
+strapping GPIO2/8 left NC to keep boot deterministic):
+
+| GPIO | Function | Notes |
+|------|----------|-------|
+| EN | Reset (SW1) | RC: R5 pullup + C6 |
+| 9 | Boot (SW2) | strapping, internal + R6 pullup |
+| 5 | IR transmit | → R13 → Q3 gate; → R19 → D10 indicator |
+| 6 | IR receive | TSOP38238 out |
+| 7 | I2C SDA | AHT20 + Qwiic (R28 pullup) |
+| 10 | I2C SCL | AHT20 + Qwiic (R29 pullup) |
+| 3 | User LED1 | → Q4 gate (blue, low-side from 5V) |
+| 4 | User LED2 | → Q5 gate |
+| 18/19 | USB D−/D+ | native USB-Serial-JTAG |
+| 0,1,20,21 | spare → J4 | 0/1 = ADC1; 20/21 = UART0 (ROM log/debug) |
+
+**Execution (staged commits on this branch; CI is the gate):**
+- [x] **Firmware** ported: new `[env:esp32-c3]` (native USB CDC build flags,
+      new pins), banner de-hardcoded, CI builds esp32-c3 not esp32dev.
+      `pio run -e esp32-c3` → SUCCESS (host). Retired the WROOM-32E esp32dev
+      env. F1.3 native tests + nodemcuv2 unchanged.
+- [x] **AHT20 vendored** (C2757850) into `hardware/libraries/` via jlcpcb
+      MCP; symbol lib registered, 3D model path made `${KIPRJMOD}`-relative
+      (CI render-safe per the vendoring lesson). Pinout: 2=VDD 3=SCL 4=SDA
+      5=GND (1/6 NC).
+- [x] **Bench upgraded to KiCad 10** (Nick; CI already on 10.0.2). v10's
+      netlist exporter uses the expanded multi-line s-expr (+`libparts`);
+      fixed `fab-outputs.py`'s brittle single-line parser to reuse
+      `hardware_validate.py`'s tokenizer (was silently parsing 0 comps →
+      empty BOM/CPL), added a lib-table self-heal to `hardware-check.sh`,
+      regenerated the committed netlist under v10 (verified electrically
+      empty). Full local validation passes on 10.0.3 = CI. **First CI run on
+      this branch: green.** PR <https://github.com/njdancer/claude-ir/pull/11>.
+- [x] **Schematic redesign DONE + machine-verified (autonomous, 2026-06-14).**
+      All 20 deletes + 3 IC swaps (U1→AMS1117, U3→ESP32-C3, U5→AHT20) + full
+      rewire via `connect_to_net`. **`scripts/ci/golden_netlist_v2.py` → GOLDEN
+      OK: all 36 multi-pin nets match the intended v2 design exactly** (C3
+      pinout, LDO + JP1 disconnect, AHT20 I2C bus, native USB D±, IO2/IO8
+      strap pull-ups, direct-GPIO user LEDs, repurposed J4). BOM attrs set:
+      0805 LEDs (red system / yellow user), 22Ω IR (C17958), LCSC on all new
+      parts. Commits on PR #11. **The electrical redesign — the hard, dead-
+      board-risk part — is complete and verified.**
+- [ ] **Schematic cleanup (next):** ERC is 219 violations, but **~197 are
+      orphan graphics** from the deletions (99 unconnected_wire_endpoint, 44
+      endpoint_off_grid, 25 label_dangling, 18 no_connect_dangling, 11
+      wire_dangling) — the netlist is correct, the dangling wire/label/NC
+      stubs left by removed symbols need sweeping. Plus: real residue = 13
+      multiple_net_names (dual functional+GPIO labels, acceptable), 4
+      pin_to_pin + 1 power_pin_not_driven (PWR_FLAG/pin-type config, e.g.
+      AHT20 VDD is `unspecified` type). Then: **J2 → SMD USB-C footprint**
+      (verify pad names vs C393939 — pad-map risk), **un-DNP R28/R29** (I2C
+      pull-ups now fitted).
+- [~] **PCB re-layout — clean reproducible pipeline + placement fix
+      (autonomous, 2026-06-14 session 2).** Diagnosed the root causes of the
+      stuck routes and built a deterministic, re-runnable pipeline:
+      **rip → `pcb_place_v2.py` → `pcb_router.py` → `pcb_stub_heal.py` →
+      `pcb_pour.py`**.
+      - **`scripts/pcb_place_v2.py`** (new): collision-checked greedy placer
+        that re-seats the C3-support parts (R5/R6/R7/R8/R28/R29/C6 +
+        decoupling) at the nearest free slot to their C3 pin, highest-priority
+        pin-pullups first. The v1.4→v2 swap had left them ~45mm from the new
+        C3 pins; this closed **IO8_STRAP + I2C_SDA** (router went 7→4 unrouted).
+      - **`scripts/pcb_stub_heal.py`** (rewritten): the grid router targets
+        each pad's bounding *box*; for round THT pads the bbox corners are
+        outside the copper, so legs stop ~1mm shy → DRC unconnected. This
+        reads the DRC report and adds ONE short bridge from the pad anchor to
+        the nearest same-net track **vertex** (never a mid-segment point →
+        no dangling), with a **foreign-clearance guard** that rejects any
+        bridge that would short. Closed 6 THT shortfalls cleanly, correctly
+        *refused* 2 that would short (IR_RX_VS, SPARE_IO1 — dense sensor/header
+        corners). NOTE: earlier blind/geometric heal variants caused real
+        shorts — the targeted+guarded version is the keeper.
+      - **State: no shorts**, DRC non-cosmetic = 2 antenna-keepout (accepted),
+        1 U3/H1 courtyard (accepted), 2 starved-thermal, 5 track_dangling,
+        3 holes_co_located, 1 hole_to_hole. **8 unconnected**, all now
+        characterised:
+        * **STRUCTURAL (need design changes):** CC1 (R1↔J2.A5), USB_D±
+          (A6↔B6, A7↔B7) — all three are the **THT USB-C escape problem**
+          (0.85mm-pitch through-holes can't fan the inner data/CC pins out).
+          → **fix = the SMD-16P USB-C swap (item 4 above)**, which the BOM
+          plan already calls for. ESP_BOOT (R6↔U3.8) — pin 8 is boxed in by
+          the **D1 TVS** sitting under the C3 south pins → **fix = relocate
+          the power-entry cluster (D1/F1/U1) out from under C3**.
+        * **LOCAL rework:** IR_RX_VS + SPARE_IO1 (rip the bad stub, re-route),
+          2 GND zone islands (stitching), 5 track_dangling (stub cleanup).
+      - Helper venv `/tmp/kv10` persists (app python + numpy). silk_overlap is
+        ~90 (baseline 44) — a silk pass is still owed before CI green.
+      **Next placement step:** SMD USB-C swap + power-cluster relocation, then
+      one more rip→route→heal→pour cycle should reach 0 real unconnected.
+- [~] **SMD USB-C swap DONE + structural routing closed (session 2 cont.).**
+      `scripts/pcb_swap_usbc.py`: J2 THT GCT → **SMD XKB U262-16XN-4BVC11
+      (= JLCPCB C393939)**, the part the BOM plan already specifies. Renames
+      the footprint's shield posts SH→S1 to match the symbol's shield pin
+      (golden expects J2.S1). Schematic J2 footprint + LCSC (→C393939) updated
+      to match → **GOLDEN still OK (36/36), ERC = 1 (baseline), parity holds.**
+      The single SMD pad row fans the data/CC pins to B.Cu — **closed all 3
+      THT-escape gaps (CC1, USB_D+, USB_D−)** in one move. Also relocated
+      **D1 (TVS) out from under the C3 south pins** and dropped **R6 (BOOT
+      pullup) vertically under pin 8** → **ESP_BOOT now routes**. R1 moved
+      beside the new A5. **Structural unrouted: 4 → 1** (only IO8_STRAP left —
+      a 1.5mm-pin-pitch packing limit: two 1206 pullups can't both sit under
+      adjacent pins 7/8; needs R7 as 0805 or a hand L-route). Remaining 8
+      DRC-unconnected are now **mostly GND-pour** (3 zone islands + U3.9
+      thermal + J2 shield S1↔A1 — the pour/stitching needs a pass after the
+      part moves; 4 starved_thermal corroborate), plus IO8_STRAP, IR_RX_VS,
+      SPARE_IO1. silk still ~90 (owe a silk pass). **The expensive structural
+      problems are solved; the remainder is GND-pour tuning + 1 pin + cosmetics.**
+- [ ] **Validation rebuild + green CI (remaining):** rewrite the POLARITY
+      table in `hardware_validate.py` for the v2 netlist (currently all v1.4
+      parts — D8/D9/Q1/Q2/Q4/Q5/U2 buck/CH340/AM2302/L1); update
+      `fab-outputs.py` HAND_SOLDER (kit = 4×IR LED + TSOP + USB-C + headers)
+      + JLC_ROTATION for SOT-223/ESP32-C3-WROOM-02/AHT20/0805; refresh
+      `ci-baseline.json` in the kicad:10.0.2 container; regen fab-outputs +
+      bom_report. Then the PCB DRC must reach the accepted-baseline set.
+- [ ] **Re-layout** (Mac): module footprint changed + ~12 parts gone → placement
+      redo + freerouting/heal/pour/DRC (the H2 pipeline). Board can shrink.
+- [ ] **Fab + CI validation rebuild:** new HAND_SOLDER split (kit = IR LEDs +
+      TSOP + headers only), JLC_ROTATION for C3/AHT20/USB-C/SOT-23 packages,
+      rebuild the polarity truth table for the new netlist, add a USB-D±→C3
+      pin invariant + C3 strapping check, refresh ci-baseline. Run
+      `bom_report.py` to confirm the cost.
+
+
+
 ✅ **AM2302 (U5) 3D model seating FIXED & visually verified (2026-06-13, remote
 session).** Nick reported the temp-sensor pins didn't line up with the holes in
 the 3D viewer, the silk outline was off by a different amount, and suspected a

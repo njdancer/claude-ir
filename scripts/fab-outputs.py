@@ -20,6 +20,7 @@ Outputs (hardware/fab/):
 
 import csv
 import io
+import math
 import os
 import re
 import shutil
@@ -34,6 +35,9 @@ FAB = os.path.join(HW, "fab")
 PCB = os.path.join(HW, "esp32-ir-remote.kicad_pcb")
 NET = os.path.join(HW, "esp32-ir-remote.net")
 
+sys.path.insert(0, os.path.join(ROOT, "scripts", "ci"))
+from hardware_validate import netlist_fields, netlist_model  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # THE ASSEMBLY SPLIT.
 #
@@ -43,26 +47,19 @@ NET = os.path.join(HW, "esp32-ir-remote.net")
 # two-terminal SMD Extended parts. What remains on the assembly BOM is
 # all Basic except exactly three Extended lines: U1 (buck), U2 (CH340C),
 # U3 (WROOM) — the placements where machine quality matters most.
+# v2 kit: only the easy through-hole bits. Everything else (incl. the SMD
+# USB-C, the SMB TVS, the 0805 LEDs, the polyfuse, the AHT20) is now
+# JLC-assembled, so the kit shrank to the IR LEDs + the TSOP receiver.
 HAND_SOLDER = {
-    "D1":  "TVS SMBJ5.0A, SMB 2-pad. Align cathode band with the on-board "
-           "silk band marker (= the +5V pad; marking fixed 2026-06-13).",
-    "D2":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
-    "D3":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
-    "D4":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
-    "D5":  "TSAL6200 IR LED. Bend 90deg over north edge per silk fan guide.",
-    "D6":  "Red 3mm, 5V power LED. Flat = cathode.",
-    "D7":  "Green 3mm, 3V3 power LED. Flat = cathode.",
-    "D8":  "Amber 3mm, serial TX LED. Flat = cathode.",
-    "D9":  "Amber 3mm, serial RX LED. Flat = cathode.",
-    "D10": "Red 3mm, IR-TX indicator. Flat = cathode.",
-    "D11": "Blue 3mm, user LED 1. Flat = cathode.",
-    "D12": "Blue 3mm, user LED 2. Flat = cathode.",
-    "F1":  "Polyfuse 1812, 2-pad, non-polarized. Fit BEFORE first power.",
-    "J2":  "USB-C GCT USB4085, through-hole. Fit BEFORE first power.",
-    "J3":  "Qwiic JST-SH 1mm pitch. Fiddliest of the kit; flux + drag.",
-    "L1":  "4.7uH 6x6mm, side-wrap terminations. Fit BEFORE first power.",
-    "U4":  "TSOP38238 IR receiver, 3-pin THT.",
-    "U5":  "AM2302/DHT22, 4-pin THT. NEAR STOCK-OUT AT LCSC - order early.",
+    "D2":  "TSAL6200 IR LED, 5mm THT. Bend 90deg over north edge per silk "
+           "fan guide. Long leg = anode (the series-resistor pad).",
+    "D3":  "TSAL6200 IR LED, 5mm THT. Bend 90deg over north edge per silk "
+           "fan guide. Long leg = anode.",
+    "D4":  "TSAL6200 IR LED, 5mm THT. Bend 90deg over north edge per silk "
+           "fan guide. Long leg = anode.",
+    "D5":  "TSAL6200 IR LED, 5mm THT. Bend 90deg over north edge per silk "
+           "fan guide. Long leg = anode.",
+    "U4":  "TSOP38238 IR receiver, 3-pin THT. Dome faces the board edge.",
 }
 # THT bits with no LCSC code (generic): listed on the kit for completeness.
 KIT_EXTRA = [
@@ -83,14 +80,28 @@ NEVER_PLACE = {"JP1"}
 # matching SYMMETRIC_RE — otherwise this script refuses to emit a CPL, so a
 # new package can never reach JLC with an unreviewed rotation.
 JLC_ROTATION = {
-    "TSOT-23-6": 180,                   # U1 AP63203   (^TSOT-23 -> 180)
-    "SOIC-16_3.9x9.9mm_P1.27mm": 270,   # U2 CH340C    (^SOIC-   -> 270)
-    "ESP32-WROOM-32D": 270,             # U3 WROOM-32E (^ESP32-W -> 270)
-    "SOT-23": 270,                      # Q1-Q5        (^SOT-23  -> -90)
+    "SOT-223-3_TabPin2": 180,           # U1 AMS1117   (^SOT-223 -> 180)
+    "SOT-23": 270,                      # Q3 AO3400A   (^SOT-23  -> -90)
+    # USB_C XKB U262-16XN: rotation 0 per JLCKicadTools, but it carries a
+    # +1.44mm X datum offset (see JLC_OFFSET) — without it the connector
+    # places 1.44mm off and the SMD pads / THT posts miss their lands.
+    "USB_C_Receptacle_XKB_U262-16XN-4BVC11": 0,
+    # No matching JLCKicadTools regex -> 0 (KiCad orientation already = JLC):
+    "ESP32-C3-WROOM-02": 0,             # U3  (** verify in JLC preview - MCU **)
+    "SENSOR-SMD_L3.0-W3.0-P1.00-BR": 0,  # U5 AHT20 (vendored JLC fp, JLC-native)
+    "LED_0805_2012Metric": 0,           # D6/D7/D10/D11/D12 (chip LED, not in db)
+    "D_SMB": 0,                         # D1 TVS (not in db)
+    "Fuse_1812_4532Metric": 0,          # F1 polyfuse (non-polar 2-pad)
     # Tact switch: pads are 180-symmetric and same-row pads are internally
     # common, so 0/180 are equivalent; a 90 error would miss the pads
     # entirely (visible in preview).
     "SW-SMD_TS-1187A-5.1x5.1": 0,
+}
+# Footprint-origin -> JLC-centroid datum offsets (mm, in the part's own frame,
+# BEFORE rotation), from JLCKicadTools cpl_rotations_db.csv. Applied to the CPL
+# position so the part lands centred on JLC's pick datum.
+JLC_OFFSET = {
+    "USB_C_Receptacle_XKB_U262-16XN-4BVC11": (1.44, 0.0),
 }
 # Orientation-irrelevant chip passives (rectangular 2-pad).
 SYMMETRIC_RE = re.compile(r"^[RC]_\d{4}_\d{4}Metric")
@@ -108,19 +119,24 @@ def run(*args):
 
 
 def parse_netlist():
-    """ref -> dict(value, footprint, lcsc, dnp)"""
-    net = open(NET).read()
+    """ref -> dict(value, footprint, lcsc, dnp).
+
+    Reuses the s-expression parser in scripts/ci/hardware_validate.py so this
+    is whitespace-robust: it handles both the KiCad 9 compact netlist and the
+    KiCad 10 expanded (multi-line, tab-nested, libparts) format. The old
+    single-line regex silently parsed 0 components on a v10-exported netlist
+    (which would have emitted an empty BOM/CPL).
+    """
+    fields = netlist_fields(NET)
+    _, model_comps, _ = netlist_model(NET)
     comps = {}
-    for blk in re.split(r"\n    \(comp ", net)[1:]:
-        ref = re.search(r'\(ref "([^"]+)"\)', blk).group(1)
-        val = re.search(r'\(value "([^"]*)"\)', blk)
-        fp = re.search(r'\(footprint "([^"]*)"\)', blk)
-        lcsc = re.search(r'\(field \(name "LCSC"\) "([^"]*)"\)', blk)
+    for ref, f in fields.items():
+        fp = model_comps.get(ref, ("", ""))[1]
         comps[ref] = {
-            "value": val.group(1) if val else "",
-            "footprint": (fp.group(1) if fp else "").split(":")[-1],
-            "lcsc": lcsc.group(1) if lcsc else "",
-            "dnp": '(property (name "dnp")' in blk,
+            "value": f["value"],
+            "footprint": fp.split(":")[-1],
+            "lcsc": f["fields"].get("LCSC", ""),
+            "dnp": f["dnp"],
         }
     return comps
 
@@ -205,10 +221,18 @@ def main():
             if row["Ref"] not in keep:
                 continue
             off = rotation_offset(row["Ref"])
-            rot = (float(row["Rot"]) + (off or 0)) % 360
+            rot0 = float(row["Rot"])
+            rot = (rot0 + (off or 0)) % 360
+            px, py = float(row["PosX"]), float(row["PosY"])
+            dx, dy = JLC_OFFSET.get(comps[row["Ref"]]["footprint"], (0.0, 0.0))
+            if dx or dy:
+                # rotate the datum offset into the board frame by the part's
+                # KiCad rotation (KiCad Y axis points down)
+                a = math.radians(rot0)
+                px += dx * math.cos(a) - dy * math.sin(a)
+                py -= dx * math.sin(a) + dy * math.cos(a)
             fout.write("%s,%f,%f,%s,%f\n" % (
-                row["Ref"], float(row["PosX"]), float(row["PosY"]),
-                row["Side"].capitalize(), rot))
+                row["Ref"], px, py, row["Side"].capitalize(), rot))
             if off is not None:
                 c = comps[row["Ref"]]
                 orient.append([row["Ref"], c["value"], c["lcsc"],

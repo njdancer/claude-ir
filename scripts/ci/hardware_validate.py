@@ -49,55 +49,51 @@ NO_LCSC_OK = {"J4", "J5", "JP1"}
 
 # ---------------------------------------------------------------------------
 # Polarity / orientation truth table — pin -> net for every polarized or
-# orientation-critical part, locked from the triple-reviewed v1.4 design
-# (H1.4 datasheet review + 2026-06-13 re-derivation). A value is either a
-# net name (leading '/' ignored) or a list of partner nodes "REF.PIN" that
-# must share the (auto-named) net. ANY future edit that flips a diode,
-# swaps a transistor pinout, or rewires a power pin fails CI loudly.
+# orientation-critical part. Rebuilt for board v2 (ESP32-C3 redesign,
+# 2026-06-14) and cross-checked against scripts/ci/golden_netlist_v2.py, which
+# independently verifies the full intended connectivity. A value is either a
+# net name (power rails — leading '/' ignored) or a list of partner nodes
+# "REF.PIN" that must share the pin's net (signal nets, name-agnostic so it
+# survives dual-label / KiCad-version net renames). ANY future edit that flips
+# a diode, swaps a transistor pinout, or rewires a power pin fails CI loudly.
 # Re-derive consciously, never blindly: each line encodes a datasheet fact.
 POLARITY = {
-    # TVS on +5V rail: pad 1 = cathode = the silk band end = +5V (D1 was
-    # rotated 2026-06-13 so the on-board band marks the correct pad)
+    # TVS on +5V rail (SMB): pad 1 = cathode = silk band = +5V, anode = GND
     "D1": {"1": "+5V", "2": "GND"},
-    # IR LEDs: cathodes sink into Q3 drain, anode each via its own 18R
-    "D2": {"1": "IR_DRAIN", "2": ["R9.1"]},
-    "D3": {"1": "IR_DRAIN", "2": ["R10.1"]},
-    "D4": {"1": "IR_DRAIN", "2": ["R11.1"]},
-    "D5": {"1": "IR_DRAIN", "2": ["R12.1"]},
-    # Indicator LEDs: cathode to GND (or sunk by UART line / user-LED FET
-    # drain), anode via series resistor
-    "D6": {"1": "GND", "2": ["R15.2"]},
-    "D7": {"1": "GND", "2": ["R16.2"]},
-    "D8": {"1": "ESP_GPIO1", "2": ["R17.2"]},
-    "D9": {"1": "ESP_GPIO3", "2": ["R18.2"]},
-    "D10": {"1": "GND", "2": ["R19.2"]},
-    "D11": {"1": ["Q4.3"], "2": ["R25.2"]},
-    "D12": {"1": ["Q5.3"], "2": ["R20.1"]},
-    # Auto-reset 2N7002 pair (SOT-23 1=G 2=S 3=D), cross-coupled, with the
-    # R21/R26 470R bypass links on the sources
-    "Q1": {"1": ["R3.2"], "2": ["R26.2", "R4.2"], "3": "ESP_EN"},
-    "Q2": {"1": ["R4.1"], "2": ["R21.1", "R3.1"], "3": "ESP_GPIO0"},
-    # IR driver AO3400A: gate via R13 (+R14 pulldown), low-side switch
-    "Q3": {"1": ["R13.1", "R14.2"], "2": "GND", "3": "IR_DRAIN"},
-    # User-LED drivers: gate from GPIO, source GND, drain = LED cathode
-    "Q4": {"1": "ESP_GPIO16", "2": "GND", "3": ["D11.1"]},
-    "Q5": {"1": "ESP_GPIO17", "2": "GND", "3": ["D12.1"]},
-    # AP63203 (TSOT-26): 1=FB(=VOUT, fixed 3V3) 2=EN(JP1) 3=VIN 4=GND
-    # 5=SW(L1 + BST cap) 6=BST
-    "U1": {"1": "+3.3V", "2": ["JP1.2"], "3": "+5V", "4": "GND",
-           "5": ["C4.2", "L1.1"], "6": ["C4.1"]},
-    # CH340C: 1=GND 4=V3 tied to VCC(16)=+3.3V (3V3 mode), UART to GPIO1/3,
-    # DTR/RTS to the auto-reset bypass links
-    "U2": {"1": "GND", "2": "ESP_GPIO3", "3": "ESP_GPIO1", "4": "+3.3V",
-           "5": "USB_D+", "6": "USB_D-", "13": ["R21.2"], "14": ["R26.1"],
-           "15": "GND", "16": "+3.3V"},
-    # TSOP38238: 1=OUT 2=GND 3=Vs (RC-filtered)
-    "U4": {"1": "ESP_GPIO19", "2": "GND", "3": "IR_RX_VS"},
-    # AM2302: 1=VDD 2=SDA 3=NC/GND 4=GND
-    "U5": {"1": "+3.3V", "2": "ESP_GPIO4", "3": "GND", "4": "GND"},
-    # Buck output path + input fuse direction
-    "L1": {"1": ["C4.2", "U1.5"], "2": "+3.3V"},
-    "F1": {"1": "+5V", "2": ["J2.A4", "J2.A9", "J2.B4", "J2.B9"]},
+    # IR LEDs (TSAL6200): pad 1 = cathode -> Q3 drain (IR_DRAIN, shared with
+    # the other three + J5.2); pad 2 = anode via its own 22R series resistor
+    "D2": {"1": ["Q3.3", "D3.1"], "2": ["R9.1"]},
+    "D3": {"1": ["Q3.3", "D2.1"], "2": ["R10.1"]},
+    "D4": {"1": ["Q3.3", "D5.1"], "2": ["R11.1"]},
+    "D5": {"1": ["Q3.3", "D4.1"], "2": ["R12.1"]},
+    # System indicator LEDs (0805): pad 1 = cathode = GND, pad 2 = anode via R
+    "D6": {"1": "GND", "2": ["R15.2"]},    # +5V power
+    "D7": {"1": "GND", "2": ["R16.2"]},    # +3V3 power
+    "D10": {"1": "GND", "2": ["R19.2"]},   # IR-TX activity
+    # User LEDs (0805), DIRECT GPIO drive (no FET in v2): pad 1 = cathode =
+    # GND, pad 2 = anode via R to the GPIO
+    "D11": {"1": "GND", "2": ["R25.2"]},   # USER_LED1 (IO3 via R25)
+    "D12": {"1": "GND", "2": ["R20.1"]},   # USER_LED2 (IO4 via R20)
+    # IR driver AO3400A (SOT-23: 1=G 2=S 3=D): gate via R13 (+R14 pulldown),
+    # source = GND, drain = IR_DRAIN (the IR-LED cathode bus)
+    "Q3": {"1": ["R13.1", "R14.2"], "2": "GND", "3": ["D2.1", "D5.1"]},
+    # AMS1117-3.3 LDO (SOT-223-3, TabPin2): 1=GND 2=VOUT(->JP1 disconnect
+    # jumper -> +3V3) 3=VIN(+5V). Tab (pin2 region) = VOUT.
+    "U1": {"1": "GND", "2": ["JP1.1"], "3": "+5V"},
+    # TSOP38238 IR receiver (1=OUT 2=GND 3=Vs): OUT -> C3 IO6 (IR_RX),
+    # Vs RC-filtered (IR_RX_VS = C9.1 + R27.2)
+    "U4": {"1": ["U3.5"], "2": "GND", "3": ["C9.1", "R27.2"]},
+    # AHT20 temp/humidity (DFN-6: 2=VDD 3=SCL 4=SDA 5=GND, 1/6 NC). SCL/SDA
+    # confirmed by their pull-ups (R29=SCL, R28=SDA).
+    "U5": {"2": "+3.3V", "3": ["R29.2"], "4": ["R28.2"], "5": "GND"},
+    # Input fuse: pad 1 = +5V (post-fuse rail), pad 2 = VBUS from the USB-C
+    "F1": {"1": "+5V", "2": ["J2.A4", "J2.A9"]},
+    # USB-C receptacle (SMD XKB U262-16XN). Locks the new footprint's pinout:
+    # VBUS A4/A9, CC1 A5->R1, CC2 B5->R2, D+ A6/B6 -> C3 IO19 (pin14),
+    # D- A7/B7 -> C3 IO18 (pin13), GND on A1/A12/B1/B12/S1.
+    "J2": {"A4": ["F1.2"], "A5": ["R1.1"], "B5": ["R2.2"],
+           "A6": ["U3.14", "J2.B6"], "A7": ["U3.13", "J2.B7"],
+           "A1": "GND", "A12": "GND", "S1": "GND"},
 }
 
 failures = []  # list of (check, message)
