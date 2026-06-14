@@ -23,19 +23,35 @@ floorplan"):
   the board** — no stock box, no purchase gate. Free outline: shape it to the
   component layout; place 4× M3 holes wherever the floorplan makes convenient
   (the print adapts). Long-thin still preferred for EMF separation.
-- [ ] **Free outline + 4 M3 holes** sized to the zoned floorplan (Edge.Cuts).
-- [ ] **Schematic → 6 hierarchical sheets** (power / mcu / ir-tx / ir-rx /
-      sensor / io), zones 1:1 with the floorplan. KiCad GUI, **not** s-expr
-      scripting (that caused the off-sheet render bug). Gate: empty `.net`
-      diff proves it was purely structural.
-- [ ] Rewrite `scripts/pcb_place_v2.py` with explicit per-zone coordinates;
-      re-run `pcb_router.py → pcb_pour.py → pcb_silk.py`. **Render to Nick
-      before routing** (H2.2 exit criterion). Wins: shorter traces, smaller
-      footprint, cleaner IR-drive return, better EMF.
-- [ ] **Underside metadata block (B.SilkS)** via `pcb_silk.py`: Claude
-      starburst logo footprint (author via `bitmap2component` — not in tree
-      yet) + "Designed by Claude" + board rev `v2` + auto-stamped git
-      short-hash + gen date + URL. See layout.md "Underside metadata block".
+**Sequencing reality:** the PCB floorplan is fully scriptable (pcbnew via the
+`/tmp/kv10` env, confirmed present) so it goes FIRST and is where the visible
+win is. The **schematic hierarchical split is GUI-bound** — there's no
+schematic-edit MCP and s-expr scripting is banned (it caused the off-sheet
+render bug), so it's a separate focused KiCad-GUI effort, done after the PCB
+is settled. Execute in phases, commit+push each:
+
+- [~] **Phase A — outline + anchor placement.** New long-thin Edge.Cuts;
+      place zone anchors (U3 center w/ antenna over a long edge; U1+J2+F1+D1
+      power/USB one short end; Q3+D2–D5 IR-TX other short end; U4 IR-RX near
+      front but EMI-isolated; U5 sensor far corner; D6–D12+J4+J5 status/IO
+      edge) + 4× M3 holes wherever clean. Render, iterate.
+- [ ] **Phase B — support re-seat + holes.** Extend `pcb_place_v2.py` spiral
+      search to re-seat decoupling/pullups/RC against the new anchors.
+- [ ] **Phase C — route + pour + silk.** `pcb_router.py → pcb_pour.py →
+      pcb_silk.py`. **Render to Nick before routing commits** (H2.2 rule).
+- [ ] **Phase C2 — underside metadata (B.SilkS).** The Claude spark already
+      exists as **8× top-level `gr_poly` on F.SilkS** (bbox ≈126.8–131.0 ×
+      98.9–103.1, added in `d37cee9`); the matching "designed by Claude"
+      `gr_text` was stripped by `pcb_silk.py` phase-1 (explains lost-text /
+      kept-icon). Plan: extract those 8 polys into a **B.SilkS logo
+      footprint** (reuse geometry — identical mark), **delete the stray
+      F.SilkS polys**, and have `pcb_silk.py` place the footprint + a stamped
+      text block (rev `v2` + `git rev-parse --short HEAD`[-dirty] + date +
+      URL + attribution). See layout.md "Underside metadata block".
+- [ ] **Phase D — validate.** `hardware_validate.py`, open PR, watch CI
+      (ERC/DRC/parity/freshness), refresh baseline only if counts legit-change.
+- [ ] **Phase E — schematic → 6 hierarchical sheets** (GUI; gate: empty
+      `.net` diff). Last, since it's GUI-bound and PCB-independent.
 - Note: v1 order package (`order/v2.0` tagging) is paused behind this — no
   point freezing an outline we're about to change.
 

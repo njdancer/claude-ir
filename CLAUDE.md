@@ -28,6 +28,24 @@ meta-tooling unless it directly de-risks the board AND has a machine
 validator. Prefer existing tools (KiCad, kicad-cli, PlatformIO, pytest/Unity)
 over inventing anything.
 
+**Persevere on long tasks — don't stall, don't self-truncate.** Big jobs
+(re-layouts, migrations, sweeps) are expected to span many tool calls and
+even multiple context windows. Keep going until the work is actually done:
+- Don't stop early, ask to "continue later", or wrap up just because a lot
+  has happened. Don't fear running out of context — the session
+  auto-compacts and hands you a summary to continue from; a mid-task compact
+  is normal, not a reason to rush or cut scope.
+- **Commit AND push after every meaningful increment** (a working sub-step,
+  a green validator run) so progress is durable and visible — pushes to the
+  working branch are pre-authorised for this kind of multi-step work. Keep
+  `ROADMAP.md` updated in those commits so a fresh session can resume exactly
+  where you left off.
+- **Delegate parallelisable, self-contained sub-tasks to subagents** (the
+  Agent tool) — e.g. extracting an asset, drafting a script, a focused
+  search — to move faster, then integrate and verify their output yourself.
+- Only stop for the genuine gates above (money / direction / bench time).
+  "This is taking a while" is not a gate.
+
 ## Sources of truth
 
 | Artifact | Truth for | Notes |
