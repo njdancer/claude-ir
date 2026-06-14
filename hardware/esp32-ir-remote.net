@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-14T02:33:15")
+		(date "2026-06-14T10:14:09")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -1311,14 +1311,14 @@
 		(comp
 			(ref "J2")
 			(value "USB_C_Receptacle_USB2.0_14P")
-			(footprint "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+			(footprint "Connector_USB:USB_C_Receptacle_XKB_U262-16XN-4BVC11")
 			(datasheet "https://www.usb.org/sites/default/files/documents/usb_type-c.zip")
 			(description "USB 2.0-only 14P Type-C Receptacle connector")
 			(fields
 				(field
-					(name "LCSC") "C7095263")
+					(name "LCSC") "C393939")
 				(field
-					(name "Footprint") "Connector_USB:USB_C_Receptacle_GCT_USB4085")
+					(name "Footprint") "Connector_USB:USB_C_Receptacle_XKB_U262-16XN-4BVC11")
 				(field
 					(name "Datasheet") "https://www.usb.org/sites/default/files/documents/usb_type-c.zip")
 				(field
@@ -1331,7 +1331,7 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C7095263")
+				(value "C393939")
 			)
 			(property
 				(name "Sheetname")

@@ -179,6 +179,24 @@ strapping GPIO2/8 left NC to keep boot deterministic):
         ~90 (baseline 44) — a silk pass is still owed before CI green.
       **Next placement step:** SMD USB-C swap + power-cluster relocation, then
       one more rip→route→heal→pour cycle should reach 0 real unconnected.
+- [~] **SMD USB-C swap DONE + structural routing closed (session 2 cont.).**
+      `scripts/pcb_swap_usbc.py`: J2 THT GCT → **SMD XKB U262-16XN-4BVC11
+      (= JLCPCB C393939)**, the part the BOM plan already specifies. Renames
+      the footprint's shield posts SH→S1 to match the symbol's shield pin
+      (golden expects J2.S1). Schematic J2 footprint + LCSC (→C393939) updated
+      to match → **GOLDEN still OK (36/36), ERC = 1 (baseline), parity holds.**
+      The single SMD pad row fans the data/CC pins to B.Cu — **closed all 3
+      THT-escape gaps (CC1, USB_D+, USB_D−)** in one move. Also relocated
+      **D1 (TVS) out from under the C3 south pins** and dropped **R6 (BOOT
+      pullup) vertically under pin 8** → **ESP_BOOT now routes**. R1 moved
+      beside the new A5. **Structural unrouted: 4 → 1** (only IO8_STRAP left —
+      a 1.5mm-pin-pitch packing limit: two 1206 pullups can't both sit under
+      adjacent pins 7/8; needs R7 as 0805 or a hand L-route). Remaining 8
+      DRC-unconnected are now **mostly GND-pour** (3 zone islands + U3.9
+      thermal + J2 shield S1↔A1 — the pour/stitching needs a pass after the
+      part moves; 4 starved_thermal corroborate), plus IO8_STRAP, IR_RX_VS,
+      SPARE_IO1. silk still ~90 (owe a silk pass). **The expensive structural
+      problems are solved; the remainder is GND-pour tuning + 1 pin + cosmetics.**
 - [ ] **Validation rebuild + green CI (remaining):** rewrite the POLARITY
       table in `hardware_validate.py` for the v2 netlist (currently all v1.4
       parts — D8/D9/Q1/Q2/Q4/Q5/U2 buck/CH340/AM2302/L1); update
