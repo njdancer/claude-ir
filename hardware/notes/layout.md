@@ -64,14 +64,19 @@ constraints that rules can't express.
    wide (~±45°) acceptance cone + enclosure reflection saturate its AGC during
    TX, so self-validation reads a clipped blob, not recoverable mark/space
    timing, and the receiver (the most EMI-sensitive part on the board) sits in
-   the 400 mA / 38 kHz drive loop's near field. Target zone: **south long edge,
-   ~(150, 111), lens facing south (+y)** — between the MCU and the U5 sensor,
-   well clear of the IR-TX east end and the power/USB west end. At ≥20 mm it
-   still hears its own TX via room/enclosure bounce (good for "did it fire +
-   coarse timing") without saturating. **Enclosure: add an optical baffle rib
-   between the TX window (east) and the RX window (south) in the 3D print.**
-   Tight near-field loopback timing, if ever wanted, is a job for an external
-   aimed RX (breadboard-style), not the onboard window.
+   the 400 mA / 38 kHz drive loop's near field. **As-built (2026-06-14):** U4
+   moved to the **south long edge at (153.0, 110.5), rot 180 so the lens fires
+   south (+y, outward)**, between the MCU and the U5 sensor; the Vs RC filter
+   sits in-line to its west — C9 at (144.5, 110.5), R27 at (140.0, 110.5).
+   Achieved separation: **31 mm to Q3, 34–46 mm to D2–D5**, 44 mm to USB. At
+   that distance it still hears its own TX via room/enclosure bounce (good for
+   "did it fire + coarse timing") without saturating. Re-routed via the
+   standard pipeline (rip → router → stub_heal → pour); DRC = 0 errors (the
+   lone unconnected is the pre-existing accepted USB_D+ J2/A6 item, unrelated).
+   **Enclosure: add an optical baffle rib between the TX window (east) and the
+   RX window (south) in the 3D print.** Tight near-field loopback timing, if
+   ever wanted, is a job for an external aimed RX (breadboard-style), not the
+   onboard window.
 
 ## Placement constraints (soft / serviceability)
 
@@ -152,7 +157,7 @@ a stamping helper) so it regenerates with every pipeline run.
 | Zone | Edge / region | Parts | Schematic sheet |
 |------|---------------|-------|-----------------|
 | IR-TX | front end panel | Q3, R9–R12, D2–D5 (5 mm, fanned ±67.5/±22.5°) | `ir-tx` |
-| IR-RX | **south long edge ~(150,111)**, ≥20 mm from Q3+D2–D5, lens facing south | U4 TSOP, R27/C9 | `ir-rx` |
+| IR-RX | **south long edge: U4@(153,110.5) lens south; C9@(144.5), R27@(140)**, ≥31 mm from Q3/D2–D5 | U4 TSOP, R27/C9 | `ir-rx` |
 | MCU core | center; C3 antenna overhangs a long edge | U3 ESP32-C3, decoupling, strapping R's, SW1/SW2, EN/boot RC | `mcu` |
 | Sensor | corner away from LDO heat, over a vent slot | U5 AHT20 | `sensor` |
 | Power | rear end panel | J2 USB-C, F1, D1 TVS, U1 AMS1117, C1/2/3 | `power` |

@@ -28,11 +28,15 @@ mark/space timing — and the most EMI-sensitive part on the board ends up in
 the 400 mA / 38 kHz drive loop's near field. It was the worst of both worlds:
 too close to be EMI-clean, not usefully coupled for clean timing.
 
-Revised target (see `layout.md` constraint 6): **south long edge, ~(150, 111),
-lens facing south, ≥20 mm from Q3 and every IR LED.** At that distance U4
-still hears its own TX via room/enclosure bounce (enough to confirm a burst
-fired and check coarse timing) without saturating, and gets a clean window to
-point the physical remote at. Pair it with an **optical baffle rib** between
-the TX (east) and RX (south) windows in the 3D-printed enclosure. Reliable
-*near-field* loopback timing, if ever needed, belongs on an external aimed
-receiver (as on the breadboard), not the onboard one.
+As-built (2026-06-14, see `layout.md` constraint 6): U4 sits on the **south
+long edge at (153.0, 110.5), rot 180 (lens fires south, outward)**, with the
+Vs RC filter in-line to its west (C9 @ 144.5, R27 @ 140.0). Separation from
+the TX: **31 mm to Q3, 34–46 mm to the IR LEDs** (was ~11–19 mm). At that
+distance U4 still hears its own TX via room/enclosure bounce (enough to
+confirm a burst fired and check coarse timing) without saturating, and gets a
+clean window to point the physical remote at. Re-routed with the standard
+pipeline (rip → router → stub_heal → pour), DRC 0 errors. Pair it with an
+**optical baffle rib** between the TX (east) and RX (south) windows in the
+3D-printed enclosure. Reliable *near-field* loopback timing, if ever needed,
+belongs on an external aimed receiver (as on the breadboard), not the onboard
+one.
