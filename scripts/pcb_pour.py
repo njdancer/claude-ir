@@ -49,6 +49,15 @@ def main():
     for v in old_gnd_vias:
         board.Remove(v)
 
+    # SOLID GND-pad connection (per-pad — the board is reflow-assembled, so
+    # thermal relief only buys starved spokes on the C3 centre pad + USB-C
+    # shield that read as unconnected). Pad-level FULL is filler-safe headless;
+    # zone-level FULL crashes it.
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetCode() == gnd_code0:
+                pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+
     # --- antenna keepout rule areas (both layers) -----------------------
     ko = pcbnew.ZONE(board)
     ko.SetIsRuleArea(True)
@@ -141,9 +150,127 @@ def main():
     # --- fill ------------------------------------------------------------
     filler = pcbnew.ZONE_FILLER(board)
     filler.Fill(board.Zones())
+
+    # --- tie orphan fill islands -----------------------------------------
+    # A small GND fill that touches only a pad (not the main plane) reads as an
+    # unconnected zone. Drop a GND via where the island overlaps the OTHER
+    # layer's pour, stitching it into the plane, then re-fill. Iterate so a
+    # chain (F-island -> B-island -> F-main) resolves over a few passes.
+    ties = 0
+    for _ in range(4):
+        n = tie_islands(board, gnd_code)
+        if not n:
+            break
+        ties += n
+        filler.Fill(board.Zones())
+    print(f"island ties: {ties}")
+
     pcbnew.SaveBoard(BOARD_PATH, board)
     print("zones filled, saved")
     return 0
+
+
+def _poly_areas(ps):
+    out = []
+    for i in range(ps.OutlineCount()):
+        ol = ps.Outline(i)
+        a = 0
+        n = ol.PointCount()
+        for k in range(n):
+            p1, p2 = ol.CPoint(k), ol.CPoint((k + 1) % n)
+            a += p1.x * p2.y - p2.x * p1.y
+        out.append(abs(a) / 2)
+    return out
+
+
+def tie_islands(board, gnd_code):
+    zones = {z.GetLayer(): z for z in board.Zones()
+             if z.GetNetCode() == gnd_code and not z.GetIsRuleArea()}
+    if pcbnew.F_Cu not in zones or pcbnew.B_Cu not in zones:
+        return 0
+    polys = {L: zones[L].GetFilledPolysList(L) for L in (pcbnew.F_Cu, pcbnew.B_Cu)}
+    areas = {L: _poly_areas(polys[L]) for L in polys}
+    main = {L: (areas[L].index(max(areas[L])) if areas[L] else -1) for L in polys}
+
+    # obstacles for a safety check: non-GND pads/tracks (clearance) + ALL vias
+    # (hole-to-hole). A tie via must clear every one.
+    fpads = []   # (x, y, halfsize) of non-GND pads
+    fsegs = []   # (x0, y0, x1, y1, halfwidth) of non-GND track segments
+    allvias = []  # (x, y) of every existing via
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetCode() == gnd_code:
+                continue
+            bb = pad.GetBoundingBox()
+            fpads.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
+                          max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2))
+    for t in board.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA):
+            allvias.append((pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y)))
+        elif t.GetNetCode() != gnd_code:
+            s, e = t.GetStart(), t.GetEnd()
+            fsegs.append((pcbnew.ToMM(s.x), pcbnew.ToMM(s.y),
+                          pcbnew.ToMM(e.x), pcbnew.ToMM(e.y), pcbnew.ToMM(t.GetWidth()) / 2))
+
+    def seg_d(px, py, x0, y0, x1, y1):
+        dx, dy = x1 - x0, y1 - y0
+        L2 = dx * dx + dy * dy
+        u = 0 if L2 == 0 else max(0, min(1, ((px - x0) * dx + (py - y0) * dy) / L2))
+        return math.hypot(x0 + u * dx - px, y0 + u * dy - py)
+
+    def clear_of_foreign(xmm, ymm):
+        r = VIA_D / 2 + CLEAR
+        if any(abs(fx - xmm) < fr + r and abs(fy - ymm) < fr + r for fx, fy, fr in fpads):
+            return False
+        if any(seg_d(xmm, ymm, *s[:4]) < s[4] + r for s in fsegs):
+            return False
+        if any(math.hypot(vx - xmm, vy - ymm) < VIA_D + 0.5 for vx, vy in allvias):
+            return False  # hole-to-hole
+        return True
+
+    gnd_via_pts = [t.GetPosition() for t in board.GetTracks()
+                   if isinstance(t, pcbnew.PCB_VIA) and t.GetNetCode() == gnd_code]
+
+    added = 0
+    for L in (pcbnew.F_Cu, pcbnew.B_Cu):
+        opp = pcbnew.B_Cu if L == pcbnew.F_Cu else pcbnew.F_Cu
+        if main[opp] < 0:
+            continue
+        for i in range(polys[L].OutlineCount()):
+            if i == main[L]:
+                continue
+            # already stitched into the plane? (a GND via inside it) -> skip
+            if any(polys[L].Contains(p, i) for p in gnd_via_pts):
+                continue
+            ol = polys[L].Outline(i)
+            n = ol.PointCount()
+            xs = [ol.CPoint(k).x for k in range(n)]
+            ys = [ol.CPoint(k).y for k in range(n)]
+            # dense grid scan: first interior point that also sits over the
+            # opposite main pour and clears foreign copper gets a tie via
+            step = int(0.2 * 1e6)
+            done = False
+            yy = min(ys)
+            while yy < max(ys) and not done:
+                xx = min(xs)
+                while xx < max(xs):
+                    pt = pcbnew.VECTOR2I(int(xx), int(yy))
+                    if (polys[L].Contains(pt, i)
+                            and polys[opp].Contains(pt, main[opp])
+                            and clear_of_foreign(pcbnew.ToMM(int(xx)), pcbnew.ToMM(int(yy)))):
+                        v = pcbnew.PCB_VIA(board)
+                        v.SetPosition(pt)
+                        v.SetWidth(pcbnew.FromMM(VIA_D))
+                        v.SetDrill(pcbnew.FromMM(VIA_DRILL))
+                        v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+                        v.SetNetCode(gnd_code)
+                        board.Add(v)
+                        added += 1
+                        done = True
+                        break
+                    xx += step
+                yy += step
+    return added
 
 
 if __name__ == "__main__":
