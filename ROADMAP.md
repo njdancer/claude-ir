@@ -519,12 +519,31 @@ Pages CI image is bumped `kicad/kicad:9.0.6 → 10.0.2` (kicad-cli 10 reads
 the v9 files without migration; full `build-site.sh` verified in the image).
 The fixer script now only adds the metallic/roughness factors kicad-cli
 still omits (color-classified: gold/silver → metal) and forces translucent
-mask/silk opaque — this also fixed a live bug where white silkscreen was
-tinted green by an unclamped 1.1 multiplier. The recolor-by-name table
+silk/board-body opaque — this also fixed a live bug where white silkscreen was
+tinted green by an unclamped 1.1 multiplier. (The soldermask was *also* forced
+opaque here, which silently buried every copper trace — fixed 2026-06-14, see
+note below.) The recolor-by-name table
 remains as a fallback for KiCad 9 exports (e.g. local Mac builds until the
 bench moves to 10). Note: real *texture maps* (IC markings, FR4 weave) don't
 exist in STEP/GLB sources at all — that would need a Blender-style bake
 pipeline, deliberately out of scope.
+
+### Tooling: 3D viewer now shows copper traces (2026-06-14)
+
+The Pages 3D viewer rendered the board as a featureless green slab — no
+traces, pads, or vias visible. Root cause was *not* the export
+(`kicad-cli pcb export glb --include-tracks` is valid and the copper mesh
+(`esp32-ir-remote_copper`) survives the whole center→optimize→draco
+pipeline). It was `scripts/fix_glb_materials.py` forcing **all** translucent
+board materials opaque, including the soldermask — a flat sheet kicad-cli
+exports just above the copper plane, so an opaque mask hides everything
+beneath it. Fix: the soldermask is now exempted (kept `alphaMode:BLEND`,
+α=`SOLDERMASK_ALPHA`=0.75, glossier roughness to cut model-viewer haze) while
+silk/body still go opaque; copper now reads through as the familiar
+darker-green routing. Verified before/after in model-viewer (side-by-side
+render). A validation assert now fails the build if no translucent soldermask
+survives, so a future refactor can't silently re-bury the traces. Tune
+visibility-vs-milkiness via the two constants near the top of `main()`.
 
 ### Tooling: 3D models are vendored (2026-06-11)
 
