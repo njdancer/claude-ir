@@ -10,6 +10,36 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🐞 **SCHEMATIC RENDER BUG FOUND & FIXED (2026-06-14, Nick caught it).** The
+published schematic PDF was missing the three v2-swapped ICs — **U3 (ESP32-C3),
+U1 (AMS1117 LDO), U5 (AHT20)**. Root cause: the v2 IC-swap scripts dropped the
+new symbols at a constant **off-sheet column (x≈330mm, past the A4 297mm edge)**,
+so `kicad-cli sch export pdf/svg` cropped them out. They were still wired by net
+labels → netlist correct (U3 = 20 nodes), ERC clean, so nothing flagged it
+(**ERC has no "symbol off the page" rule** — gap in our gate). Fixes this commit:
+- **Schematic:** page A4 → **A3** so the off-sheet cluster (max x≈377) falls
+  inside the page and renders. Pure paper-size change → netlist-invariant by
+  construction (paper size isn't in the `.net`); CI freshness check will confirm.
+- **3D models:** vendored the missing STEP files into `hardware/lib/3dshapes/`
+  and repointed every `(model …)` from `${KICAD10_3DMODEL_DIR}` (didn't resolve
+  in the Pages render / local lint) to `${KIPRJMOD}`: ESP32-C3-WROOM-02, SOT-223,
+  LED_0805 (×5), R_0805 (R6/R7 → existing bundled copy), and USB-C (C393939
+  TYPE-C16PIN, fetched via JLC MCP). **`check_models()` now 0 missing.**
+- ⚠️ **Could not render-verify here (remote session, no kicad-cli).** Needs a
+  PR (CI ERC/DRC/parity/freshness) and/or Pages rebuild to confirm the PDF shows
+  all parts and the GLB renders them.
+
+**Queued (Mac/KiCad):**
+- [ ] **Proper schematic re-layout** — A3 is a stopgap; relocate U3/U1/U5 + their
+      support cluster into a clean position on the canvas (or go hierarchical),
+      then revert to A4 if it fits. Do this in the KiCad GUI, not by scripting
+      s-expressions (that's what caused this).
+- [ ] **Verify USB-C 3D model alignment** — `USB_C_XKB_U262-16XN-4BVC11.step` is
+      the EasyEDA-derived C393939 model on KiCad's native XKB footprint; its
+      origin/rotation may need an `(offset)/(rotate)` tweak. Eyeball in KiCad.
+- [ ] Add an off-sheet-symbol guard to `hardware_validate.py` so this can't
+      recur silently (assert every placed symbol's origin is within page extents).
+
 ✅ **BOARD v2 — ESP32-C3 cost-down redesign COMPLETE & CI-GREEN
 (2026-06-14).** Schematic + PCB + validation all done on PR #11; every CI job
 passes (app, **hardware**, bom-report, firmware). State:
@@ -28,8 +58,8 @@ passes (app, **hardware**, bom-report, firmware). State:
 - **Next (Nick's bench / $$):** order-time JLC-preview verification of the
   flagged rotations (U3 ESP32-C3 MCU especially, U5 AHT20, J2 USB-C datum),
   then freeze the order package by tagging the commit (e.g. `order/v2.0`) and
-  place the 5-board JLCPCB assembly order. Optional polish: vendor the 5
-  missing 3D STEP models (USB-C/LED_0805/SOT-223/ESP32-C3/R_0805 — WARN-only).
+  place the 5-board JLCPCB assembly order. (3D STEP models now vendored — see
+  the render-bug fix at the top of this section.)
 
 ---
 

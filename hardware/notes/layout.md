@@ -1,5 +1,9 @@
 # PCB Layout Constraints (H2.1)
 
+> ⚠️ Predates the **v2 ESP32-C3 redesign** (see [`ROADMAP.md`](../../ROADMAP.md)).
+> The WROOM-32E antenna-keepout constraint below still applies in spirit to the
+> C3 module (U3), but exact references are v1; the schematic/PCB win.
+
 Placement and routing constraints for the v1.2 board. Written before any
 placement so layout (H2.2+) is execution against a checklist, not
 improvisation. Board design rules and net classes live in the KiCad project
