@@ -26,7 +26,7 @@ STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
 # parts), plus a caption over the status-LED cluster (S of the MCU).
 LABELS = [
     ("ESP32-C3 IR REMOTE", 150.0, 73.5, 1.0),
-    ("STATUS", 151.0, 99.5, 0.7),
+    ("STATUS", 151.0, 99.5, 0.8),
 ]
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
 LOGO_LIB = "hardware/libraries/Branding.pretty"
@@ -166,9 +166,9 @@ def phase2():
     meta = [
         ("Designed by Claude", 0.95),
         ("ESP32-C3 IR Remote  rev v2", 0.8),
-        (f"{date}  git {git_stamp()}", 0.7),
-        ("njdancer.github.io/claude-ir", 0.7),
-        ("Non-commercial hobby project", 0.6),
+        (f"{date}  git {git_stamp()}", 0.8),
+        ("njdancer.github.io/claude-ir", 0.8),
+        ("Non-commercial hobby project", 0.8),
     ]
     mx, my = 152.0, 88.0
     for i, (text, size) in enumerate(meta):

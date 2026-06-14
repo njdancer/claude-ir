@@ -13,7 +13,7 @@ LEDs are SMD, untouched). Run after pcb_floorplan.py.
 import pcbnew
 
 PCB = "hardware/esp32-ir-remote.kicad_pcb"
-BENT = "${KIPRJMOD}/hardware/lib/3dshapes/LED_D5.0mm_bent.wrl"
+BENT = "${KIPRJMOD}/lib/3dshapes/LED_D5.0mm_bent.wrl"
 IR_LEDS = {"D2", "D3", "D4", "D5"}
 
 

@@ -108,12 +108,18 @@ def main():
     # occupancy check against pads/tracks/vias of non-GND nets
     pads_l = []   # (x, y, halfsize, netcode)
     segs_l = []   # (x0, y0, x1, y1, halfwidth, netcode)
+    drills = []   # (x, y, drill_radius) for EVERY drilled hole (any net) —
+                  # hole-to-hole spacing applies regardless of net, incl. GND
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             bb = pad.GetBoundingBox()
             pads_l.append((pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y),
                            max(pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())) / 2,
                            pad.GetNetCode()))
+            if pad.GetAttribute() in (pcbnew.PAD_ATTRIB_PTH, pcbnew.PAD_ATTRIB_NPTH):
+                pp = pad.GetPosition()
+                drills.append((pcbnew.ToMM(pp.x), pcbnew.ToMM(pp.y),
+                               pcbnew.ToMM(pad.GetDrillSizeX()) / 2))
     for t in board.GetTracks():
         if isinstance(t, pcbnew.PCB_VIA):
             pads_l.append((pcbnew.ToMM(t.GetPosition().x), pcbnew.ToMM(t.GetPosition().y),
@@ -149,6 +155,14 @@ def main():
                         if inc == gnd_code:
                             continue
                         if seg_dist(x, y, x0s, y0s, x1s, y1s) < hw + r:
+                            ok = False
+                            break
+                if ok:
+                    # hole-to-hole spacing vs EVERY drilled hole (incl. GND THT
+                    # pads — net doesn't matter for drill spacing). board min
+                    # 0.25mm; keep margin.
+                    for (hx, hy, hr) in drills:
+                        if math.hypot(hx - x, hy - y) < VIA_D / 2 + hr + 0.3:
                             ok = False
                             break
             if ok:

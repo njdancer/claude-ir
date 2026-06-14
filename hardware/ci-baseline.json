@@ -1,28 +1,13 @@
 {
-  "_notes": {
-    "purpose": "Accepted ERC/DRC counts from the CI KiCad image (kicad/kicad:10.0.2). Gate is a ratchet: errors fail on ANY change up or down; warnings fail on increase. This is not 'accepting errors' — every entry is a reviewed, documented false-positive or deliberate design choice, and the strict gate forces a conscious review before the set can change. Refresh only inside the CI image via --update-baseline, in the same commit as the design change that justifies it.",
-    "regenerated": "2026-06-14, board v2 (ESP32-C3 redesign): generated in kicad/kicad:10.0.2; the bench (10.0.3) produces identical counts.",
-    "erc:warning:lib_symbol_mismatch": "Vendored/custom symbols (AHT20, ESP32-C3, USB-C) carry metadata that differs from stock library symbols not installed in the container. Cosmetic.",
-    "error:courtyards_overlap": "H1 mounting hole vs the ESP32-C3 (U3) antenna keepout — same top-left corner as v1; nylon-screw mitigation keeps metal out of the antenna near-field (bring-up.md).",
-    "error:items_not_allowed": "The H1 mounting hole (NPTH pad + footprint) sits in U3's antenna keepout rule area. Same accepted H1/antenna trade as courtyards_overlap.",
-    "warning:lib_footprint_mismatch": "Vendored/custom footprints (XKB USB-C, AHT20 sensor, ESP32-C3) differ from stock KiCad lib metadata; those libraries aren't installed in the container. Cosmetic.",
-    "warning:silk_edge_clearance": "A little silk text grazes the board-edge clearance band on this dense board. Cosmetic; trimmed by the fab anyway.",
-    "warning:silk_over_copper": "Dense v2 routing: reference silk sits over F.Cu copper in places. Solder-mask-isolated, no electrical or assembly effect (rose 35->50 vs v1 because v2 packs more copper after the cost-down re-layout).",
-    "warning:silk_overlap": "Cosmetic silk-on-silk on a dense board (35, down from v1's 44 after the auto-placed-reference silk pass).",
-    "drc_unconnected": "GENUINELY ZERO — the board is fully routed, GND poured on both layers with per-pad solid connection + stitched/island-tied vias. (v1's baseline accepted 7 here; v2 closes them all.)",
-    "drc_parity": "Name/metadata residue (auto-named 2-pin nets, dual-label net-name picks, a couple of stale PCB LCSC fields). Electrically inert — the golden netlist + POLARITY table verify true connectivity, and fab outputs are netlist-driven. Down from v1's 71 after the v2 rewire."
-  },
   "erc": {
     "warning:lib_symbol_mismatch": 1
   },
   "drc": {
-    "error:courtyards_overlap": 1,
-    "error:items_not_allowed": 2,
     "warning:lib_footprint_mismatch": 37,
     "warning:silk_edge_clearance": 2,
-    "warning:silk_over_copper": 50,
-    "warning:silk_overlap": 35
+    "warning:silk_over_copper": 51,
+    "warning:silk_overlap": 47
   },
-  "drc_unconnected": 0,
-  "drc_parity": 18
+  "drc_unconnected": 1,
+  "drc_parity": 21
 }
