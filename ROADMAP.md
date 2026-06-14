@@ -72,8 +72,48 @@ rev/commit/date/URL). **Remaining (blocked or polish):**
 - [ ] **CI baseline refresh** — every count drifted (full restructure); must
       run `hardware_validate.py --update-baseline` inside `kicad/kicad:10.0.2`
       (can't locally). Open a PR and let CI be the gate (per CLAUDE.md).
-- [ ] **Silk polish** — 46 silk_overlap + RD-over-copper; tune `pcb_silk.py`
-      RD placement (back-silk-over-pour warnings are cosmetic/expected).
+- [x] **Silk polish DONE (2026-06-14).** Nick: "the silkscreen's a bit shit."
+      Root cause of the front mess: the BOM workflow left each footprint's
+      **LCSC part-number field visible on F.SilkS** at full 1.27mm — 25 part
+      codes (C2934560, C6186, …) piled on the designators → illegible. Fixes
+      in `pcb_silk.py`: (a) hide *every* footprint field except Reference (not
+      just Value) — kills the LCSC codes; (b) 0.2mm separation margin in the
+      ref placer so adjacent refs can't pack edge-to-edge (was colliding
+      R20/R29); (c) `STATUS` caption moved below the D6–D12 LED row (was
+      overlapping R19); (d) back-silk Claude logo re-seated as a header above
+      the attribution block (was stranded 34mm east over the IR array).
+      **Result (kicad-cli DRC): silk_overlap 44→0, silk_over_copper 53→0**;
+      remaining 2 silk_edge_clearance are J2 (USB-C) silk vs the board edge —
+      inherent to the edge-overhang connector, cosmetic. Diff is silk-only
+      (25 `hide yes` + a few text moves); **zero copper/pad/net/zone lines
+      touched → electrically identical, netlist/parity unaffected.** Front
+      now fully legible; back logo grouped with its caption.
+- [x] **Silk follow-up (2026-06-14, Nick's review of the above).** Two asks:
+      - **Per-LED captions** — the single "STATUS" word was useless. Replaced
+        with abbreviated function captions under each status LED, anchored to
+        the footprint (`STATUS_FN` in `pcb_silk.py`, tracks re-layout):
+        D6=`5V`, D7=`3V3`, D10=`TX`, D11=`USR1`, D12=`USR2` (mapping verified
+        against the netlist: D6/D7 = +5V/+3V3 rails, D10 = IR_TX/GPIO5,
+        D11/D12 = USER_LED1/2 on GPIO3/4). `status-leds.md` rewritten v1→v2
+        (was still documenting the deleted serial + blue-MOSFET LEDs). DRC
+        still 0 silk_overlap / 0 silk_over_copper.
+      - **Merged main (PR #22, IR-RX relocation) into this branch:** the new
+        U4 (IR receiver) at (153,110.5) sits directly below the LED-caption
+        row, so the silk was regenerated against main's board (took main's
+        electrical state verbatim — diff vs main is silk-only, 0 electrical
+        lines — and re-ran `pcb_silk.py`). Caught in review: D10's `IR` caption
+        would read as if it labelled the adjacent receiver, so **D10 → `TX`**
+        (transmit activity; the serial-TX LED that could've clashed is gone).
+      - **Git "-dirty" stamp on published assets** — root cause: `pcb_silk.py`
+        bakes the silk git line on a dirty tree, so the committed board (which
+        CI renders) always reads "-dirty" + the *parent* hash. Fix:
+        `scripts/stamp_silk.py` re-stamps that one line (text-only, idempotent,
+        non-fatal) from the CURRENT commit; wired into the CI hardware job
+        (after validation, before render + fab) and `build-site.sh` (Pages,
+        CI-guarded so local previews don't dirty the tree). CI checkout is
+        clean at the build SHA → published renders/GLB/gerbers show the exact
+        commit, no "-dirty". Committed file's own stamp is now a placeholder
+        CI overwrites at publish (resolves the bake-then-commit fixed point).
 - [ ] **Phase E schematic split** — GUI-bound, still pending.
 - [ ] check_models() flags the bent .wrl "missing" though it exists — likely a
       ${KIPRJMOD} path-resolution quirk in the validator; verify on Pages.
