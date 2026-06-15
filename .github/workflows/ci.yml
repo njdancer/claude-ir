@@ -97,6 +97,7 @@ jobs:
         # (hardware/notes/validation-tooling.md). pip needs --no-compile (macros
         # quirk) + --break-system-packages (externally-managed image python).
         run: |
+          apt-get install -y --no-install-recommends python3-pip
           pip3 install --no-compile --break-system-packages -q \
             kibot lxml requests pyyaml colorama qrcodegen InteractiveHtmlBom
           find /usr -path '*kibot*' -name '*.pyc' -delete 2>/dev/null || true
