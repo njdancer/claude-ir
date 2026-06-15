@@ -62,6 +62,37 @@ The winner is a *placement*; finalize it through the normal route ritual
 `kicad/kicad:10.0.2`) and **render the top few for a human serviceability call**
 (the scorer rewards SI/routability, not button reachability or aesthetics).
 
+## Results (2026-06-15, N=40 + item-2 probe)
+
+**Verdict: the merged 2-layer floorplan is already near-optimal; the board is
+the constraint, not the placement.**
+
+- Of 40 candidates only **3 were DRC-legal**; the best (`rand31`, score **687.9**
+  vs baseline **709.7**, ~3 %) differs from baseline in **one** way — the **LDO
+  tucked into the NW corner** (everything else identical), which trims
+  USB-on-B.Cu 56→49 mm and decoupling distance. That margin is within the
+  run-to-run jitter noise (the same zone combo scored 619 legal in one pilot and
+  6553 illegal in another when ±0.6 mm jitter tipped a tight courtyard) — i.e.
+  not a robust win, not worth churning the board + re-baselining for.
+- Nick's "everything bottom-left + J4 under the ESP" hypothesis routed **worse /
+  illegal** — a 5-LED row + 2 buttons + caps don't fit cleanly in the SW corner.
+- **Item 2 (USB → F.Cu) does NOT yield to a keepout here (hard data).** Forcing
+  the pair off B.Cu pushed USB-on-B.Cu **49→108 mm with +1 unrouted** — strictly
+  worse. Root cause is geometric: U3's USB pins (IO18/IO19) sit on the module's
+  **east** side (x≈158) facing *away* from the **west** USB-C (J2, x≈113), so the
+  shortest path ducks **under the module on B.Cu** (F.Cu is blocked by the module
+  pads; N is the antenna keepout). The B.Cu run is the natural optimum and is
+  functional for full-speed USB (note: `autorouting-freerouting.md`). `pcb_usb_keepout.py`
+  is kept for the record / a future 4-layer board.
+
+**Real levers (for a future re-spin, where the search has room):**
+1. **Module orientation/placement** so the C3's USB pins face J2 — the only
+   placement fix for the USB pair, but it moves the antenna off the N edge
+   (RF implications — needs care).
+2. **4-layer board** (dedicated GND plane + coupled D+/D−) — already the
+   documented next-rev lever; the search tooling will have real degrees of
+   freedom there (layer assignment, module rotation).
+
 ## Notes / limits
 
 - The scorer rewards USB-on-F.Cu but placement alone can't force it to 0 vias —

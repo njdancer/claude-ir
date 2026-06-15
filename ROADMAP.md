@@ -10,6 +10,23 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🧪 **GENERATIVE FLOORPLAN SEARCH built + run (2026-06-15, Nick: "generate a
+bunch of layouts, autoroute them, score, find the optimum").** New reusable
+tooling (`scripts/pcb_score.py` + `pcb_search.py`, refactored `pcb_floorplan.py`,
+note `hardware/notes/floorplan-search.md`): sample floorplans over the flexible
+groups → legalize → FreeRouting (the routability oracle) → DRC-gate → score →
+rank. Orchestrates mature tools; clears the "machine validator" bar.
+- **Finding: the merged 2-layer floorplan is already near-optimal.** N=40 → only
+  3 DRC-legal; best (LDO-in-NW-corner) ~3 % over baseline, **within jitter
+  noise** — not worth churning the board. Nick's "everything bottom-left" idea
+  routed worse/illegal (SW corner can't hold a 5-LED row + 2 buttons + caps).
+- **USB/SI is board-limited, not placement-limited** — see item (2): the USB
+  pair on B.Cu is geometric (module USB pins face away from J2). **The real
+  lever is a 4-layer re-spin**, where the search gains real DOF (layer
+  assignment, module rotation). Tooling is ready for that.
+- Board left UNCHANGED (merged state); no marginal-noise churn. The LDO-corner
+  tweak is available on request if Nick wants the ~3 %.
+
 🔧 **PHASE B DONE — decoupling re-seat + full re-route (2026-06-15, Nick: "do
 the full restructure now").** The MOD "decoupling far from pins" finding is
 fixed. Root cause: `pcb_place_v2.py`'s net heuristic can't distribute a *shared*
@@ -41,13 +58,16 @@ its own bank:
 
 🔭 **Deferred follow-ups from the JP1/tooling brief (2026-06-15):**
 - ✅ **(1) Power width + DRU** — done above.
-- [ ] **(2) Force USB D+/D− onto F.Cu.** This re-route still split the pair
-  (D+ 18 F.Cu/42 B.Cu, D− 45/14, 2 vias each) — FreeRouting can't express
-  "F.Cu-only." Fix = a **B.Cu keepout corridor** under the J2→U3 USB lane (FR
-  honours board keepouts) or a saved `.rules` fed via `-dr`. Functional for
-  full-speed USB either way (note: `autorouting-freerouting.md`); SI nicety,
-  closes the old "USB not a matched pair" review item. Deferred to keep this
-  clean route stable — needs its own re-route + tuning pass.
+- ⛔ **(2) Force USB D+/D− onto F.Cu — INVESTIGATED, not viable on the current
+  2-layer placement (2026-06-15).** Tried the B.Cu-keepout under the J2→U3 lane
+  (`scripts/pcb_usb_keepout.py`): it **backfires** — USB-on-B.Cu went 49→108 mm
+  with +1 unrouted. Root cause is geometric, not tooling: U3's USB pins
+  (IO18/IO19) are on the module's **east** side (x≈158) facing *away* from the
+  **west** USB-C (J2, x≈113), so the shortest path ducks **under the module on
+  B.Cu** (F.Cu blocked by module pads, N blocked by the antenna keepout). The
+  B.Cu run is the natural optimum and is fine for full-speed USB. Real fix =
+  re-orient the module so its USB pins face J2 (moves the antenna off the N
+  edge — RF care) **or a 4-layer board**. Folded into the re-spin levers below.
 - [ ] **(3) Cut CPL/BOM over from `fab-outputs.py` to KiBot.** Already
   de-risked: `esp32-ir-remote-fab.kibot.yaml` + `scripts/ci/cpl_crosscheck.py`
   (gating) prove KiBot ≡ fab-outputs.py (43/43, 0 delta). Point the order
