@@ -61,8 +61,7 @@ ANCHORS = {
     # --- TSOP receiver: SOUTH long edge (relocated off the TX corner, 1fc1f68);
     #     lens fires south/room, isolated from the 38kHz drive loop ---
     "U4":  (153.0, 110.5, 180),
-    # --- South / west: power jumper, buttons, sensor ---
-    "JP1": (110.0, 110.0, 0),    # LDO-disable jumper near U1
+    # --- South / west: buttons, sensor ---
     "SW1": (120.0, 109.0, 0),    # RESET
     "SW2": (131.0, 109.0, 0),    # BOOT
     "U5":  (165.0, 110.0, 0),    # AHT20 sensor, S edge, far from LDO heat (W)
@@ -94,14 +93,26 @@ def set_outline(b):
 
 def main():
     b = pcbnew.LoadBoard(PCB)
+    apply_anchors(b, ANCHORS, HOLES)
+    pcbnew.SaveBoard(PCB, b)
+
+
+def apply_anchors(b, anchors, holes, draw_outline=True):
+    """Place every anchor + mounting hole, fan the IR LEDs about their true
+    centre, and (optionally) (re)draw the outline. Used by main() with the
+    module ANCHORS and by pcb_search.py with generated candidate dicts.
+
+    draw_outline=False skips set_outline() (whose b.Remove() curses later
+    .Pads()/.GetCourtyard() iteration) so the caller can legalize placement
+    first and draw the outline itself afterwards."""
     fps = {f.GetReference(): f for f in b.GetFootprints()}
     # NB: set_outline() does b.Remove() which curses later .Pads() iteration,
     # so it runs LAST (after the LED-centroid alignment below).
     moved = 0
-    for ref, (x, y, rot) in {**HOLES_AS_ANCHORS(), **ANCHORS}.items():
+    for ref, (x, y, rot) in {**{r: (hx, hy, 0) for r, (hx, hy) in holes.items()},
+                             **anchors}.items():
         f = fps.get(ref)
         if not f:
-            print(f"  ! {ref} not found")
             continue
         f.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
         if rot is not None:
@@ -110,12 +121,12 @@ def main():
 
     # IR LEDs fan but must stay ALIGNED: rotate about the true LED centre, not
     # the footprint anchor (pad 1). After rotation, shift each so its pad
-    # centroid lands on the ANCHORS target — equivalent to pivoting in place.
+    # centroid lands on the target — equivalent to pivoting in place.
     for ref in ("D2", "D3", "D4", "D5"):
         f = fps.get(ref)
-        if not f:
+        if not f or ref not in anchors:
             continue
-        tx, ty, _ = ANCHORS[ref]
+        tx, ty, _ = anchors[ref]
         xs, ys = [], []
         for p in f.Pads():
             pp = p.GetPosition()
@@ -126,13 +137,10 @@ def main():
         f.SetPosition(pcbnew.VECTOR2I(pos.x + pcbnew.FromMM(tx - cx),
                                       pos.y + pcbnew.FromMM(ty - cy)))
 
-    set_outline(b)   # last: its b.Remove() curses .Pads() iteration above
-    pcbnew.SaveBoard(PCB, b)
+    if draw_outline:
+        set_outline(b)   # last: its b.Remove() curses .Pads() iteration above
     print(f"outline {BX1-BX0:.0f}x{BY1-BY0:.0f}mm, moved {moved} parts")
-
-
-def HOLES_AS_ANCHORS():
-    return {ref: (x, y, 0) for ref, (x, y) in HOLES.items()}
+    return moved
 
 
 if __name__ == "__main__":
