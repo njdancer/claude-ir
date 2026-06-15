@@ -35,9 +35,10 @@ HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
 ANCHORS = {
     # --- WEST end: power + USB ---
     "J2":  (109.7, 92.0, 270),   # USB-C, mouth overhangs west edge ~0.5mm, pads on-board
-    "U1":  (120.0, 81.0, 0),     # AMS1117 LDO — moved into the open NW corner so
-                                 # the SOT-223 tab (faces E) sits in clear copper
-                                 # for a big 2-sided thermal pour (see pcb_ldo_pour)
+    "U1":  (120.0, 80.5, 90),    # AMS1117 LDO in the open NW corner, rot90 so the
+                                 # SOT-223 tab faces NORTH into the to-the-edge
+                                 # thermal pour (max heat spread); pins face S to
+                                 # the VBUS chain. 2-sided pour+vias in pcb_ldo_pour
     "F1":  (119.0, 88.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1), pocket S of U1
     "D1":  (119.0, 93.0, 0),     # TVS, stacked below F1
     # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
