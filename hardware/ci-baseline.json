@@ -4,7 +4,8 @@
   },
   "drc": {
     "warning:lib_footprint_mismatch": 37,
-    "warning:silk_edge_clearance": 2
+    "warning:silk_edge_clearance": 2,
+    "warning:silk_over_copper": 1
   },
   "drc_unconnected": 0,
   "drc_parity": 19
