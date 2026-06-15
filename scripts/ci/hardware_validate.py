@@ -12,11 +12,14 @@ Checks (all gating unless marked):
   models   every footprint 3D model path resolves (WARN-only: SW1/SW2
            STEP models are a known cosmetic debt)
 
-Baseline (hardware/ci-baseline.json) stores (severity, type) violation
-counts as produced by the CI KiCad container (kicad/kicad:10.0.2 — counts
-can differ slightly under the bench's KiCad 9). Errors gate strictly: any
-change, up or down, fails so the baseline never goes stale. Warnings gate
-on increase only; a decrease prints a reminder to refresh.
+Baseline (hardware/ci-baseline.json) stores (severity, type) violation counts.
+ERROR-severity changes gate strictly (any change fails); unconnected and
+schematic-parity counts gate exactly (both version-stable). WARNING-severity
+count changes (lib_footprint_mismatch, silk_edge_clearance, lib_symbol_mismatch)
+are INFORMATIONAL only — these are KiCad geometry/library heuristics that drift
+between patch releases (10.0.2 vs 10.0.3), so gating their exact counts produced
+spurious CI failures. KiBot owns the ERC/DRC error gate in CI; the real-error
+and parity/unconnected gates here are version-stable.
 
 Usage:
   python3 scripts/ci/hardware_validate.py                  # validate
@@ -226,7 +229,15 @@ def json_to_counts(d):
 
 
 def compare(check, actual, base):
-    """Errors strict (any change fails), warnings increase-only."""
+    """Errors fail on any change. Warning-count changes are INFORMATIONAL only.
+
+    Warning categories (lib_footprint_mismatch, silk_edge_clearance,
+    lib_symbol_mismatch) are computed by KiCad geometry/library heuristics that
+    drift between patch releases (10.0.2 vs 10.0.3), so gating on their exact
+    counts caused spurious CI failures. KiBot now owns the ERC/DRC error gate
+    (CI), and parity/unconnected (version-stable) are still gated below — so
+    benign warning drift no longer needs to fail the build.
+    """
     ok = True
     keys = set(actual) | set(base)
     for key in sorted(keys):
@@ -234,12 +245,12 @@ def compare(check, actual, base):
         a, b = actual.get(key, 0), base.get(key, 0)
         if a == b:
             continue
-        if sev == "error" or a > b:
+        if sev == "error":
             failures.append((check, f"{sev}:{typ} count {b} -> {a}"))
             ok = False
         else:
-            warnings.append((check, f"{sev}:{typ} improved {b} -> {a} — "
-                             "refresh baseline (--update-baseline)"))
+            warnings.append((check, f"{sev}:{typ} {b} -> {a} (warning drift, "
+                             "informational; refresh baseline if persistent)"))
     return ok
 
 
