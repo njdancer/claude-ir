@@ -5,12 +5,12 @@
 # Owns the ERC/DRC/schematic-parity gate (the modern kicad-cli engine; loads the
 # project design rules automatically) and the InteractiveHtmlBom hand-assembly
 # artifact. The DRC/ERC preflights fail on ERRORS (unconnected, shorts,
-# clearance, keepout); the benign library-version / silk-edge / parity classes
-# are KiCad *warnings* and do not fail the gate — same set the old
-# ci-baseline.json tolerated. Fab outputs (gerbers/drill/CPL/BOM) + the CPL
-# rotation table stay in scripts/fab-outputs.py until that table is
-# diff-verified against KiBot's rot_footprint DB (dead-board gate — see
-# hardware/notes/validation-tooling.md).
+# clearance, keepout); benign KiCad *warning* classes are filtered below so the
+# report shows only actionable items. Fab outputs (gerbers/drill/CPL/BOM) + the
+# CPL rotation table currently stay in scripts/fab-outputs.py; migrating CPL/BOM
+# here (KiBot `position`+`rot_footprint`+`bom`) is planned, gated by a
+# byte-for-byte diff against fab-outputs.py's CPL — KiBot ships NO built-in
+# rotation DB, so we'd feed it our own values (see validation-tooling.md).
 kibot:
   version: 1
 
@@ -22,6 +22,22 @@ preflight:
     enabled: true
     schematic_parity: true
     dont_stop: false
+    # Benign warning classes we accept — filtered so a NEW warning stands out.
+    # Narrow on purpose: only board-only mounting-hole/logo "extra footprint"
+    # (never in the netlist) and the inherent J2 USB-C silk-vs-edge clip (the
+    # edge-overhang connector). Real parity mismatches are NOT filtered. The
+    # lib_symbol/footprint_link noise is env-only (missing global lib tables)
+    # and absent in CI, so it needs no filter.
+    filters:
+      - filter: 'Board-only mounting holes + Claude logo (not in netlist)'
+        error: 'extra_footprint'
+        regex: 'Footprint (H[0-9]+|REF\*\*)'
+      - filter: 'Inherent USB-C edge-overhang silk clip'
+        error: 'silk_edge_clearance'
+        regex: '.*'
+  # Fail if any copper zone's fill is stale vs the board (our pipeline pours
+  # GND then the LDO thermal pour; a stale fill reaching fab is a real risk).
+  check_zone_fills: true
   # Export a BoM XML so the interactive BOM can show the LCSC field.
   update_xml:
     enabled: true

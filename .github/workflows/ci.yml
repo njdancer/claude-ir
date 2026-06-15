@@ -44,6 +44,9 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends git
       - uses: actions/checkout@v4
+        with:
+          # KiDiff (PR visual diff, below) needs the base+head history.
+          fetch-depth: 0
       - name: Install KiCad global library tables
         # The job runs as root, which has no KiCad config; without the global
         # sym/fp lib tables ERC drowns in ~170 bogus lib_symbol_issues /
@@ -75,12 +78,32 @@ jobs:
           kicad-cli pcb render --side bottom -w 900 -h 700 -o renders/bottom.png "$PCB"
           kicad-cli pcb render --perspective --rotate ' -25,0,35' \
             -w 900 -h 700 -o renders/iso.png "$PCB"
+      - name: Visual diff (KiDiff) — PCB + schematic, base vs PR
+        # Maintained INTI-CMNB visual differ (same engine KiBot's `diff` wraps);
+        # emits a red/green PDF of what changed on each layer/page between the
+        # PR base and head. Informational only — never gates the build.
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        continue-on-error: true
+        run: |
+          apt-get install -y --no-install-recommends imagemagick ghostscript python3-pip
+          pip3 install --break-system-packages -q kidiff
+          mkdir -p diffs
+          BASE='${{ github.event.pull_request.base.sha }}'
+          HEAD='${{ github.event.pull_request.head.sha }}'
+          for f in esp32-ir-remote.kicad_pcb esp32-ir-remote.kicad_sch; do
+            kind="${f##*.kicad_}"   # pcb | sch
+            kicad-diff.py --no_reader --diff_mode red_green \
+              --output_dir "diffs" --output_name "${kind}-diff.pdf" \
+              --old_file_hash "$BASE" --new_file_hash "$HEAD" \
+              "hardware/$f" "hardware/$f" || echo "kidiff failed for $f (non-gating)"
+          done
       - name: Stage PR-comment inputs
         if: ${{ always() && github.event_name == 'pull_request' }}
         run: |
-          mkdir -p _pr/renders
+          mkdir -p _pr/renders _pr/diffs
           cp hardware-facts.json _pr/ 2>/dev/null || true
           cp renders/*.png _pr/renders/ 2>/dev/null || true
+          cp diffs/*.pdf _pr/diffs/ 2>/dev/null || true
       - name: Upload PR-comment inputs
         if: ${{ always() && github.event_name == 'pull_request' }}
         uses: actions/upload-artifact@v4
