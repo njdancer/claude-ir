@@ -90,19 +90,25 @@ the parity/netlist baseline in the same commit) — expect the 2 U5 NC nets.
 
 ## Plan once unblocked
 
-1. Re-save schematic in KiCad 10 (normalizes instance paths) → regenerate `.net`
-   + refresh baseline. Confirm KiBot parses it.
-2. `hardware/esp32-ir-remote.kibot.yaml` (staged): `erc` + `drc`
-   (`schematic_parity`) preflights + `ibom`; then `gerber`/`excellon`/`position`/
-   `bom`/zip with `rot_footprint`. **CPL ROTATION IS THE DEAD-BOARD GATE:** KiBot
-   has no built-in DB (empty `rotations`), and the *community* DBs disagree on
-   `^SOT-23` (matthewlai `-90` vs bennymeg `180`; ours `270`). Feed KiBot **our**
-   validated `JLC_ROTATION`/`JLC_OFFSET` table (via `rot_footprint`
-   `rotations:`/`offsets:`, `bennymeg_mode: true` pinned) and **diff KiBot's CPL
-   against `fab-outputs.py`'s to zero delta** before trusting it — a
-   blind switch could flip Q3 (AO3400A) or shift the USB-C connector.
+1. ✅ **DONE (2026-06-15): KiBot CPL/BOM + cross-check.**
+   `hardware/esp32-ir-remote-fab.kibot.yaml` produces the JLCPCB `position`
+   (with a `rot_footprint` pre_transform carrying **our** reviewed rotations:
+   `^SOT-223-3_TabPin2`→180, `^SOT-23`→270, USB-C +1.44 mm X offset;
+   `bennymeg_mode: true`) + a JLCPCB `bom`. `scripts/ci/cpl_crosscheck.py`
+   (gating in CI, after fab-outputs.py + the KiBot install) asserts the two
+   engines agree: every assembled designator → same rotation (mod 360), same
+   position (≤1 µm), same side, same LCSC. **Verified equivalent: 43/43
+   placements, 0 delta**, and the negative test (flip `^SOT-23` to 180) fails
+   the gate as intended. So the dead-board concern (KiBot vs our trig applying
+   the same values) is closed; the CPL ROTATION GATE is now automated.
+2. **Cutover (when ready):** point CI's order package at KiBot's
+   `position`+`bom`+`gerber`/`excellon`/zip and slim `fab-outputs.py` to its
+   special core (hand-solder kit narrative + the refuse-on-unclassified guard +
+   the orientation report). **Still gated by the mandatory JLC-preview check**
+   for SOT-23/USB-C on the first assembled order — the cross-check proves the
+   two tools agree, not that the absolute rotation is right on real silicon.
 3. Slim `hardware_validate.py` to the 3 bespoke checks wrapping KiBot's exit code;
-   retire `fab-outputs.py`; keep `bom_report.py`.
+   keep `bom_report.py`.
 4. CI: swap `kicad/kicad:10.0.2` → pinned `ghcr.io/inti-cmnb/kicad10_auto[_full]`
    by digest; `kibot -c …`. (Confirm a published k10.0.2/10.0.3 KiBot image.)
 

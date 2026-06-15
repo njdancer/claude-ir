@@ -1,0 +1,64 @@
+# KiBot FAB config — JLCPCB CPL + BOM, used by scripts/ci/cpl_crosscheck.py to
+# cross-validate scripts/fab-outputs.py's hand-rolled CPL/BOM against KiBot's
+# maintained engine. NOT the producer yet (fab-outputs.py still owns the order
+# package); this proves the two agree on the dead-board-critical rotations +
+# the LCSC BOM before any cutover. KiBot ships no rotation DB — we feed it our
+# OWN reviewed JLC_ROTATION/JLC_OFFSET values (mirrors fab-outputs.py).
+kibot:
+  version: 1
+
+filters:
+  # The JLC SMT-assembled subset: drop the hand-solder kit (IR LEDs + TSOP)
+  # and the DNP / no-LCSC parts (headers, R30). Mirrors fab-outputs.py's split.
+  - name: only_jlc_assembled
+    type: generic
+    exclude_refs: [D2, D3, D4, D5, U4, J4, J5, R30]
+    exclude_kicad_dnp: true
+  # Rotation/offset corrections — OUR reviewed values (KiBot has no built-in DB).
+  # Same numbers as fab-outputs.py JLC_ROTATION/JLC_OFFSET.
+  - name: our_jlc_rotations
+    type: rot_footprint
+    extend: false
+    bennymeg_mode: true
+    negative_bottom: false
+    rotations:
+      - ['^SOT-223-3_TabPin2$', 180]
+      - ['^SOT-23$', 270]
+    offsets:
+      - ['^USB_C_Receptacle_XKB_U262-16XN-4BVC11$', '1.44,0']
+
+variants:
+  - name: jlc
+    type: kibom
+    pre_transform: our_jlc_rotations
+    exclude_filter: only_jlc_assembled
+
+outputs:
+  - name: jlc_position
+    type: position
+    dir: fabcheck
+    options:
+      variant: jlc
+      format: CSV
+      units: millimeters
+      separate_files_for_front_and_back: false
+      only_smd: false
+      columns: [Ref, PosX, PosY, Side, Rot]
+
+  - name: jlc_bom
+    type: bom
+    dir: fabcheck
+    options:
+      variant: jlc
+      format: CSV
+      output: '%f-kibot-bom.%x'
+      columns:
+        - field: Value
+          name: Comment
+        - field: References
+          name: Designator
+        - field: Footprint
+          name: Footprint
+        - field: LCSC
+          name: LCSC
+      group_fields: [LCSC]

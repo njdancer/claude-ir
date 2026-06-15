@@ -130,6 +130,14 @@ jobs:
           kibot -c hardware/esp32-ir-remote.kibot.yaml \
             -e hardware/esp32-ir-remote.kicad_sch -b hardware/esp32-ir-remote.kicad_pcb \
             -d hardware/fab
+      - name: CPL/BOM cross-check (fab-outputs.py vs KiBot)
+        # Dead-board gate: both are fed the same reviewed rotation values but
+        # apply them with independent engines (our trig vs KiBot rot_footprint).
+        # Fails if the JLCPCB CPL rotations/positions or the designator->LCSC
+        # BOM disagree — catches a rotation-table drift before an assembled
+        # order. (fab-outputs.py ran above -> hardware/fab/ is the reference;
+        # kibot was just installed.)
+        run: python3 scripts/ci/cpl_crosscheck.py
       - name: Upload fab package
         uses: actions/upload-artifact@v4
         with:

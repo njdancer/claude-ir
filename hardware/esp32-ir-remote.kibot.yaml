@@ -7,10 +7,12 @@
 # artifact. The DRC/ERC preflights fail on ERRORS (unconnected, shorts,
 # clearance, keepout); benign KiCad *warning* classes are filtered below so the
 # report shows only actionable items. Fab outputs (gerbers/drill/CPL/BOM) + the
-# CPL rotation table currently stay in scripts/fab-outputs.py; migrating CPL/BOM
-# here (KiBot `position`+`rot_footprint`+`bom`) is planned, gated by a
-# byte-for-byte diff against fab-outputs.py's CPL — KiBot ships NO built-in
-# rotation DB, so we'd feed it our own values (see validation-tooling.md).
+# CPL rotation table currently stay in scripts/fab-outputs.py. A KiBot CPL/BOM
+# (esp32-ir-remote-fab.kibot.yaml) + cross-check (scripts/ci/cpl_crosscheck.py,
+# gating in CI) now prove KiBot's position+rot_footprint+bom match
+# fab-outputs.py exactly (rotations mod 360 + designator->LCSC), so the cutover
+# is de-risked. KiBot ships NO built-in rotation DB — both engines are fed our
+# OWN reviewed values (see validation-tooling.md).
 kibot:
   version: 1
 
