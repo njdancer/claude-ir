@@ -10,6 +10,33 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🧮 **CAP AUDIT + v2 doc reconciliation (2026-06-15, Nick asked).** Audited all
+nine caps (C1–C3, C5–C10; no C4 — deleted with U2/CH340C in v2). Verdict on the
+"are C7/C8 and C5/C10 duplicated?" question: **no copy-paste bug.** Within a
+pair the two values do different jobs (100 nF HF + 10 µF bulk); the two *banks*
+are identical only because the +3.3V rail has **two consumers** — U3 (C3
+module) and U5 (AHT20) — so it's one bank per IC. Full map: C1 = LDO VIN
+(10 µF); C2/C3 = LDO VOUT (22 µF ×2); C5+C10 / C7+C8 = the two 100 nF+10 µF
+banks; C6 = U3 EN power-on-reset RC (1 µF, NOT decoupling); C9 = TSOP Vs filter.
+- **Real defect found (not the duplication):** the placer scattered the banks —
+  both 10 µF at U3, both 100 nF orphaned ~50 mm SW, **U5 left with no local
+  decoupling.** This is already the queued "MOD — decoupling far from pins" item
+  and belongs to **restructure Phase B** (re-seat decoupling against new
+  anchors); doing a piecemeal re-route now would be overwritten by Phase B, so
+  **not** done here. Captured the correct one-bank-per-IC intent in
+  `layout.md` constraint 10 so Phase B places it right.
+- **Adjacent finding — I²C pull-ups DNP:** R28/R29 (4.7 kΩ on SDA/SCL) are
+  do-not-populate (a v1 Qwiic-era default; J3 Qwiic is gone). The on-board
+  AHT20 has no internal pull-ups → **R28/R29 should be populated in v2.**
+  Flagged in `temp-sensor.md` for the next schematic pass; not yet actioned.
+- **Docs reconciled v1→v2:** `layout.md` constraints 5 (DHT22→AHT20 I²C),
+  10 (decoupling rewrite — no C4/U2, C6 is EN-RC not CH340C), 11 (JP1 + R21/R26
+  + Q1/Q2 all deleted); `temp-sensor.md` fully rewritten (AHT20/I²C). Pulled
+  `origin/main` (JP1-removal merge) into the branch first.
+- **KiCad-in-session:** pulled `kicad/kicad:10.0.2` via Docker
+  (`registry-1.docker.io/...`, Docker Hub anon pull was rate-limited) — kicad-cli
+  10.0.2 confirmed working for headless ERC/DRC/validate if needed.
+
 ⚡ **POWER SIMPLIFIED — JP1 LDO-disconnect jumper REMOVED, single supply
 (2026-06-15, Nick's call).** The series jumper on the 3V3 output was deleted:
 the rail now runs from the one AMS1117 LDO, and to bench-inject or prototype a

@@ -50,10 +50,13 @@ constraints that rules can't express.
    change if possible. ESD/TVS (D1) and fuse (F1) sit between J2 and the
    rest: order on VBUS must be J2 → F1 → D1 → U1 (fuse before TVS,
    per H1.4).
-5. **DHT22 (U5) away from heat:** maximum practical distance from U1 (buck)
-   and U3 (WiFi heat); prefer a board corner with slots/perimeter routing
-   between it and heat sources if space allows. Sensor must sample room
-   air, not board air.
+5. **AHT20 (U5) away from heat (v2 — was DHT22):** the v2 sensor is the
+   **AHT20 I²C** part (SCL = C3 IO10, SDA = C3 IO7; bus also broken out on
+   header J4), NOT the v1 AM2302/DHT22 single-wire part. Place it the maximum
+   practical distance from U1 (LDO) and U3 (WiFi heat); prefer a board corner
+   with slots/perimeter routing between it and heat sources if space allows.
+   Sensor must sample room air, not board air. Its 100 nF decoupling and the
+   I²C pull-ups (R28/R29 — see ir/temp notes; currently DNP) travel with it.
 6. **TSOP receiver (U4) faces the user/room AND keeps its distance from the
    TX array (revised 2026-06-14):** board edge, lens unobstructed; its RC
    filter (R27/C9, net `IR_RX_VS`) directly at the Vs pin. **Hard separation:
@@ -89,10 +92,31 @@ constraints that rules can't express.
 9. **Status LEDs (D6–D12)** visible from one viewing angle; group serial
    TX/RX (D8/D9) together; user LEDs (D11/D12) together. THT 3 mm,
    hand-soldered.
-10. **Decoupling:** C4/C5/C7 (100 nF) at their IC power pins (U2, U3);
-    C10 at U3's 3V3 entry; C6 (1 µF) at CH340C V3.
-11. **JP1 (buck disable)** and **R21/R26 (auto-reset 0Ω links)** accessible
-    for rework; silkscreen labels required (H2.4).
+10. **Decoupling (v2 — U2/CH340C and C4 deleted):** the +3.3V rail carries
+    **two identical bypass banks, one per IC** — *not* a duplication bug.
+    There are two consumers on the rail: U3 (the C3 module) and U5 (the AHT20),
+    so each gets a 100 nF + 10 µF pair (C5/C7 are the 100 nF, C8/C10 the 10 µF;
+    all four sit on +3.3V↔GND, so the exact ref↔IC assignment is free — Phase B
+    picks by shortest route).
+    - **U3 (ESP32-C3):** 100 nF + 10 µF hard against the 3V3 pin (pin 1); the
+      100 nF gets the shorter loop. The module courtyard bounds the caps to
+      ~7 mm on this 2-layer board (accepted — see ROADMAP; the module also has
+      internal decoupling).
+    - **U5 (AHT20):** 100 nF at VDD (pin 2); the second 10 µF rides along as
+      local rail bulk. (The AHT20 strictly needs only the 100 nF — the 10 µF is
+      generous; keep for rail stiffness or drop to save a part.)
+    - **As-built the placer scattered these** (both 10 µF landed at U3, both
+      100 nF orphaned ~50 mm SW, U5 left with no local cap). **Phase B must
+      re-pair one bank to each IC.**
+    - **C6 (1 µF) is NOT a decoupling cap** — it is U3's EN power-on-reset RC
+      (with the 10 kΩ EN pull-up, ~10 ms POR delay) at the EN pin. (The old
+      "CH340C V3" note was wrong; that chip is gone.)
+    - LDO caps (C1 at VIN; C2/C3 at VOUT) are covered by constraint 3.
+11. **No jumpers / no auto-reset links (v2):** JP1 (LDO-disconnect), the
+    R21/R26 auto-reset 0 Ω links, and the Q1/Q2 reset FETs were all **deleted**
+    in v2 — the C3's native USB-Serial-JTAG handles reset/boot/download over
+    USB-C, and the rail runs from the single LDO (desolder U1 to bench-inject).
+    Silkscreen pin-1 / button labels still required (H2.4).
 
 ## Layer policy (signal vs power on a 2-layer GND-pour board)
 
