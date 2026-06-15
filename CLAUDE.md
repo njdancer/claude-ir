@@ -99,9 +99,29 @@ tagging the ordered commit (e.g. `order/v1.4`).
 - Firmware builds run in the podman devcontainer (`pio run`); flash/monitor
   run on the host (USB passthrough doesn't work under podman/macOS).
 
-**Remote/web sessions (no KiCad, no serial):** firmware, analysis, app code,
-docs, research, and planning only. Don't attempt KiCad operations; queue them
-in `ROADMAP.md` for a Mac session instead.
+**Remote/web sessions (no serial; KiCad is installable on demand):** serial/
+USB is unavailable (no flash/monitor/capture — those need Nick's Mac). But
+KiCad **is** installable in the container and works fully (kicad-cli ERC/DRC/
+netlist/render + the `pcbnew` Python bindings for our pcb_*.py pipeline), so
+don't defer schematic/PCB work by default — install it and do the edit.
+Install recipe (Ubuntu 24.04 container; ~2 min):
+
+```bash
+# add-apt-repository crashes because the active python3 is 3.11 but apt_pkg is
+# built for 3.12 — drive it with the system interpreter explicitly:
+sudo /usr/bin/python3.12 /usr/bin/add-apt-repository --yes ppa:kicad/kicad-10.0-releases
+sudo apt-get update -y && sudo apt-get install -y --no-install-recommends kicad
+kicad-cli version                                   # 10.0.x
+/usr/bin/python3.12 -c "import pcbnew; print(pcbnew.GetBuildVersion())"
+```
+
+`pcbnew` binds to **/usr/bin/python3.12** (not the default `python3`); run the
+`scripts/pcb_*.py` pipeline with `python3.12` (add numpy via
+`python3.12 -m pip install --break-system-packages numpy` if needed). The CI
+gate still runs in `kicad/kicad:10.0.2`, so refresh `ci-baseline.json` there,
+not from a local 10.0.3 run, if counts drift. Only genuinely Mac-bound work
+(serial bring-up, USB flashing, the KiCad GUI for heavy interactive schematic
+re-layout) gets queued in `ROADMAP.md`.
 
 ## Commands
 

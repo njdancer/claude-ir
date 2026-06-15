@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-15T04:18:15")
+		(source "/home/user/claude-ir/hardware/esp32-ir-remote.kicad_sch")
+		(date "2026-06-15T08:14:11")
 		(tool "Eeschema 10.0.3-10.0.3~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -1525,60 +1525,6 @@
 				(tstamps "/")
 			)
 			(tstamps "003ae6d9-32c7-484d-af4e-e8aaf7b9d12b")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "JP1")
-			(value "LDO Disable")
-			(footprint "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
-			(fields
-				(field
-					(name "Footprint") "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Jumper")
-				(part "Jumper_2_Open")
-				(description "Jumper, 2-pole, open")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "esp32-ir-remote.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "Jumper SPST")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Jumper* TestPoint*2Pads* TestPoint*Bridge*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "55a8e8e6-f4ad-400d-9f0c-78865c0923c2")
 			(units
 				(unit
 					(name "A")
@@ -3874,42 +3820,6 @@
 			)
 		)
 		(libpart
-			(lib "Jumper")
-			(part "Jumper_2_Open")
-			(description "Jumper, 2-pole, open")
-			(footprints
-				(fp "Jumper*")
-				(fp "TestPoint*2Pads*")
-				(fp "TestPoint*Bridge*")
-			)
-			(fields
-				(field
-					(name "Reference") "JP")
-				(field
-					(name "Value") "Jumper_2_Open")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Jumper, 2-pole, open")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "A")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "B")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
 			(lib "RF_Module")
 			(part "ESP32-C3-WROOM-02")
 			(description "802.11 b/g/n Wi­Fi and Bluetooth 5 module, ESP32­C3 SoC, RISC­V microprocessor, On-board antenna")
@@ -4135,44 +4045,8 @@
 	)
 	(libraries
 		(library
-			(logical "Connector")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
-		)
-		(library
-			(logical "Connector_Generic")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
-		)
-		(library
-			(logical "Device")
-			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
-		)
-		(library
-			(logical "Interface_Optical")
-			(uri "${KICAD10_SYMBOL_DIR}/Interface_Optical.kicad_sym")
-		)
-		(library
 			(logical "JLC-MCP-Sensors")
 			(uri "${KIPRJMOD}/libraries/symbols/JLC-MCP-Sensors.kicad_sym")
-		)
-		(library
-			(logical "Jumper")
-			(uri "${KICAD10_SYMBOL_DIR}/Jumper.kicad_sym")
-		)
-		(library
-			(logical "RF_Module")
-			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
-		)
-		(library
-			(logical "Regulator_Linear")
-			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
-		)
-		(library
-			(logical "Switch")
-			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
-		)
-		(library
-			(logical "Transistor_FET")
-			(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")
 		)
 	)
 	(nets
@@ -4214,12 +4088,6 @@
 				(ref "J4")
 				(pin "1")
 				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "JP1")
-				(pin "2")
-				(pinfunction "B_2")
 				(pintype "passive")
 			)
 			(node
@@ -4286,6 +4154,12 @@
 				(ref "R9")
 				(pin "2")
 				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "VO_2")
+				(pintype "power_out")
 			)
 			(node
 				(ref "U3")
@@ -4625,23 +4499,6 @@
 		)
 		(net
 			(code "16")
-			(name "/LDO_OUT")
-			(class "Default")
-			(node
-				(ref "JP1")
-				(pin "1")
-				(pinfunction "A_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "2")
-				(pinfunction "VO_2")
-				(pintype "power_out")
-			)
-		)
-		(net
-			(code "17")
 			(name "/SPARE_IO0")
 			(class "Default")
 			(node
@@ -4658,7 +4515,7 @@
 			)
 		)
 		(net
-			(code "18")
+			(code "17")
 			(name "/SPARE_IO1")
 			(class "Default")
 			(node
@@ -4675,7 +4532,7 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "18")
 			(name "/SPARE_RX")
 			(class "Default")
 			(node
@@ -4692,7 +4549,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "19")
 			(name "/SPARE_TX")
 			(class "Default")
 			(node
@@ -4709,7 +4566,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "20")
 			(name "/USB_D+")
 			(class "Default")
 			(node
@@ -4732,7 +4589,7 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "21")
 			(name "/USB_D-")
 			(class "Default")
 			(node
@@ -4755,7 +4612,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "22")
 			(name "/USER_LED1")
 			(class "Default")
 			(node
@@ -4771,7 +4628,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "23")
 			(name "/USER_LED2")
 			(class "Default")
 			(node
@@ -4787,7 +4644,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "24")
 			(name "GND")
 			(class "Power")
 			(node
@@ -4978,7 +4835,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "25")
 			(name "Net-(D2-A)")
 			(class "IR_Drive")
 			(node
@@ -4994,7 +4851,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "26")
 			(name "Net-(D3-A)")
 			(class "IR_Drive")
 			(node
@@ -5010,7 +4867,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "27")
 			(name "Net-(D4-A)")
 			(class "IR_Drive")
 			(node
@@ -5026,7 +4883,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "28")
 			(name "Net-(D5-A)")
 			(class "IR_Drive")
 			(node
@@ -5042,7 +4899,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "29")
 			(name "Net-(D6-A)")
 			(class "Default")
 			(node
@@ -5058,7 +4915,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "30")
 			(name "Net-(D7-A)")
 			(class "Default")
 			(node
@@ -5074,7 +4931,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "31")
 			(name "Net-(D10-A)")
 			(class "Default")
 			(node
@@ -5090,7 +4947,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "32")
 			(name "Net-(F1-Pad2)")
 			(class "Power")
 			(node
@@ -5124,7 +4981,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "33")
 			(name "Net-(J2-CC1)")
 			(class "Default")
 			(node
@@ -5140,7 +4997,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "34")
 			(name "Net-(J2-CC2)")
 			(class "Default")
 			(node
@@ -5156,7 +5013,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "35")
 			(name "Net-(Q3-G)")
 			(class "Default")
 			(node
@@ -5177,7 +5034,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "36")
 			(name "unconnected-(U5-NC-Pad1)")
 			(class "Default")
 			(node
@@ -5188,7 +5045,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "37")
 			(name "unconnected-(U5-NC-Pad6)")
 			(class "Default")
 			(node

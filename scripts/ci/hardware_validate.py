@@ -48,8 +48,9 @@ NET = os.path.join(HW, "esp32-ir-remote.net")
 BASELINE = os.path.join(HW, "ci-baseline.json")
 
 # Fitted parts allowed to have no LCSC code: generic 2.54mm headers bought
-# anywhere (J4/J5) and the bare solder jumper (JP1).
-NO_LCSC_OK = {"J4", "J5", "JP1"}
+# anywhere (J4/J5). (The JP1 LDO-disconnect jumper was removed in the
+# single-supply simplification — see U1 in the polarity table below.)
+NO_LCSC_OK = {"J4", "J5"}
 
 # ---------------------------------------------------------------------------
 # Polarity / orientation truth table — pin -> net for every polarized or
@@ -81,9 +82,10 @@ POLARITY = {
     # IR driver AO3400A (SOT-23: 1=G 2=S 3=D): gate via R13 (+R14 pulldown),
     # source = GND, drain = IR_DRAIN (the IR-LED cathode bus)
     "Q3": {"1": ["R13.1", "R14.2"], "2": "GND", "3": ["D2.1", "D5.1"]},
-    # AMS1117-3.3 LDO (SOT-223-3, TabPin2): 1=GND 2=VOUT(->JP1 disconnect
-    # jumper -> +3V3) 3=VIN(+5V). Tab (pin2 region) = VOUT.
-    "U1": {"1": "GND", "2": ["JP1.1"], "3": "+5V"},
+    # AMS1117-3.3 LDO (SOT-223-3, TabPin2): 1=GND 2=VOUT=+3V3 3=VIN(+5V). Tab
+    # (pin2 region) = VOUT, which now drives the +3.3V rail directly — the JP1
+    # LDO-disconnect jumper was removed (single supply; desolder U1 to inject).
+    "U1": {"1": "GND", "2": "+3.3V", "3": "+5V"},
     # TSOP38238 IR receiver (1=OUT 2=GND 3=Vs): OUT -> C3 IO6 (IR_RX),
     # Vs RC-filtered (IR_RX_VS = C9.1 + R27.2)
     "U4": {"1": ["U3.5"], "2": "GND", "3": ["C9.1", "R27.2"]},

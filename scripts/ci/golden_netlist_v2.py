@@ -37,8 +37,11 @@ from hardware_validate import netlist_model  # noqa: E402
 GOLDEN = [
     # --- power ---------------------------------------------------------------
     {"F1.1", "D1.1", "C1.1", "U1.3", "R15.1", "J4.2"},                 # +5V (VBUS post-fuse)
-    {"U1.2", "JP1.1"},                                                 # LDO_OUT (AMS VO -> JP1)
-    {"JP1.2", "C2.1", "C3.1", "C5.2", "C7.1", "C8.1", "C10.1",         # +3.3V
+    # AMS1117 VO drives +3.3V directly — JP1 LDO-disconnect jumper removed
+    # (single supply; desolder U1 to bench-inject/prototype battery). The old
+    # /LDO_OUT net is collapsed into +3.3V; the redundant +3.3V PWR_FLAG (which
+    # only existed because the open jumper left the rail undriven) is gone too.
+    {"U1.2", "C2.1", "C3.1", "C5.2", "C7.1", "C8.1", "C10.1",          # +3.3V
      "R5.1", "R6.1", "R7.2", "R8.2", "R9.2", "R10.2", "R11.2", "R12.2",
      "R16.1", "R27.1", "R28.1", "R29.1", "R30.1", "U3.1", "U5.2", "J4.1"},
     {"C1.2", "C2.2", "C3.2", "C5.1", "C6.2", "C7.2", "C8.2", "C9.2",   # GND

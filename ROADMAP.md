@@ -10,6 +10,72 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+⚡ **POWER SIMPLIFIED — JP1 LDO-disconnect jumper REMOVED, single supply
+(2026-06-15, Nick's call).** The series jumper on the 3V3 output was deleted:
+the rail now runs from the one AMS1117 LDO, and to bench-inject or prototype a
+battery you desolder the SOT-223 (≈60 s) — far cheaper than carrying a jumper +
+its problems (the open-jumper state left the LDO output with no stability cap).
+A real second supply would need an OR-ing front end (ideal-diode / power-path
+PMIC), not a rail tap — deferred to a later rev. Done end-to-end in-container on
+KiCad 10.0.3 (installed this session — see below):
+- **Schematic:** JP1 symbol + its label/wire stubs removed; `/LDO_OUT` net
+  collapsed into `+3.3V` (U1 VO drives the rail directly); the now-redundant
+  `+3.3V` PWR_FLAG removed (it only existed because the open jumper left the
+  rail undriven — with the regulator on the net it caused a power-output↔
+  power-output ERC conflict). ERC clean (only container lib-table noise).
+- **PCB:** JP1 footprint removed; the 5 `/LDO_OUT` copper objects re-netted to
+  `+3.3V`; **2 stitching vias added at the old JP1 pad sites** (the THT
+  TestPoint pads had been silently bridging F.Cu↔B.Cu — removing them stranded
+  the B.Cu segments) + a short F.Cu bridge across the old jumper gap. Re-poured
+  GND + LDO thermal pour. **DRC 0 violations / 0 unconnected.**
+- **`pcb_ldo_pour.py`** now pours the tab on `+3.3V` (257 mm², bonded to the
+  tab as rail copper — a better heat path than the old isolated island).
+- **Validators updated + green:** `golden_netlist_v2.py` (LDO_OUT row dropped,
+  35 nets), `hardware_validate.py` polarity (`U1.2 = +3.3V`) + LCSC allowlist
+  (JP1 gone); `ci-baseline.json` `drc_parity` 21→19. `hardware_validate.py`
+  EXIT 0 (0 unconnected, parity 19, 43 polarity invariants, netlist≡schematic).
+  Baseline `drc_parity` edited by hand (NOT `--update-baseline`, which would
+  clobber the CI-correct lib counts with this container's lib-table noise).
+- Docs: `power-supply.md` fully rewritten v1→v2 (was still describing the
+  AP63203 buck + old buck-EN jumper); `layout.md` gained a **layer policy**
+  section (signal-on-F.Cu / power-takes-short-B.Cu-dips + autorouter-ruleset
+  findings); `CLAUDE.md` Environments updated (see below).
+- ⚠️ **CI baseline note:** counts validated locally on 10.0.3; CI runs 10.0.2.
+  Parity/unconnected/polarity are version-proof, but if a silk/lib count drifts
+  by 1–2 on the first CI run, refresh from the `kicad/kicad:10.0.2` container.
+
+🔧 **CLAUDE.md fix: KiCad IS installable in remote sessions (2026-06-15).** The
+old guidance ("Don't attempt KiCad operations; queue for a Mac session") was
+wrong — install works fine. Recorded the recipe (the `add-apt-repository` needs
+`/usr/bin/python3.12` because the active `python3` is 3.11 vs apt_pkg-3.12;
+`pcbnew` binds to python3.12). Only serial/USB + heavy GUI schematic re-layout
+stay Mac-bound.
+
+✅ **TOOLING IMPROVEMENTS DONE (2026-06-15, Nick picked all 4 threads).**
+Four-agent research → four shipped increments (each its own commit):
+- ✅ **Rotation-DB cite fix (safe):** `matthewlai/JLCKicadTools` is deprecated;
+  re-cited `bennymeg/Fabrication-Toolkit` (live, KiBot's `bennymeg_mode`
+  tracks it) in `fab-outputs.py` + `validation-tooling.md`; corrected the false
+  "KiBot has a built-in rotation DB" premise (it doesn't). Flagged the genuine
+  SOT-23 disagreement (−90 vs 180) — JLC-preview every SOT-23 + USB-C.
+- ✅ **KiBot quick wins:** `check_zone_fills` preflight (stale-pour guard) +
+  narrow DRC `filters` (board-only mounting-hole/logo + USB-C silk-edge) +
+  **KiDiff** PR visual diff (PCB+sch, base→head PDF artifact, non-gating).
+- ✅ **Net-class/DRU:** net classes already live in `.kicad_pro` (nothing to
+  migrate) + design_settings already enforce JLC floors; added a *focused*
+  `esp32-ir-remote.kicad_dru` (IR_Drive min-width 0.45 mm). Per-layer
+  preferred-direction confirmed the WRONG tool for a 2-layer GND-pour board.
+  Finding: `+3.3V` routing has 0.2 mm segments → Power min-width DRU deferred
+  to the next re-route; USB-on-F.Cu `.rules`/keepout is the real open lever.
+- ✅ **CPL/BOM → KiBot (gated):** `esp32-ir-remote-fab.kibot.yaml` (KiBot
+  `position`+`rot_footprint`+`bom`, our values) + `scripts/ci/cpl_crosscheck.py`
+  (gating) prove KiBot ≡ fab-outputs.py — **43/43 placements, 0 delta**,
+  negative test fails as intended. Cutover de-risked; fab-outputs.py stays the
+  producer pending the first-order JLC-preview sign-off.
+- Kept genuinely-special bespoke (pressure-tested): polarity truth table,
+  netlist partition-freshness/golden, page-extents guard, hand-solder kit
+  narrative + refuse-on-unclassified guard.
+
 🚀 **AUTOROUTER REPLACED + LDO THERMAL DONE (2026-06-15).** Two big wins:
 
 - **FreeRouting replaces the home-grown router.** The hand-rolled greedy A*

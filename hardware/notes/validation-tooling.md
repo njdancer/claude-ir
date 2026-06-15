@@ -11,14 +11,21 @@
   informational, not failures. Errors + parity/unconnected (version-stable)
   still gate. (Answers the 10.0.3↔10.0.2 drift question directly.)
 - ✅ **InteractiveHtmlBom** generated in CI into the fab package.
-- 🟰 **Fab outputs stay in `scripts/fab-outputs.py`** — a deliberate decision,
-  not a TODO. Its assembly-split logic (the hand-solder kit, no-LCSC→DNP, the
-  kit CSV + orientation report, the "refuse to emit on an unclassified
-  footprint" safety guard) is genuinely project-specific, and the only KiBot
-  win there — its built-in JLC rotation DB — can't be trusted without the
-  dead-board gate below. Migrating would mean re-implementing the safe custom
-  logic to *maybe* save a tiny rotation table. Revisit only if a future part
-  makes the rotation table painful.
+- 🟰 **Fab outputs stay in `scripts/fab-outputs.py` (for now)** — a deliberate
+  decision, not a TODO. Its assembly-split logic (the hand-solder kit,
+  no-LCSC→DNP, the kit CSV + orientation report, the "refuse to emit on an
+  unclassified footprint" safety guard) is genuinely project-specific.
+  **Premise correction (2026-06-15):** the earlier reasoning here assumed the
+  KiBot win was "its built-in JLC rotation DB." That DB **does not exist** —
+  KiBot's `rot_footprint` ships an *empty* `rotations` list; you supply the
+  table (same as us). The maintained community values now live in
+  `bennymeg/Fabrication-Toolkit` (`transformations.csv`), which KiBot's
+  `bennymeg_mode: true` tracks — our old `matthewlai/JLCKicadTools` cite is
+  deprecated. So migrating to KiBot's `position`+`rot_footprint`+`bom`
+  consolidates onto a *maintained CPL/BOM engine* (stop hand-rolling the
+  rotate/offset trig) but does **not** hand us a free DB; the values + the
+  refuse-on-unclassified guard remain ours to keep. Worth doing, gated by the
+  byte-diff below — see "Plan once unblocked".
 
 The schematic instance-path bug that blocked KiBot is fixed (see below).
 
@@ -32,7 +39,7 @@ a lot that **KiBot** + native KiCad rules already do.
 | We hand-rolled | Adopt |
 |---|---|
 | ERC/DRC/parity gate + `ci-baseline.json` counts (`hardware_validate.py`) | **KiBot** `erc`/`drc` preflights (fail on errors; allow-list noise via `filters:`) |
-| Gerbers/drill/pos/BOM + hand-maintained JLC rotation tables (`fab-outputs.py`) | **KiBot** outputs + built-in `rot_footprint` DB → retire `fab-outputs.py` |
+| Gerbers/drill/pos/BOM + the rotate/offset CPL trig (`fab-outputs.py`) | **KiBot** `gerber`/`position`/`bom` + `rot_footprint` (we supply the values — KiBot has no built-in DB) → shrink `fab-outputs.py` to its special core |
 | Interactive BOM (none today) | **InteractiveHtmlBom** (KiBot `ibom` output) — useful for the hand-solder kit |
 | Geometry checks (`pcb_checks.py`) | mostly **already native** — see below |
 
@@ -50,7 +57,18 @@ The project's `design_settings` (in `.kicad_pro`) already enforce edge clearance
 the per-netclass widths (Power 0.6 / IR_Drive 0.5 / Default 0.2, verified). So
 the only genuinely *additive* DRU rules would be **per-netclass minimum track
 width** (catch a manually-narrowed Power/IR track) and a **USB diff-pair**
-gap/skew rule. Low value for this board — fold into the KiBot work, not urgent.
+gap/skew rule.
+
+**ADDED (2026-06-15): `hardware/esp32-ir-remote.kicad_dru`** with the
+IR_Drive minimum-track-width rule (`min 0.45mm`) — kicad-cli DRC + KiBot's drc
+preflight auto-load it; verified it loads (forcing min 0.6 flags all 33
+IR_Drive tracks) and passes at 0.45. This hard-locks the 400 mA drive nets
+against a future neck-down. **Power-class min-width is intentionally NOT set
+yet:** the current FreeRouting `+3.3V` routing still contains 0.2 mm segments
+(only IR_Drive is uniformly at-class), so a Power min-width rule would fail the
+board today — widen the power rail in the next re-route, then add it. The USB
+diff-pair gap rule is moot until USB is forced onto F.Cu (the remaining
+FreeRouting `.rules`/keepout lever — see `autorouting-freerouting.md`).
 
 ## ✅ RESOLVED — schematic instance-path inconsistency (was the blocker)
 
@@ -72,18 +90,25 @@ the parity/netlist baseline in the same commit) — expect the 2 U5 NC nets.
 
 ## Plan once unblocked
 
-1. Re-save schematic in KiCad 10 (normalizes instance paths) → regenerate `.net`
-   + refresh baseline. Confirm KiBot parses it.
-2. `hardware/esp32-ir-remote.kibot.yaml` (staged): `erc` + `drc`
-   (`schematic_parity`) preflights + `ibom`; then `gerber`/`excellon`/`position`/
-   `bom`/zip with `rot_footprint`. **CPL ROTATION IS THE DEAD-BOARD GATE:** KiBot's
-   built-in DB disagrees with `fab-outputs.py` (KiBot `^SOT-23→180` vs ours `270`;
-   USB-C offset Y-axis vs our X-axis). Feed KiBot **our** validated
-   `JLC_ROTATION`/`JLC_OFFSET` table (via `rot_footprint` `rotations:`/`offsets:`)
-   and **diff KiBot's CPL against `fab-outputs.py`'s** before trusting it — a
-   blind switch could flip Q3 (AO3400A) or shift the USB-C connector.
+1. ✅ **DONE (2026-06-15): KiBot CPL/BOM + cross-check.**
+   `hardware/esp32-ir-remote-fab.kibot.yaml` produces the JLCPCB `position`
+   (with a `rot_footprint` pre_transform carrying **our** reviewed rotations:
+   `^SOT-223-3_TabPin2`→180, `^SOT-23`→270, USB-C +1.44 mm X offset;
+   `bennymeg_mode: true`) + a JLCPCB `bom`. `scripts/ci/cpl_crosscheck.py`
+   (gating in CI, after fab-outputs.py + the KiBot install) asserts the two
+   engines agree: every assembled designator → same rotation (mod 360), same
+   position (≤1 µm), same side, same LCSC. **Verified equivalent: 43/43
+   placements, 0 delta**, and the negative test (flip `^SOT-23` to 180) fails
+   the gate as intended. So the dead-board concern (KiBot vs our trig applying
+   the same values) is closed; the CPL ROTATION GATE is now automated.
+2. **Cutover (when ready):** point CI's order package at KiBot's
+   `position`+`bom`+`gerber`/`excellon`/zip and slim `fab-outputs.py` to its
+   special core (hand-solder kit narrative + the refuse-on-unclassified guard +
+   the orientation report). **Still gated by the mandatory JLC-preview check**
+   for SOT-23/USB-C on the first assembled order — the cross-check proves the
+   two tools agree, not that the absolute rotation is right on real silicon.
 3. Slim `hardware_validate.py` to the 3 bespoke checks wrapping KiBot's exit code;
-   retire `fab-outputs.py`; keep `bom_report.py`.
+   keep `bom_report.py`.
 4. CI: swap `kicad/kicad:10.0.2` → pinned `ghcr.io/inti-cmnb/kicad10_auto[_full]`
    by digest; `kibot -c …`. (Confirm a published k10.0.2/10.0.3 KiBot image.)
 

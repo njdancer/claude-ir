@@ -94,7 +94,67 @@ constraints that rules can't express.
 11. **JP1 (buck disable)** and **R21/R26 (auto-reset 0Ω links)** accessible
     for rework; silkscreen labels required (H2.4).
 
+## Layer policy (signal vs power on a 2-layer GND-pour board)
+
+The rule for what drops to B.Cu when a power trace and a signal trace must
+cross on F.Cu:
+
+- **Keep the high-frequency / sensitive signal contiguous on F.Cu; dip the
+  POWER trace to B.Cu to cross — short and perpendicular.** The signal needs
+  the intact GND plane directly beneath it as its return reference; a DC power
+  trace does not (it carries current at ~0 Hz and only wants copper + low IR
+  drop). Routing the *signal* on B.Cu instead would strip its reference (B.Cu's
+  "reference" up on F.Cu is signals/power, not a plane) and add via
+  discontinuities — all to a trace whose edges are the thing that cares.
+- The one cost of a B.Cu power dip is that it **slots the GND pour** for its
+  length, forcing return currents of any signal crossing that slot to detour.
+  So keep the dip short, cross perpendicular, **flank it with GND stitching
+  vias**, and never run a long power trace on B.Cu. Priority order: (1) signal
+  on F.Cu over solid GND, (2) power on F.Cu if it can, (3) when they must
+  cross, power takes the short B.Cu dip — never the signal.
+- On *this* board the stakes are modest (38 kHz IR carrier; fastest edges are
+  the C3's digital/flash/crystal, not controlled-impedance nets), but the
+  discipline is free and pays off for WiFi-adjacent and IR_RX nets.
+
+**Autorouter rulesets — what's standard vs not (researched 2026-06-15):**
+
+- **Per-layer "preferred direction" (H-on-top/V-on-bottom) does NOT apply
+  here.** It's a multi-*signal*-layer convention to reduce crossings when both
+  layers route; with B.Cu as a near-solid GND pour it would just force more
+  vias and break the reference. KiCad doesn't even export a `(direction …)`
+  token to the DSN; FreeRouting's `preferred_direction_horizontal` is a soft
+  cost set via CLI/`.rules`, not the board. Skip it. To reduce layer changes,
+  raise FreeRouting's `via_costs` (CLI/JSON) instead.
+- **Set width/clearance/via-size/membership in KiCad net classes** — these *do*
+  export into the Specctra DSN (`(class …)` with per-class `(rule (width…)
+  (clearance…))` + `(via …)`), so FreeRouting consumes them. Prefer this over
+  hand-coding per-net geometry in our pcb_*.py. (Gap: KiCad always writes the
+  *default* netclass clearance for copper-to-hole in the DSN — verify hole
+  clearance with DRC after import.)
+- **Keep USB on F.Cu** the only way FreeRouting honours it: a B.Cu keepout
+  corridor under the J2→module USB lane, or a saved FreeRouting `.rules` file
+  fed with `-dr` (KiCad can't express "this net F.Cu-only" in the DSN). USB-FS
+  needs no length/skew matching (skew budget ≫ our lengths).
+- **Net classes are already the rule home** (Default/IR_Drive/Power in
+  `.kicad_pro`, JLC-appropriate via 0.3/0.6), and FreeRouting + DRC honour
+  them — nothing to migrate out of Python here. The JLC floors (edge clearance,
+  via/track/hole minima, silk) are already enforced by `design_settings`, so a
+  wholesale community `.kicad_dru` (labtroll) would be redundant. We added a
+  *focused* `hardware/esp32-ir-remote.kicad_dru` instead: an **IR_Drive
+  min-track-width (0.45 mm)** rule that locks the 400 mA drive nets.
+- ⚠️ **Finding:** the FreeRouting `+3.3V` (Power-class) routing has 0.2 mm
+  segments (only IR_Drive is uniformly at class width). Not dangerous at our
+  currents but under the Power nominal 0.6 mm — widen on the next re-route, then
+  add a Power min-width DRU. (This is why the bridge across the old JP1 gap is
+  0.4 mm: 0.6 mm clears the GND pour by <0.3 mm there, and the rail is the weak
+  link anyway, not the bridge.)
+
 ## Routing notes
+
+> ⚠️ Several bullets below predate the v2 LDO redesign + FreeRouting and are
+> stale (AP63203 buck, L1, `buck_b_keepout`, `JP1-B`, `pcb_finish.py`, DHT22).
+> They are kept for historical context; the active routing model is the layer
+> policy above + `hardware/notes/autorouting-freerouting.md`.
 
 - 2-layer plan: **B.Cu as continuous GND pour**, F.Cu for signals + power;
   stitch vias liberally, especially around the buck and under U3's GND pad
