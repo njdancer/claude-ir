@@ -32,7 +32,12 @@ import sys
 import pcbnew
 
 PCB = "hardware/esp32-ir-remote.kicad_pcb"
-NET = "/LDO_OUT"
+# The LDO output is the +3.3V rail itself now: the JP1 LDO-disconnect jumper was
+# removed and the old /LDO_OUT net collapsed into +3.3V (single-supply design;
+# desolder U1 to bench-inject). The SOT-223 tab pad is +3.3V, so the thermal
+# pour bonds to it on the +3.3V net and simply becomes rail copper in the NW
+# corner — a better heat path than the old isolated /LDO_OUT island.
+NET = "+3.3V"
 
 # NW-corner pour. x0/y0 run PAST the W (106) and N (70) board edges so KiCad
 # clips the fill flush to the outline (edge clearance only). East bound stops
@@ -100,7 +105,7 @@ def measure_pour_area():
                     ln = b.GetLayerName(lid)
                     areas[ln] = areas.get(ln, 0.0) + a
     for ln in sorted(areas):
-        print(f"/LDO_OUT {ln} pour filled area = {areas[ln]:.1f} mm^2")
+        print(f"{NET} {ln} pour filled area = {areas[ln]:.1f} mm^2")
 
 
 if __name__ == "__main__":

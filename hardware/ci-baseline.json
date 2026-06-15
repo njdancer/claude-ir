@@ -7,5 +7,5 @@
     "warning:silk_edge_clearance": 2
   },
   "drc_unconnected": 0,
-  "drc_parity": 21
+  "drc_parity": 19
 }
