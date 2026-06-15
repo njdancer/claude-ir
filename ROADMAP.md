@@ -10,7 +10,37 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** Re-ran the
+🚀 **AUTOROUTER REPLACED + LDO THERMAL DONE (2026-06-15).** Two big wins:
+
+- **FreeRouting replaces the home-grown router.** The hand-rolled greedy A*
+  `pcb_router.py` + rip-up `pcb_finish.py` never converged on the congested
+  module-west escape (one net always frozen out, finisher mangled the route).
+  Both are **retired**; the ROUTE stage is now `scripts/pcb_route_fr.py`
+  (KiCad DSN → FreeRouting 2.2.4 negotiated-congestion → SES). Routes all 127
+  nets to **0 unrouted in ~7 s**, **byte-for-bit deterministic** (`-mt 1 -is
+  sequential -us greedy`, pinned jar), board passes the full
+  `hardware_validate.py` gate (0 unconnected, parity 19). Rationale + the
+  optional refinements (USB→F.Cu nicety; pour-only GND) in
+  [`hardware/notes/autorouting-freerouting.md`](hardware/notes/autorouting-freerouting.md).
+  Pipeline is now: floorplan → place → rip → **route_fr** → pour → ldo_pour →
+  silk. Env: Java 25 + jar at `/tmp/fr/`, pcbnew via `/tmp/kv10/bin/python`.
+- **LDO thermal solved.** U1 relocated to the open NW corner, **rot90 so the
+  SOT-223 tab faces north into a 257 mm² to-the-edge pour** that *displaces*
+  GND in the corner (no slivers). T_J ≈ 75 °C at the 0.85 W worst case
+  (was ~140 °C bare). `pcb_ldo_pour.py` + `pcb_floorplan.py` anchors.
+
+📋 **Validation-pipeline audit (2026-06-15, research done).** Same "shoulders of
+giants" lens found more home-grown reinvention: adopt **KiBot** (owns ERC/DRC/
+parity gate + all fab outputs, built-in JLC rotation DB) + native **`.kicad_dru`**
+(geometry checks from `pcb_checks.py`) + **InteractiveHtmlBom**; keep ~3 bespoke
+Python checks (netlist freshness, polarity truth table, page-extent); retire
+`fab-outputs.py`. ⚠️ Gate before trusting: KiBot's CPL rotation table differs
+from ours (SOT-23 270 vs 180, USB-C offset axis) — diff against JLC preview
+first. Full plan pending Nick's go-ahead. Not started.
+
+✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** [SUPERSEDED
+by the FreeRouting re-route above — the `HARD_F`/`STRONG_F` router rules it
+describes no longer exist.] Re-ran the
 deterministic pipeline (`rip → place → router → pour → pcb_ldo_pour → silk →
 stamp`) with the hand-tuned **anchors fixed** (IR fan + U4 south-edge
 relocation synced into `pcb_floorplan.py`, so all that work is preserved) and

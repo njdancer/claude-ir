@@ -1,6 +1,13 @@
 # Autorouting rework: adopt FreeRouting (negotiated congestion)
 
-**Status (2026-06-15): proven end-to-end, integration in progress.**
+**Status (2026-06-15): DONE — wired into the pipeline, board committed.**
+The home-grown `pcb_router.py` + `pcb_finish.py` are retired (deleted; in git
+history). The ROUTE stage is now `scripts/pcb_route_fr.py` (export DSN →
+FreeRouting → import SES). The full pipeline regenerates a **DRC-clean,
+CI-passing** board (0 unconnected, parity 19, all `hardware_validate.py` checks
+green), and the FreeRouting run is **byte-for-bit deterministic** (verified:
+two runs produce md5-identical `.ses`). Determinism flags: `-mt 1 -is
+sequential -us greedy`, pinned jar 2.2.4.
 
 ## Why we're replacing the home-grown router
 
@@ -60,24 +67,36 @@ pour-free board). Orchestrated by `scripts/pcb_route_fr.py`
 (export/route/import stages). Retire `pcb_router.py` + `pcb_finish.py` (keep in
 git history).
 
-## Open items before this fully lands
+## How GND is handled (resolved)
 
-1. **USB pair → F.Cu.** FreeRouting does not honour "F.Cu only, no layer
-   change" — it routed `/USB_D+` on B.Cu (21 mm), slotting the GND return (the
-   exact SI regression the old `HARD_F` rule prevented) and incidentally
-   blocking a GND via under R1.2. Constrain it: a **B.Cu keepout** under the
-   J2→module USB corridor, or per-net layer rules via a FreeRouting `.rules`
-   file (`-dr`). Verify the pair lands on F.Cu over solid B.Cu ground.
-2. **GND handling.** We want pour-only GND. Routing signals then dropping all
-   GND traces can strand a GND pad whose pour patch has no B-via (seen: R1.2,
-   blocked by USB_D+ on B.Cu — fixes once #1 is done). Either keep FR's GND
-   routing and only fix edge-clearance GND traces, or harden `pcb_pour.py`
-   island tying. The robust GND F↔B stitcher used during bring-up (find GND-F/B
-   fill polys with no via inside + GND on the other layer + a safe spot) should
-   fold into `pcb_pour.py`.
-3. **CI.** Add Java 25 + the pinned FreeRouting jar (or
-   `ghcr.io/freerouting/freerouting:2.2.4` as a separate Docker step) to the
-   hardware job. The CI KiCad image has no Java.
+We **keep** FreeRouting's GND routing rather than going pour-only: dropping all
+GND traces strands a GND pad whose pour patch has no via to the B plane (seen:
+R1.2, where `/USB_D+` on B.Cu blocks the via). Keeping FR's GND traces
+guarantees 0 unconnected; the GND **pour** is added on top as the plane (so GND
+is both routed and poured — redundant but robust). `pcb_route_fr.py`'s import
+stage drops only the few GND traces FR routes right up to the board edge
+(`copper_edge_clearance`, redundant with the pour). `pcb_pour.py` removes
+unconnected GND fill islands (`ISLAND_REMOVAL_MODE_ALWAYS`) so no isolated
+copper. Result: clean DRC with no manual stitching.
+
+## Remaining refinements (optional, not blocking)
+
+1. **USB pair → F.Cu (SI nicety).** FreeRouting does not honour "F.Cu only" and
+   routed `/USB_D+` partly on B.Cu. For this board's **full-speed** native-USB
+   (12 Mbps) with GND poured on both layers, B.Cu routing is functional — its
+   return reference is the F.Cu pour above it. The old `HARD_F` F.Cu-only rule
+   was best-practice, not a requirement. If we want it back: a **B.Cu keepout**
+   under the J2→module USB corridor, or per-net layer rules via a FreeRouting
+   `.rules` file (`-dr`). Note J2 (USB-C, west) and U3's USB pins (east of the
+   module) are on opposite sides, so F.Cu-only forces a long detour around the
+   module's south — the reason it's a 2-layer compromise either way.
+2. **Pour-only GND (cosmetic).** If the redundant GND traces are unwanted, pair
+   refinement #1 (USB off B.Cu near J2) with a hardened `pcb_pour.py` island
+   tie so R1.2-type pads stitch, then exclude GND from FR routing.
+3. **CI re-route (optional).** CI currently *validates the committed board* (it
+   doesn't re-route), and the board is deterministic, so CI needs no Java. If we
+   ever want CI to regenerate-and-diff the board, add Java 25 + the pinned jar
+   (or `ghcr.io/freerouting/freerouting:2.2.4` as a separate step).
 4. **Cosmetic:** FreeRouting warns on the `Ω` glyph in resistor values in the
    DSN (non-ASCII) — harmless.
 

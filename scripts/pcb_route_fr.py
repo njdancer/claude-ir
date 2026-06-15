@@ -86,8 +86,26 @@ def import_ses():
     b = pcbnew.LoadBoard(PCB)
     if not pcbnew.ImportSpecctraSES(b, SES):
         sys.exit("SES import failed")
+    # FreeRouting routes GND too (we keep it — dropping all GND traces strands
+    # pads the pour can't reach where USB sits on B.Cu, e.g. R1.2). But it also
+    # routes some GND right up to the board edge (copper_edge_clearance). Those
+    # edge GND traces are redundant with the pour, so drop any GND track with an
+    # endpoint within 0.55 mm of an edge; the pour grounds those pads.
+    import pcbnew as _p
+    X0, Y0, X1, Y1 = 106.0, 70.0, 198.0, 114.0
+    drop = []
+    for t in b.GetTracks():
+        if t.GetClass() == "PCB_VIA" or t.GetNetname() != "GND":
+            continue
+        for p in (t.GetStart(), t.GetEnd()):
+            x, y = _p.ToMM(p.x), _p.ToMM(p.y)
+            if min(x - X0, X1 - x, y - Y0, Y1 - y) < 0.55:
+                drop.append(t)
+                break
+    for t in drop:
+        b.Remove(t)
     pcbnew.SaveBoard(PCB, b)
-    print("imported SES into board")
+    print(f"imported SES into board (dropped {len(drop)} edge-hugging GND traces)")
 
 
 if __name__ == "__main__":
