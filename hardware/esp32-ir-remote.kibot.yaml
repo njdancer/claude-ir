@@ -1,0 +1,36 @@
+# KiBot config — validation gate + assembly artifacts for the ESP32 IR board.
+# Run: kibot -c hardware/esp32-ir-remote.kibot.yaml \
+#        -e hardware/esp32-ir-remote.kicad_sch -b hardware/esp32-ir-remote.kicad_pcb
+#
+# Owns the ERC/DRC/schematic-parity gate (the modern kicad-cli engine; loads the
+# project design rules automatically) and the InteractiveHtmlBom hand-assembly
+# artifact. The DRC/ERC preflights fail on ERRORS (unconnected, shorts,
+# clearance, keepout); the benign library-version / silk-edge / parity classes
+# are KiCad *warnings* and do not fail the gate — same set the old
+# ci-baseline.json tolerated. Fab outputs (gerbers/drill/CPL/BOM) + the CPL
+# rotation table stay in scripts/fab-outputs.py until that table is
+# diff-verified against KiBot's rot_footprint DB (dead-board gate — see
+# hardware/notes/validation-tooling.md).
+kibot:
+  version: 1
+
+preflight:
+  erc:
+    enabled: true
+    dont_stop: false
+  drc:
+    enabled: true
+    schematic_parity: true
+    dont_stop: false
+  # Export a BoM XML so the interactive BOM can show the LCSC field.
+  update_xml:
+    enabled: true
+
+outputs:
+  - name: ibom
+    comment: "Interactive HTML BOM for hand assembly"
+    type: ibom
+    dir: fab
+    options:
+      extra_fields: 'LCSC'
+      netlist_file: 'hardware/esp32-ir-remote.xml'

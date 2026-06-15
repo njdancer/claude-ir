@@ -10,7 +10,44 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
-✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** Re-ran the
+🚀 **AUTOROUTER REPLACED + LDO THERMAL DONE (2026-06-15).** Two big wins:
+
+- **FreeRouting replaces the home-grown router.** The hand-rolled greedy A*
+  `pcb_router.py` + rip-up `pcb_finish.py` never converged on the congested
+  module-west escape (one net always frozen out, finisher mangled the route).
+  Both are **retired**; the ROUTE stage is now `scripts/pcb_route_fr.py`
+  (KiCad DSN → FreeRouting 2.2.4 negotiated-congestion → SES). Routes all 127
+  nets to **0 unrouted in ~7 s**, **byte-for-bit deterministic** (`-mt 1 -is
+  sequential -us greedy`, pinned jar), board passes the full
+  `hardware_validate.py` gate (0 unconnected, parity 19). Rationale + the
+  optional refinements (USB→F.Cu nicety; pour-only GND) in
+  [`hardware/notes/autorouting-freerouting.md`](hardware/notes/autorouting-freerouting.md).
+  Pipeline is now: floorplan → place → rip → **route_fr** → pour → ldo_pour →
+  silk. Env: Java 25 + jar at `/tmp/fr/`, pcbnew via `/tmp/kv10/bin/python`.
+- **LDO thermal solved.** U1 relocated to the open NW corner, **rot90 so the
+  SOT-223 tab faces north into a 257 mm² to-the-edge pour** that *displaces*
+  GND in the corner (no slivers). T_J ≈ 75 °C at the 0.85 W worst case
+  (was ~140 °C bare). `pcb_ldo_pour.py` + `pcb_floorplan.py` anchors.
+
+✅ **KiBot adopted (2026-06-15).** Same "shoulders of giants" lens applied to
+validation/fab. Done: **KiBot owns the ERC/DRC error gate** in CI +
+**InteractiveHtmlBom** generated into the fab package; the v2 schematic
+instance-path bug that blocked KiBot's parser is fixed (netlist regenerated,
+parity baseline 19→21). **Version-drift killed** —
+`hardware_validate.py` warning-count baseline changes are now informational
+(KiCad patch-release lib/silk heuristics no longer fail CI); it keeps the
+bespoke checks + parity/unconnected. `.kicad_dru` skipped (the project's
+`design_settings` + `antenna_keepout` already enforce geometry natively).
+**`fab-outputs.py` deliberately kept** (project-specific assembly split + safety
+guard; KiBot's rotation DB is hardware-gated) — rationale in
+[`hardware/notes/validation-tooling.md`](hardware/notes/validation-tooling.md).
+- ⚠️ If we ever migrate fab to KiBot: its rotation DB disagrees with ours
+  (SOT-23 270 vs 180; USB-C offset axis) — diff the CPL + validate against JLC's
+  placement preview first, or Q3/USB-C could place wrong (dead board).
+
+✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** [SUPERSEDED
+by the FreeRouting re-route above — the `HARD_F`/`STRONG_F` router rules it
+describes no longer exist.] Re-ran the
 deterministic pipeline (`rip → place → router → pour → pcb_ldo_pour → silk →
 stamp`) with the hand-tuned **anchors fixed** (IR fan + U4 south-edge
 relocation synced into `pcb_floorplan.py`, so all that work is preserved) and
@@ -24,7 +61,17 @@ trustworthy). **Every metric improved or held — nothing regressed:**
   length-match here.)
 - **IR_RX 5.5 → 2.7 mm** single short B.Cu crossing; **IR_RX_VS 0 mm** —
   `STRONG_F` penalty + routing the SI-critical nets first.
-- **LDO thermal pour** (`pcb_ldo_pour.py`): /LDO_OUT tab copper ~20 → ~69 mm².
+- **LDO thermal stack** (`pcb_ldo_pour.py`): two-sided now — F.Cu tab pour
+  68.5 mm² **+ B.Cu /LDO_OUT island 43.8 mm² + 6 thermal vias** (0.3/0.6 mm)
+  tying the tab through the FR-4 to the bottom island (≈112 mm² total, was bare
+  ~20). Bottom island kept tight to the tab — the west power zone is the
+  least-bad place to slot B.Cu (far from IR_RX/USB returns). θ_JA est.
+  ~110 → ~90 °C/W ⇒ T_J at the 0.85 W worst case ~120 → ~101 °C (24 °C margin
+  at 25 °C ambient; ~116 °C in a 40 °C enclosure). Clears 125 °C at the rated
+  load — short of the 1-in² ideal but the dense power zone caps further gain;
+  relocating U1 to open copper is the remaining lever. **Validated locally on
+  real KiCad 10.0.3 in-container: `kicad-cli pcb drc` 0 violations / 0
+  unconnected; `hardware_validate.py` all checks pass (no baseline drift).**
 - **0 unconnected** (was 1: the USB-C A6↔B6 reversibility tie now routes →
   reversible USB works); **silk_overlap 44 → 0, silk_over_copper 53 → 0**;
   DRC 0 errors. Baseline refreshed (`ci-baseline.json`).

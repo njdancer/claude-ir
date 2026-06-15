@@ -90,6 +90,23 @@ jobs:
           if-no-files-found: warn
       - name: Regenerate fab package
         run: python3 scripts/fab-outputs.py --skip-renders
+      - name: KiBot — ERC/DRC gate + interactive HTML BOM
+        # KiBot owns the ERC/DRC error gate (its preflights fail on real
+        # violations) and the hand-assembly interactive BOM. hardware_validate.py
+        # above still runs the bespoke checks (netlist freshness, polarity,
+        # page-extent, BOM-LCSC) + parity/unconnected and reports counts, but no
+        # longer gates on benign warning-count drift. pip needs --no-compile
+        # (macros quirk) + --break-system-packages (externally-managed image).
+        run: |
+          apt-get install -y --no-install-recommends python3-pip
+          pip3 install --no-compile --break-system-packages -q \
+            kibot lxml requests pyyaml colorama qrcodegen InteractiveHtmlBom
+          find /usr -path '*kibot*' -name '*.pyc' -delete 2>/dev/null || true
+          IBOM=$(python3 -c "import InteractiveHtmlBom,os;print(os.path.dirname(InteractiveHtmlBom.__file__))")
+          ln -sf "$IBOM/generate_interactive_bom.py" /usr/local/bin/generate_interactive_bom.py
+          kibot -c hardware/esp32-ir-remote.kibot.yaml \
+            -e hardware/esp32-ir-remote.kicad_sch -b hardware/esp32-ir-remote.kicad_pcb \
+            -d hardware/fab
       - name: Upload fab package
         uses: actions/upload-artifact@v4
         with:

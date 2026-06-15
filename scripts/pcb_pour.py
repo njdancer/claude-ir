@@ -95,11 +95,12 @@ def main():
         z.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
         z.SetThermalReliefGap(pcbnew.FromMM(0.3))
         z.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.5))
-        # drop fill islands that can't be stitched into the plane (otherwise
-        # they read as unconnected-zone DRC items); keep >2mm^2 so the tie pass
-        # can still rescue the ones worth keeping.
-        z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_AREA)
-        z.SetMinIslandArea(int(2.0 * 1e6 * 1e6))   # 2 mm^2 in nm^2
+        # remove ALL unconnected fill islands (they otherwise read as
+        # unconnected-zone DRC items). With FreeRouting routing the signals,
+        # every GND pad is already tied by a routed trace, so the pour only
+        # needs to be the plane — any island it can't stitch is redundant and
+        # should go rather than be rescued by the tie pass.
+        z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
         z.SetAssignedPriority(0)
         z.SetZoneName(f"gnd_pour_{'F' if layer == pcbnew.F_Cu else 'B'}")
         board.Add(z)
