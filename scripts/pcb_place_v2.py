@@ -32,6 +32,29 @@ X0, Y0, X1, Y1 = BX0 + EDGE, BY0 + EDGE, BX1 - EDGE, BY1 - EDGE
 FIXED_REFS = set(ANCHORS) | set(HOLES)
 GND_NAMES = {"GND", "GNDA", "GNDPWR"}
 
+# Explicit decoupling / bypass / RC assignment — board knowledge the shared
+# power+GND nets cannot encode. A +3.3V bypass cap pad sees the whole rail, so
+# the net heuristic below can only seat it at the *nearest* rail pin; that piles
+# every MCU/sensor bypass onto the LDO and starves the far ICs (U5/AHT20 ended
+# up with NO local cap, both 10 uF stacked on U3). Pin each part to the specific
+# (anchor, pad) it actually bypasses so every IC gets its own HF + bulk bank:
+#   U3 (C3)   <- C7 100nF + C8 10uF  on 3V3 (pin 1); C6 1uF EN-POR RC on EN (2)
+#   U5 (AHT20)<- C5 100nF + C10 10uF on VDD (pin 2); R28/R29 I2C pull-ups (4/3)
+#   U1 (LDO)  <- C1 in-cap on VIN (3); C2/C3 out-caps on VOUT (2)
+# Refs not listed fall back to the net heuristic (e.g. R27/C9 uniquely reach U4).
+ASSIGN = {
+    "C1":  ("U1", "3"),   # LDO input cap   -> VIN (+5V)
+    "C2":  ("U1", "2"),   # LDO output cap  -> VOUT
+    "C3":  ("U1", "2"),   # LDO output cap  -> VOUT
+    "C6":  ("U3", "2"),   # EN power-on-reset RC -> C3 EN
+    "C7":  ("U3", "1"),   # U3 bank: 100nF  -> C3 3V3
+    "C8":  ("U3", "1"),   # U3 bank: 10uF   -> C3 3V3
+    "C5":  ("U5", "2"),   # U5 bank: 100nF  -> AHT20 VDD
+    "C10": ("U5", "2"),   # U5 bank: 10uF   -> AHT20 VDD
+    "R28": ("U5", "4"),   # I2C SDA pull-up -> near sensor
+    "R29": ("U5", "3"),   # I2C SCL pull-up -> near sensor
+}
+
 
 def overlaps(a, b):
     return not (a[2] <= b[0] or a[0] >= b[2] or a[3] <= b[1] or a[1] >= b[3])
@@ -99,9 +122,28 @@ def main():
             anchor_deg.setdefault(ref, set()).add(nc)
     anchor_deg = {r: len(s) for r, s in anchor_deg.items()}
 
-    # choose a target pin for each movable part: most-specific reachable net,
-    # ties broken toward the leaf anchor, then nearest.
+    def pad_pos(anchor_ref, pad_num):
+        f = fps.get(anchor_ref)
+        if not f:
+            return None
+        for pad in f.Pads():
+            if pad.GetNumber() == pad_num:
+                p = pad.GetPosition()
+                return (pcbnew.ToMM(p.x), pcbnew.ToMM(p.y))
+        return None
+
+    # choose a target pin for each movable part: explicit ASSIGN first (spec=-1
+    # so these claim their pin slot before any net-heuristic part), else the
+    # most-specific reachable net, ties broken toward the leaf anchor, then
+    # nearest.
     def target_of(f):
+        ref = f.GetReference()
+        if ref in ASSIGN:
+            pp = pad_pos(*ASSIGN[ref])
+            if pp:
+                fp = f.GetPosition()
+                d = math.hypot(pp[0] - pcbnew.ToMM(fp.x), pp[1] - pcbnew.ToMM(fp.y))
+                return (-1, 0, d, pp[0], pp[1])
         best = None  # (spec, leaf_pref, dist, x, y)
         fp = f.GetPosition()
         fx, fy = pcbnew.ToMM(fp.x), pcbnew.ToMM(fp.y)
