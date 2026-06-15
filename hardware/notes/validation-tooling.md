@@ -1,12 +1,26 @@
 # Validation/fab tooling: adopt KiBot
 
-**Status (2026-06-15): UNBLOCKED + Phase 1 wired.** The schematic instance-path
-bug (below) is fixed (commit normalizing the 16 root-only paths). KiBot 1.9.0
-now parses the schematic; its ERC/DRC/parity gate exits 0 on the clean board and
-the **InteractiveHtmlBom artifact is generated in CI** (`.github/workflows/
-ci.yml`, preflights skipped so `hardware_validate.py` stays the authoritative
-gate for now). Remaining: migrate the gate to KiBot + the fab/CPL outputs (the
-dead-board rotation gate below) + the CI image pin.
+**Status (2026-06-15): DONE — gate + ibom adopted; fab deliberately kept.**
+
+- ✅ **KiBot owns the ERC/DRC error gate** in CI (its preflights fail on real
+  violations). `hardware_validate.py` keeps the bespoke checks (netlist
+  freshness, polarity truth table, page-extent, BOM-LCSC) + parity/unconnected
+  and still emits the PR-report count facts.
+- ✅ **Version-drift killed.** WARNING-severity baseline count changes
+  (lib/silk heuristics that drift across KiCad patch releases) are now
+  informational, not failures. Errors + parity/unconnected (version-stable)
+  still gate. (Answers the 10.0.3↔10.0.2 drift question directly.)
+- ✅ **InteractiveHtmlBom** generated in CI into the fab package.
+- 🟰 **Fab outputs stay in `scripts/fab-outputs.py`** — a deliberate decision,
+  not a TODO. Its assembly-split logic (the hand-solder kit, no-LCSC→DNP, the
+  kit CSV + orientation report, the "refuse to emit on an unclassified
+  footprint" safety guard) is genuinely project-specific, and the only KiBot
+  win there — its built-in JLC rotation DB — can't be trusted without the
+  dead-board gate below. Migrating would mean re-implementing the safe custom
+  logic to *maybe* save a tiny rotation table. Revisit only if a future part
+  makes the rotation table painful.
+
+The schematic instance-path bug that blocked KiBot is fixed (see below).
 
 Same "shoulders of giants" pass as the FreeRouting one: our CI gate
 (`scripts/ci/hardware_validate.py`) and fab generation (`scripts/fab-outputs.py`,
