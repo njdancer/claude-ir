@@ -29,14 +29,24 @@ progress. Each phase lists its **gate** (what must be true to move on) and
   GND in the corner (no slivers). T_J ≈ 75 °C at the 0.85 W worst case
   (was ~140 °C bare). `pcb_ldo_pour.py` + `pcb_floorplan.py` anchors.
 
-📋 **Validation-pipeline audit (2026-06-15, research done).** Same "shoulders of
-giants" lens found more home-grown reinvention: adopt **KiBot** (owns ERC/DRC/
-parity gate + all fab outputs, built-in JLC rotation DB) + native **`.kicad_dru`**
-(geometry checks from `pcb_checks.py`) + **InteractiveHtmlBom**; keep ~3 bespoke
-Python checks (netlist freshness, polarity truth table, page-extent); retire
-`fab-outputs.py`. ⚠️ Gate before trusting: KiBot's CPL rotation table differs
-from ours (SOT-23 270 vs 180, USB-C offset axis) — diff against JLC preview
-first. Full plan pending Nick's go-ahead. Not started.
+📋 **KiBot adoption — STAGED, BLOCKED on a schematic re-save (2026-06-15).**
+Same "shoulders of giants" lens: adopt **KiBot** (owns the ERC/DRC/parity gate +
+all fab outputs + built-in JLC rotation DB) + **InteractiveHtmlBom**; keep ~3
+bespoke Python checks (netlist freshness, polarity truth table, page-extent);
+retire `fab-outputs.py`. (`.kicad_dru` is lower-value than first thought — the
+project's `design_settings` + the real `antenna_keepout` already enforce most
+geometry natively.) Config + deps proven working
+(`hardware/esp32-ir-remote.kibot.yaml`), full plan in
+[`hardware/notes/validation-tooling.md`](hardware/notes/validation-tooling.md).
+- ⛔ **BLOCKER (needs Nick — bench):** KiBot's parser crashes on a real latent
+  schematic bug — 16 v2-redesign symbols carry instance `(path "/")` instead of
+  the root-sheet UUID. **Re-save the schematic in KiCad 10** to normalize them.
+  ⚠️ That re-save **changes the committed netlist** (U5 NC pads gain
+  `unconnected-(U5-NC-Pad1/6)`, parity 19→21) — regenerate `.net` + refresh the
+  baseline in the same commit. Then I finish KiBot wiring.
+- ⚠️ **CPL dead-board gate:** KiBot's rotation DB disagrees with `fab-outputs.py`
+  (SOT-23 270 vs 180; USB-C offset axis) — feed KiBot *our* table + diff the CPL
+  before it owns fab output, or Q3/USB-C could place wrong.
 
 ✅ **SI RE-LAYOUT DONE (2026-06-14, Nick: "full re-layout pass").** [SUPERSEDED
 by the FreeRouting re-route above — the `HARD_F`/`STRONG_F` router rules it
