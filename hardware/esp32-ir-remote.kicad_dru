@@ -1,0 +1,15 @@
+(version 1)
+
+# Project custom design rules — additive to the .kicad_pro design_settings
+# (which already enforce edge clearance, via/track/hole minimums, silk, text).
+# kicad-cli pcb drc and KiBot's drc preflight auto-load this file.
+
+# The IR drive nets (IR_Drive class) carry ~400 mA pulsed through the LED
+# strings + Q3; they are routed at the class nominal 0.5 mm. Enforce a hard
+# minimum so a future edit / re-route can't silently neck one down to a
+# signal width and overheat. (Power-class min-width is intentionally NOT set
+# yet — the current +3.3V routing still has 0.2 mm segments from FreeRouting;
+# fix in a re-route before adding that rule. See layout.md.)
+(rule "IR_Drive minimum track width"
+   (condition "A.NetClass == 'IR_Drive'")
+   (constraint track_width (min 0.45mm)))

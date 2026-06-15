@@ -57,7 +57,18 @@ The project's `design_settings` (in `.kicad_pro`) already enforce edge clearance
 the per-netclass widths (Power 0.6 / IR_Drive 0.5 / Default 0.2, verified). So
 the only genuinely *additive* DRU rules would be **per-netclass minimum track
 width** (catch a manually-narrowed Power/IR track) and a **USB diff-pair**
-gap/skew rule. Low value for this board — fold into the KiBot work, not urgent.
+gap/skew rule.
+
+**ADDED (2026-06-15): `hardware/esp32-ir-remote.kicad_dru`** with the
+IR_Drive minimum-track-width rule (`min 0.45mm`) — kicad-cli DRC + KiBot's drc
+preflight auto-load it; verified it loads (forcing min 0.6 flags all 33
+IR_Drive tracks) and passes at 0.45. This hard-locks the 400 mA drive nets
+against a future neck-down. **Power-class min-width is intentionally NOT set
+yet:** the current FreeRouting `+3.3V` routing still contains 0.2 mm segments
+(only IR_Drive is uniformly at-class), so a Power min-width rule would fail the
+board today — widen the power rail in the next re-route, then add it. The USB
+diff-pair gap rule is moot until USB is forced onto F.Cu (the remaining
+FreeRouting `.rules`/keepout lever — see `autorouting-freerouting.md`).
 
 ## ✅ RESOLVED — schematic instance-path inconsistency (was the blocker)
 

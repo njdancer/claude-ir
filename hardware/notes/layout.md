@@ -135,9 +135,19 @@ cross on F.Cu:
   corridor under the J2→module USB lane, or a saved FreeRouting `.rules` file
   fed with `-dr` (KiCad can't express "this net F.Cu-only" in the DSN). USB-FS
   needs no length/skew matching (skew budget ≫ our lengths).
-- Adopt the community **JLCPCB `.kicad_dru`** (e.g. `labtroll/KiCad-DesignRules`)
-  as a native DRC gate — design to 0.3 mm drill / 0.6 mm via (the 0.2/0.35
-  floor is JLC's pricier laser tier), 6 mil track/space.
+- **Net classes are already the rule home** (Default/IR_Drive/Power in
+  `.kicad_pro`, JLC-appropriate via 0.3/0.6), and FreeRouting + DRC honour
+  them — nothing to migrate out of Python here. The JLC floors (edge clearance,
+  via/track/hole minima, silk) are already enforced by `design_settings`, so a
+  wholesale community `.kicad_dru` (labtroll) would be redundant. We added a
+  *focused* `hardware/esp32-ir-remote.kicad_dru` instead: an **IR_Drive
+  min-track-width (0.45 mm)** rule that locks the 400 mA drive nets.
+- ⚠️ **Finding:** the FreeRouting `+3.3V` (Power-class) routing has 0.2 mm
+  segments (only IR_Drive is uniformly at class width). Not dangerous at our
+  currents but under the Power nominal 0.6 mm — widen on the next re-route, then
+  add a Power min-width DRU. (This is why the bridge across the old JP1 gap is
+  0.4 mm: 0.6 mm clears the GND pour by <0.3 mm there, and the rail is the weak
+  link anyway, not the bridge.)
 
 ## Routing notes
 
