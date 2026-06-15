@@ -28,6 +28,19 @@ meta-tooling unless it directly de-risks the board AND has a machine
 validator. Prefer existing tools (KiCad, kicad-cli, PlatformIO, pytest/Unity)
 over inventing anything.
 
+**Stand on the shoulders of giants — don't reinvent the wheel.** Before
+writing a home-grown tool for anything non-trivial (routing, validation,
+BOM/fab generation, geometry checks, simulation), STOP and check whether the
+community already has a mature, widely-used solution. We learned this the hard
+way: a hand-rolled greedy autorouter + rip-up "finisher" never converged on a
+congested 2-layer board and was replaced by **FreeRouting** (negotiated
+congestion), which routed it cleanly in seconds. The bar for building our own
+is high: it must be genuinely unavailable in the ecosystem, or every existing
+option must be inadequate for a reason we can articulate. Default to adopting
+and wiring in (KiCad-native rules, FreeRouting, KiBot, ngspice, …) over
+authoring bespoke logic. When you do find we've rolled our own where a standard
+tool exists, flag it — there are probably more such opportunities lurking.
+
 **Persevere on long tasks — don't stall, don't self-truncate.** Big jobs
 (re-layouts, migrations, sweeps) are expected to span many tool calls and
 even multiple context windows. Keep going until the work is actually done:
