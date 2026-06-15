@@ -1,7 +1,12 @@
-# Validation/fab tooling: adopt KiBot (blocked on a schematic fix)
+# Validation/fab tooling: adopt KiBot
 
-**Status (2026-06-15): researched + staged; BLOCKED on a KiCad-10 schematic
-re-save (a bench task — see below).**
+**Status (2026-06-15): UNBLOCKED + Phase 1 wired.** The schematic instance-path
+bug (below) is fixed (commit normalizing the 16 root-only paths). KiBot 1.9.0
+now parses the schematic; its ERC/DRC/parity gate exits 0 on the clean board and
+the **InteractiveHtmlBom artifact is generated in CI** (`.github/workflows/
+ci.yml`, preflights skipped so `hardware_validate.py` stays the authoritative
+gate for now). Remaining: migrate the gate to KiBot + the fab/CPL outputs (the
+dead-board rotation gate below) + the CI image pin.
 
 Same "shoulders of giants" pass as the FreeRouting one: our CI gate
 (`scripts/ci/hardware_validate.py`) and fab generation (`scripts/fab-outputs.py`,
@@ -33,7 +38,7 @@ the only genuinely *additive* DRU rules would be **per-netclass minimum track
 width** (catch a manually-narrowed Power/IR track) and a **USB diff-pair**
 gap/skew rule. Low value for this board — fold into the KiBot work, not urgent.
 
-## ⛔ Blocker: schematic instance-path inconsistency (real bug)
+## ✅ RESOLVED — schematic instance-path inconsistency (was the blocker)
 
 KiBot 1.9.0 (pip, `--no-compile` + `lxml`/`requests`/`pyyaml`/`colorama`/
 `qrcodegen`) installs and the config is correct, but it **crashes parsing our
