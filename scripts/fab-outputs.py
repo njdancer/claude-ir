@@ -67,26 +67,46 @@ KIT_EXTRA = [
     ("J5", "1x2 pin header 2.54mm", "", "1", "Ext-IR header (optional). Generic."),
 ]
 # Not fitted at all: DNP parts (from schematic) and JP1 (bare solder jumper).
-NEVER_PLACE = {"JP1"}
+NEVER_PLACE = set()   # (JP1 LDO-disconnect jumper removed — single supply)
 
 # ---------------------------------------------------------------------------
 # CPL ROTATION CORRECTIONS. JLCPCB's pick-and-place zero-orientation differs
 # from KiCad's library convention per package; an uncorrected CPL is the
-# classic dead-assembled-board cause. Offsets (degrees ADDED to the KiCad
-# rotation, mod 360) follow the community-maintained JLCKicadTools database
-# (matthewlai/JLCKicadTools cpl_rotations_db.csv).
+# classic dead-assembled-board cause. Offsets are degrees ADDED to the KiCad
+# rotation (mod 360).
 #
-# EVERY assembled footprint must be classified — either listed here or
-# matching SYMMETRIC_RE — otherwise this script refuses to emit a CPL, so a
-# new package can never reach JLC with an unreviewed rotation.
+# SOURCE OF TRUTH (corrected 2026-06-15): the values follow the **maintained**
+# community DB, `bennymeg/Fabrication-Toolkit` (`plugins/transformations.csv`)
+# — the same convention KiBot's `rot_footprint` filter tracks with its default
+# `bennymeg_mode: true`. The older `matthewlai/JLCKicadTools cpl_rotations_db.csv`
+# we used to cite is now DEPRECATED (frozen May 2025, KiCad <=7; its README
+# redirects to Fabrication-Toolkit). NOTE: KiBot ships **no** built-in rotation
+# DB (its `rotations` list defaults to empty) — so neither KiBot nor KiKit
+# would relieve us of curating this table; they'd only relocate it to YAML /
+# schematic fields. We keep it here as the one reviewed gate.
+#
+# ⚠️ The DBs genuinely DISAGREE on the bare ^SOT-23 rule: matthewlai = -90
+# (==270), bennymeg = 180 — a 90-deg conflict, and the right answer depends on
+# the specific part/footprint generation. So `SOT-23` below (Q3 AO3400A) is the
+# single highest dead-board risk; the value here is UNVERIFIED on real silicon
+# and MUST be confirmed against JLC's placement preview before any assembled
+# order (the orientation-report.csv + preview check below is that gate). Same
+# care for the USB-C datum offset (different USB-C variants get 0 vs 180 + the
+# 1.44mm X offset).
+#
+# EVERY assembled footprint must be classified — either listed here or matching
+# SYMMETRIC_RE — otherwise this script refuses to emit a CPL, so a new package
+# can never reach JLC with an unreviewed rotation. (This refuse-on-unclassified
+# guard is genuinely ours — neither KiBot nor KiKit fails on an unlisted part.)
 JLC_ROTATION = {
-    "SOT-223-3_TabPin2": 180,           # U1 AMS1117   (^SOT-223 -> 180)
-    "SOT-23": 270,                      # Q3 AO3400A   (^SOT-23  -> -90)
-    # USB_C XKB U262-16XN: rotation 0 per JLCKicadTools, but it carries a
-    # +1.44mm X datum offset (see JLC_OFFSET) — without it the connector
-    # places 1.44mm off and the SMD pads / THT posts miss their lands.
+    "SOT-223-3_TabPin2": 180,           # U1 AMS1117   (^SOT-223 -> 180; DBs agree)
+    "SOT-23": 270,                      # Q3 AO3400A   (** DB CONFLICT: -90 vs 180
+                                        #               — verify in JLC preview **)
+    # USB_C XKB U262-16XN: rotation 0, but carries a +1.44mm X datum offset
+    # (see JLC_OFFSET) — without it the connector places 1.44mm off and the
+    # SMD pads / THT posts miss their lands. (** verify variant in preview **)
     "USB_C_Receptacle_XKB_U262-16XN-4BVC11": 0,
-    # No matching JLCKicadTools regex -> 0 (KiCad orientation already = JLC):
+    # No matching DB regex -> 0 (KiCad orientation already = JLC):
     "ESP32-C3-WROOM-02": 0,             # U3  (** verify in JLC preview - MCU **)
     "SENSOR-SMD_L3.0-W3.0-P1.00-BR": 0,  # U5 AHT20 (vendored JLC fp, JLC-native)
     "LED_0805_2012Metric": 0,           # D6/D7/D10/D11/D12 (chip LED, not in db)
@@ -98,7 +118,7 @@ JLC_ROTATION = {
     "SW-SMD_TS-1187A-5.1x5.1": 0,
 }
 # Footprint-origin -> JLC-centroid datum offsets (mm, in the part's own frame,
-# BEFORE rotation), from JLCKicadTools cpl_rotations_db.csv. Applied to the CPL
+# BEFORE rotation), per bennymeg/Fabrication-Toolkit. Applied to the CPL
 # position so the part lands centred on JLC's pick datum.
 JLC_OFFSET = {
     "USB_C_Receptacle_XKB_U262-16XN-4BVC11": (1.44, 0.0),
@@ -207,8 +227,8 @@ def main():
             return None  # symmetric: no correction, not orientation-critical
         raise SystemExit(
             f"UNCLASSIFIED footprint for CPL rotation: {ref} '{fp}'. Add it "
-            "to JLC_ROTATION (verify against JLCKicadTools' "
-            "cpl_rotations_db.csv + the JLC placement preview) or extend "
+            "to JLC_ROTATION (verify against bennymeg/Fabrication-Toolkit's "
+            "transformations.csv + the JLC placement preview) or extend "
             "SYMMETRIC_RE if it is genuinely orientation-irrelevant.")
 
     keep = set(assembled)

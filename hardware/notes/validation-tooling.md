@@ -11,14 +11,21 @@
   informational, not failures. Errors + parity/unconnected (version-stable)
   still gate. (Answers the 10.0.3↔10.0.2 drift question directly.)
 - ✅ **InteractiveHtmlBom** generated in CI into the fab package.
-- 🟰 **Fab outputs stay in `scripts/fab-outputs.py`** — a deliberate decision,
-  not a TODO. Its assembly-split logic (the hand-solder kit, no-LCSC→DNP, the
-  kit CSV + orientation report, the "refuse to emit on an unclassified
-  footprint" safety guard) is genuinely project-specific, and the only KiBot
-  win there — its built-in JLC rotation DB — can't be trusted without the
-  dead-board gate below. Migrating would mean re-implementing the safe custom
-  logic to *maybe* save a tiny rotation table. Revisit only if a future part
-  makes the rotation table painful.
+- 🟰 **Fab outputs stay in `scripts/fab-outputs.py` (for now)** — a deliberate
+  decision, not a TODO. Its assembly-split logic (the hand-solder kit,
+  no-LCSC→DNP, the kit CSV + orientation report, the "refuse to emit on an
+  unclassified footprint" safety guard) is genuinely project-specific.
+  **Premise correction (2026-06-15):** the earlier reasoning here assumed the
+  KiBot win was "its built-in JLC rotation DB." That DB **does not exist** —
+  KiBot's `rot_footprint` ships an *empty* `rotations` list; you supply the
+  table (same as us). The maintained community values now live in
+  `bennymeg/Fabrication-Toolkit` (`transformations.csv`), which KiBot's
+  `bennymeg_mode: true` tracks — our old `matthewlai/JLCKicadTools` cite is
+  deprecated. So migrating to KiBot's `position`+`rot_footprint`+`bom`
+  consolidates onto a *maintained CPL/BOM engine* (stop hand-rolling the
+  rotate/offset trig) but does **not** hand us a free DB; the values + the
+  refuse-on-unclassified guard remain ours to keep. Worth doing, gated by the
+  byte-diff below — see "Plan once unblocked".
 
 The schematic instance-path bug that blocked KiBot is fixed (see below).
 
@@ -32,7 +39,7 @@ a lot that **KiBot** + native KiCad rules already do.
 | We hand-rolled | Adopt |
 |---|---|
 | ERC/DRC/parity gate + `ci-baseline.json` counts (`hardware_validate.py`) | **KiBot** `erc`/`drc` preflights (fail on errors; allow-list noise via `filters:`) |
-| Gerbers/drill/pos/BOM + hand-maintained JLC rotation tables (`fab-outputs.py`) | **KiBot** outputs + built-in `rot_footprint` DB → retire `fab-outputs.py` |
+| Gerbers/drill/pos/BOM + the rotate/offset CPL trig (`fab-outputs.py`) | **KiBot** `gerber`/`position`/`bom` + `rot_footprint` (we supply the values — KiBot has no built-in DB) → shrink `fab-outputs.py` to its special core |
 | Interactive BOM (none today) | **InteractiveHtmlBom** (KiBot `ibom` output) — useful for the hand-solder kit |
 | Geometry checks (`pcb_checks.py`) | mostly **already native** — see below |
 
@@ -76,11 +83,12 @@ the parity/netlist baseline in the same commit) — expect the 2 U5 NC nets.
    + refresh baseline. Confirm KiBot parses it.
 2. `hardware/esp32-ir-remote.kibot.yaml` (staged): `erc` + `drc`
    (`schematic_parity`) preflights + `ibom`; then `gerber`/`excellon`/`position`/
-   `bom`/zip with `rot_footprint`. **CPL ROTATION IS THE DEAD-BOARD GATE:** KiBot's
-   built-in DB disagrees with `fab-outputs.py` (KiBot `^SOT-23→180` vs ours `270`;
-   USB-C offset Y-axis vs our X-axis). Feed KiBot **our** validated
-   `JLC_ROTATION`/`JLC_OFFSET` table (via `rot_footprint` `rotations:`/`offsets:`)
-   and **diff KiBot's CPL against `fab-outputs.py`'s** before trusting it — a
+   `bom`/zip with `rot_footprint`. **CPL ROTATION IS THE DEAD-BOARD GATE:** KiBot
+   has no built-in DB (empty `rotations`), and the *community* DBs disagree on
+   `^SOT-23` (matthewlai `-90` vs bennymeg `180`; ours `270`). Feed KiBot **our**
+   validated `JLC_ROTATION`/`JLC_OFFSET` table (via `rot_footprint`
+   `rotations:`/`offsets:`, `bennymeg_mode: true` pinned) and **diff KiBot's CPL
+   against `fab-outputs.py`'s to zero delta** before trusting it — a
    blind switch could flip Q3 (AO3400A) or shift the USB-C connector.
 3. Slim `hardware_validate.py` to the 3 bespoke checks wrapping KiBot's exit code;
    retire `fab-outputs.py`; keep `bom_report.py`.
