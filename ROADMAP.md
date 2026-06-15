@@ -10,6 +10,54 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔧 **PHASE B DONE — decoupling re-seat + full re-route (2026-06-15, Nick: "do
+the full restructure now").** The MOD "decoupling far from pins" finding is
+fixed. Root cause: `pcb_place_v2.py`'s net heuristic can't distribute a *shared*
+rail — a +3.3V bypass cap pad sees the whole net, so it could only seat at the
+nearest rail pin, which piled every MCU/sensor bypass onto the LDO and left
+**U5 (AHT20) with no local cap** (both 10 µF stacked on U3, both 100 nF orphaned
+~50 mm SW). Fix = an explicit `ASSIGN` map in `pcb_place_v2.py` pinning each
+bypass/EN/RC/pull-up to the specific (anchor, pad) it serves, so every IC gets
+its own bank:
+- **U3 (C3):** C7 100 nF + C8 10 µF on 3V3 (~7–8 mm, module-courtyard bound —
+  the accepted limit); C6 1 µF EN-POR RC on EN. (Before: U3 had *two* 10 µF and
+  *no* local 100 nF.)
+- **U5 (AHT20):** C5 100 nF + C10 10 µF on VDD + I²C pull-ups R28/R29 — all
+  ~2–4 mm. **U5 went from bare to a full local bank.**
+- **U1 (LDO):** C1 in-cap on VIN, C2/C3 out-caps on VOUT.
+- **Re-route:** rip → FreeRouting (0 unrouted, pass #4) → GND + LDO pour → silk.
+  **DRC 0 errors / 0 unconnected / 0 parity.** `hardware_validate.py` EXIT 0
+  (netlist unchanged — schematic untouched — 43 polarity invariants, parity 0).
+- **Item 1 (Power width + DRU) folded in:** the new route holds the 0.6 mm
+  Power class (min 0.50 mm at a few pad necks; the old 0.2 mm +3.3V segments are
+  gone), so the deferred **Power min-width DRU (0.5 mm)** is now added to
+  `esp32-ir-remote.kicad_dru`.
+- **Cosmetic:** +1 `silk_over_copper` in the now-denser SE sensor corner (a ref
+  over a track; placer dodges pads/courtyards not copper) — accepted tradeoff
+  for U5's local decoupling. Baseline refresh owed (below).
+- ⚠️ **CI baseline refresh owed** — DRC/silk counts drifted (full re-route);
+  refresh `ci-baseline.json` in `kicad/kicad:10.0.2` (done this session — see
+  commit). Done locally on KiCad 10.0.3 + FreeRouting 2.2.4.
+
+🔭 **Deferred follow-ups from the JP1/tooling brief (2026-06-15):**
+- ✅ **(1) Power width + DRU** — done above.
+- [ ] **(2) Force USB D+/D− onto F.Cu.** This re-route still split the pair
+  (D+ 18 F.Cu/42 B.Cu, D− 45/14, 2 vias each) — FreeRouting can't express
+  "F.Cu-only." Fix = a **B.Cu keepout corridor** under the J2→U3 USB lane (FR
+  honours board keepouts) or a saved `.rules` fed via `-dr`. Functional for
+  full-speed USB either way (note: `autorouting-freerouting.md`); SI nicety,
+  closes the old "USB not a matched pair" review item. Deferred to keep this
+  clean route stable — needs its own re-route + tuning pass.
+- [ ] **(3) Cut CPL/BOM over from `fab-outputs.py` to KiBot.** Already
+  de-risked: `esp32-ir-remote-fab.kibot.yaml` + `scripts/ci/cpl_crosscheck.py`
+  (gating) prove KiBot ≡ fab-outputs.py (43/43, 0 delta). Point the order
+  package at KiBot's position+bom+gerber/zip; slim `fab-outputs.py` to its
+  special core (hand-solder-kit narrative, refuse-on-unclassified, orientation
+  report); keep cpl_crosscheck green. HARD GATE: cross-check proves the tools
+  *agree*, not that absolute angle is right — JLC-preview-verify Q3 (SOT-23,
+  we use 270) + J2 (USB-C, +1.44 mm X) on the first assembled order. Plan in
+  `validation-tooling.md` → "Plan once unblocked" step 2. Unrelated to layout.
+
 🧮 **CAP AUDIT + v2 doc reconciliation (2026-06-15, Nick asked).** Audited all
 nine caps (C1–C3, C5–C10; no C4 — deleted with U2/CH340C in v2). Verdict on the
 "are C7/C8 and C5/C10 duplicated?" question: **no copy-paste bug.** Within a
@@ -204,9 +252,9 @@ by severity:
 - [ ] **MAJOR — reclaim B.Cu as solid ground.** Still slotted by ~211 mm of
       signal/power across 19 nets incl. `/IR_RX` + `/USB_D+`. Push signals
       (esp. IR_RX, USB) to F.Cu.
-- [ ] **MOD — decoupling far from pins** (MCU bypass 6.9 mm, LDO in-cap
-      11.5 mm, out-caps ~20 mm on +3.3V w/ none on `/LDO_OUT` → no stability
-      cap when JP1 open). Tighten in the same placement pass.
+- [x] **MOD — decoupling far from pins (2026-06-15).** Fixed via the Phase B
+      ASSIGN re-seat (see "Now"); LDO out-caps now on VOUT (JP1 removed), each
+      IC has a local HF+bulk bank. U3 ~7–8 mm is the accepted courtyard limit.
 - [ ] **MOD — antenna mid-edge not corner** (firing side clean, lateral 15 mm
       not met). **MINOR — H1 hole 1.5 mm from J4; silk min 0.8 mm → 1.0 mm.**
 - [ ] **Verify on CI** (no kicad-cli here): DRC unconnected/clearance/courtyard,
@@ -242,8 +290,9 @@ is settled. Execute in phases, commit+push each:
       power/USB one short end; Q3+D2–D5 IR-TX other short end; U4 IR-RX near
       front but EMI-isolated; U5 sensor far corner; D6–D12+J4+J5 status/IO
       edge) + 4× M3 holes wherever clean. Render, iterate.
-- [ ] **Phase B — support re-seat + holes.** Extend `pcb_place_v2.py` spiral
-      search to re-seat decoupling/pullups/RC against the new anchors.
+- [x] **Phase B — support re-seat + holes (2026-06-15).** `pcb_place_v2.py`
+      gained an explicit ASSIGN map (shared rails can't be net-targeted); each
+      IC now gets its own bank, U5 no longer bare. Re-routed, DRC 0/0/0.
 - [ ] **Phase C — route + pour + silk.** `pcb_router.py → pcb_pour.py →
       pcb_silk.py`. **Render to Nick before routing commits** (H2.2 rule).
 **STATUS 2026-06-14 (end of autonomous PCB session):** the restructure is
