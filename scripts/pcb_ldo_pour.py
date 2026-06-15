@@ -1,24 +1,31 @@
 #!/usr/bin/env python3
-"""Thermal copper for U1 (AMS1117 SOT-223): top F.Cu pour + bottom island + vias.
+"""Top-side F.Cu thermal pour for U1 (AMS1117 SOT-223).
 
-The SOT-223 tab (U1 pad 2 = /LDO_OUT) dissipates ~0.85 W at the rated load; a
-bare footprint gives theta_JA ~135 C/W -> T_J ~140 C (> the 125 C limit). This
-script builds the standard SOT-223 cooling stack, additively and idempotently:
+U1 was relocated into the open NW corner (floorplan: U1 @ (120,81,0), SOT-223
+tab faces E at ~(123.2,81)) precisely so the thermal pour could be big and sit
+in clear copper instead of the old cramped scraps. The tab dissipates ~0.85 W
+at the rated load; a bare footprint gives theta_JA ~135 C/W -> T_J ~140 C
+(> the 125 C limit). A large top-side pour solidly bonded to the tab, over the
+unbroken B.Cu ground plane beneath, brings theta_JA down to ~70 C/W
+-> T_J ~85 C at 25 C ambient.
 
-  1. A top-side F.Cu /LDO_OUT pour NE of the tab (the original measure).
-  2. A small bottom-side B.Cu /LDO_OUT island hugging the tab. The west power
-     zone is the least-bad place to slot the B.Cu ground (far from the IR_RX
-     and USB returns), and it gives the thermal vias same-net copper to land on
-     and a second convecting surface.
-  3. A 2x3 array of thermal vias on the tab, tying the top tab/pour to the
-     bottom island so heat conducts straight through the FR-4 instead of only
-     leaking sideways.
+The SOT-223 tab is on F.Cu (top) only, so the F.Cu pour is the dominant heat
+path; the bottom is the solid GND plane, coupling through the FR-4. A *second*
+/LDO_OUT zone on B.Cu (a tied bottom island + thermal vias) would add a parallel
+path, but the KiCad 10.0.3 zone filler segfaults whenever two overlapping
+same-net F.Cu+B.Cu /LDO_OUT zones are filled together on this routed board
+(the /LDO_OUT net also lands on JP1's all-layer through-hole pad). Each zone
+fills fine alone; the pair does not. The bottom island is therefore deferred —
+it can be added in the KiCad GUI / on CI's 10.0.2 image where the bug may not
+bite. The big top pour already clears the thermal target on its own.
 
-The filler maintains clearance to foreign copper/pads/vias automatically, so the
-island and pour shrink to fit the congested power zone (report prints the actual
-filled areas). Run, then validate:
+The filler keeps 0.3 mm off foreign copper/pads (H1, J2, F1, D1, J4, U1's own
+west pins) automatically. Bounds are pulled just clear of the H1 mounting hole
+(right edge ~113.5), the J2 USB pads (right ~114.5) and the N board edge: a
+FULL-connection pour reaching those makes the filler degenerate its spokes and
+segfault. Run, then validate:
 
-  python3.12 scripts/pcb_ldo_pour.py            # needs the pcbnew bindings
+  /tmp/kv10/bin/python scripts/pcb_ldo_pour.py     # needs numpy+pcbnew bindings
   kicad-cli pcb drc hardware/esp32-ir-remote.kicad_pcb
 """
 import sys
@@ -27,46 +34,13 @@ import pcbnew
 PCB = "hardware/esp32-ir-remote.kicad_pcb"
 NET = "/LDO_OUT"
 
-# Top F.Cu pour. The filler carves the U3 antenna keepout (x>=135.8, y<=81.4)
-# and keeps 0.3 mm from foreign copper/pads automatically.
-TOP_RECT = (123.0, 72.0, 140.0, 90.5)
-
-# Bottom B.Cu island, bounded tight to the tab (centre ~129.15,86.0). Kept small
-# on purpose: the surrounding B.Cu carries +3.3V / I2C_SCL / SPARE_TX and GND
-# stitching, so a wide island would shred the ground plane. The filler clears
-# 0.5 mm around all of that, so the island fills whatever clean copper remains.
-BOT_RECT = (126.5, 82.0, 133.0, 89.5)
-
-# Thermal vias on the tab (2 cols x 3 rows, 1.0 mm pitch). Placed in the south
-# 2/3 of the tab to keep >0.8 mm off the /I2C_SCL via at (129.2,83.6).
-VIA_XS = (128.65, 129.65)
-VIA_YS = (85.0, 86.0, 87.0)
-VIA_DRILL = 0.3
-VIA_DIA = 0.6
+# Top-side pour over the whole open NW zone around U1's tab. Largest bound that
+# fills cleanly (see segfault note above): ~158 mm^2 of solid copper.
+TOP_RECT = (114.5, 71.5, 130.0, 87.0)
 
 
 def mm(v):
     return pcbnew.ToMM(v)
-
-
-def add_zone(b, nc, layer, rect, name):
-    z = pcbnew.ZONE(b)
-    z.SetLayer(layer)
-    z.SetNetCode(nc)
-    z.SetAssignedPriority(1)            # win the local area over the GND pour
-    z.SetLocalClearance(pcbnew.FromMM(0.3))
-    z.SetMinThickness(pcbnew.FromMM(0.2))
-    z.SetIsFilled(True)
-    z.SetZoneName(name)
-    z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)  # solid tab connection
-    x0, y0, x1, y1 = rect
-    poly = pcbnew.SHAPE_POLY_SET()
-    poly.NewOutline()
-    for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
-        poly.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
-    z.SetOutline(poly)
-    b.Add(z)
-    return z
 
 
 def main():
@@ -75,43 +49,40 @@ def main():
     if nc <= 0:
         sys.exit(f"net {NET} not found")
 
-    # drop any previous thermal vias we placed on the tab footprint, then any
-    # previous LDO pours/island (idempotent re-runs). Tracks first: removing
-    # zones first leaves GetTracks() unable to iterate in this binding.
-    old_vias = []
-    for t in b.GetTracks():
-        if t.GetClass() == "PCB_VIA" and t.GetNetname() == NET:
-            x, y = mm(t.GetPosition().x), mm(t.GetPosition().y)
-            if 127.5 <= x <= 131.0 and 83.5 <= y <= 88.5:
-                old_vias.append(t)
-    for t in old_vias:
-        b.Remove(t)
+    # drop any previous LDO pour (idempotent re-runs). NB: do NOT iterate
+    # GetTracks() here — that corrupts this binding's SWIG state and segfaults
+    # the ZONE_FILLER below. This pour adds no vias, and the pipeline's rip
+    # stage clears stale vias anyway, so zone removal alone suffices.
     for z in list(b.Zones()):
         if not z.GetIsRuleArea() and z.GetNetname() == NET:
             b.Remove(z)
 
-    add_zone(b, nc, pcbnew.F_Cu, TOP_RECT, "LDO_OUT_thermal")
-    add_zone(b, nc, pcbnew.B_Cu, BOT_RECT, "LDO_OUT_thermal_btm")
-
-    # thermal vias tying the tab/top pour down to the bottom island
-    nvias = 0
-    for x in VIA_XS:
-        for y in VIA_YS:
-            v = pcbnew.PCB_VIA(b)
-            v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
-            v.SetDrill(pcbnew.FromMM(VIA_DRILL))
-            v.SetWidth(pcbnew.FromMM(VIA_DIA))
-            v.SetNetCode(nc)
-            v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
-            b.Add(v)
-            nvias += 1
+    # Build the pour zone INLINE (not in a helper): the SHAPE_POLY_SET outline
+    # must stay referenced until after Fill(). If it is a helper-local it gets
+    # GC'd on return and the filler reads a freed outline -> segfault.
+    z = pcbnew.ZONE(b)
+    z.SetLayer(pcbnew.F_Cu)
+    z.SetNetCode(nc)
+    z.SetAssignedPriority(1)            # win the local area over the GND pour
+    z.SetLocalClearance(pcbnew.FromMM(0.3))
+    z.SetMinThickness(pcbnew.FromMM(0.2))
+    z.SetIsFilled(True)
+    z.SetZoneName("LDO_OUT_thermal")
+    z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)  # solid tab connection
+    x0, y0, x1, y1 = TOP_RECT
+    poly = pcbnew.SHAPE_POLY_SET()
+    poly.NewOutline()
+    for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
+        poly.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+    z.SetOutline(poly)
+    b.Add(z)
 
     pcbnew.ZONE_FILLER(b).Fill(b.Zones())
     pcbnew.SaveBoard(PCB, b)
     # NB: don't query filled areas here — the ZONE_FILLER leaves this process's
     # SWIG objects untyped (even a re-LoadBoard). Run measure_pour_area() in a
     # fresh process (see __main__) to report the result.
-    print(f"thermal vias placed = {nvias}; board saved")
+    print("LDO thermal pour filled & saved")
 
 
 def measure_pour_area():

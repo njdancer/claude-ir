@@ -35,9 +35,11 @@ HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
 ANCHORS = {
     # --- WEST end: power + USB ---
     "J2":  (109.7, 92.0, 270),   # USB-C, mouth overhangs west edge ~0.5mm, pads on-board
-    "U1":  (126.0, 86.0, 0),     # AMS1117 LDO
-    "F1":  (122.0, 95.0, 90),    # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
-    "D1":  (130.0, 95.0, 90),    # TVS
+    "U1":  (120.0, 81.0, 0),     # AMS1117 LDO — moved into the open NW corner so
+                                 # the SOT-223 tab (faces E) sits in clear copper
+                                 # for a big 2-sided thermal pour (see pcb_ldo_pour)
+    "F1":  (119.0, 88.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1), pocket S of U1
+    "D1":  (119.0, 93.0, 0),     # TVS, stacked below F1
     # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
     "U3":  (150.0, 88.5, 0),
     # --- EAST end (front): IR-TX fan firing east. base east = rot270; fan is
@@ -50,7 +52,10 @@ ANCHORS = {
     "D4":  (186.0, 97.0, 255),  # -15
     "D5":  (186.0, 106.0, 225), # -45 SE
     # --- North edge (clear apart from the central antenna keepout x136-164) ---
-    "J4":  (120.0, 75.5, 90),    # spare-GPIO 2x5 header, NW
+    "J4":  (130.0, 84.0, 180),   # spare-GPIO 2x5 header — rotated 90 deg CCW
+                                 # (vertical), sat E of U1 but NOT hugging the
+                                 # module: leaves the module-W channel open for
+                                 # the ESP boot/strap routing that jammed before
     "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
     # --- TSOP receiver: SOUTH long edge (relocated off the TX corner, 1fc1f68);
     #     lens fires south/room, isolated from the 38kHz drive loop ---
