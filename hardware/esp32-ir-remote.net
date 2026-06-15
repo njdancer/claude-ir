@@ -2,8 +2,8 @@
 	(version "E")
 	(design
 		(source "/Users/nickdancer/Documents/claude-ir/.claude/worktrees/keen-lichterman-8a6a70/hardware/esp32-ir-remote.kicad_sch")
-		(date "2026-06-14T11:28:55")
-		(tool "Eeschema 10.0.3")
+		(date "2026-06-15T04:18:15")
+		(tool "Eeschema 10.0.3-10.0.3~ubuntu24.04.1")
 		(sheet
 			(number "1")
 			(name "/")
@@ -5174,6 +5174,28 @@
 				(ref "R14")
 				(pin "2")
 				(pintype "passive")
+			)
+		)
+		(net
+			(code "37")
+			(name "unconnected-(U5-NC-Pad1)")
+			(class "Default")
+			(node
+				(ref "U5")
+				(pin "1")
+				(pinfunction "NC_1")
+				(pintype "unspecified+no_connect")
+			)
+		)
+		(net
+			(code "38")
+			(name "unconnected-(U5-NC-Pad6)")
+			(class "Default")
+			(node
+				(ref "U5")
+				(pin "6")
+				(pinfunction "NC_6")
+				(pintype "unspecified+no_connect")
 			)
 		)
 	)
