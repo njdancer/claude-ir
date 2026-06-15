@@ -56,7 +56,7 @@ constraints that rules can't express.
    practical distance from U1 (LDO) and U3 (WiFi heat); prefer a board corner
    with slots/perimeter routing between it and heat sources if space allows.
    Sensor must sample room air, not board air. Its 100 nF decoupling and the
-   I²C pull-ups (R28/R29 — see ir/temp notes; currently DNP) travel with it.
+   I²C pull-ups (R28/R29, 4.7 kΩ, populated) travel with it — see constraint 10.
 6. **TSOP receiver (U4) faces the user/room AND keeps its distance from the
    TX array (revised 2026-06-14):** board edge, lens unobstructed; its RC
    filter (R27/C9, net `IR_RX_VS`) directly at the Vs pin. **Hard separation:

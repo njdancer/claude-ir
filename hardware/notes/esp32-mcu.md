@@ -42,8 +42,10 @@ internal flash pins (GPIO6–11). Expansion is now:
   GPIO25/26 were sacrificed to routing congestion during layout (pins NC'd at
   the module). Note **GPIO34 is input-only** (no output driver, no internal
   pulls) — don't try to drive it.
-- **J3 Qwiic (JST-SH):** I2C on GPIO21 (SDA) / GPIO22 (SCL) with DNP 4.7k
-  pull-up footprints (R28/R29) for non-Qwiic devices.
+- **On-board I²C (v2):** the AHT20 sensor (U5) sits on the C3's I²C bus —
+  SDA = IO7, SCL = IO10 — with **populated** 4.7 kΩ pull-ups (R28/R29). The
+  bus is also broken out on J4. (v1's separate J3 Qwiic connector was dropped;
+  the GPIO21/22 mapping above was the WROOM-32E's.)
 - **J6 JTAG (2×5, DNP):** ARM 10-pin layout, EN wired as nRESET.
 
 The exposed power rails on J4 are the hook for v2 battery/power experiments

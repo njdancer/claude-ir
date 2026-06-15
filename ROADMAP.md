@@ -25,10 +25,12 @@ banks; C6 = U3 EN power-on-reset RC (1 µF, NOT decoupling); C9 = TSOP Vs filter
   anchors); doing a piecemeal re-route now would be overwritten by Phase B, so
   **not** done here. Captured the correct one-bank-per-IC intent in
   `layout.md` constraint 10 so Phase B places it right.
-- **Adjacent finding — I²C pull-ups DNP:** R28/R29 (4.7 kΩ on SDA/SCL) are
-  do-not-populate (a v1 Qwiic-era default; J3 Qwiic is gone). The on-board
-  AHT20 has no internal pull-ups → **R28/R29 should be populated in v2.**
-  Flagged in `temp-sensor.md` for the next schematic pass; not yet actioned.
+- **I²C pull-ups — checked, already populated:** an earlier pass mis-read
+  R28/R29 (4.7 kΩ on SDA/SCL) as DNP (a buggy grep that slurped past the comp
+  block). Verified properly: schematic `dnp` clear + `in_bom yes`, PCB attr
+  `smd` → they ARE fitted. Corrected `temp-sensor.md` / `layout.md` and the
+  stale "DNP for Qwiic" line in `esp32-mcu.md` (no Qwiic/J3 in v2). No design
+  change needed.
 - **Docs reconciled v1→v2:** `layout.md` constraints 5 (DHT22→AHT20 I²C),
   10 (decoupling rewrite — no C4/U2, C6 is EN-RC not CH340C), 11 (JP1 + R21/R26
   + Q1/Q2 all deleted); `temp-sensor.md` fully rewritten (AHT20/I²C). Pulled

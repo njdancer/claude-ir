@@ -17,18 +17,15 @@ based on the temperature at the remote's location.
 - **Decoupling:** 100 nF at VDD, placed with the sensor (see `layout.md`
   constraint 10 — U5 gets one 100 nF + 10 µF bank).
 
-## I²C pull-ups — ⚠️ currently DNP
+## I²C pull-ups
 
-The bus pull-ups are **R28/R29 (4.7 kΩ to +3.3V)** on SDA/SCL, but they are
-marked **DNP (do-not-populate)**. That is a leftover from v1, when the I²C bus
-only fed an off-board **Qwiic** connector (J3, now removed) and Qwiic modules
-bring their own pull-ups, so the on-board footprints were optional.
-
-In v2 the AHT20 is soldered **on-board** and a bare AHT20 has **no internal
-pull-ups**, so the bus needs pull-ups to work. The ESP32-C3's internal
-pull-ups (~45 kΩ) are too weak to be relied on for a clean I²C bus. **R28/R29
-should be populated (4.7 kΩ) in v2** unless a deliberate decision says
-otherwise — flagged for the next schematic pass.
+The bus pull-ups are **R28/R29 (4.7 kΩ to +3.3V, LCSC C17936)** on SDA/SCL, and
+they **are populated** (verified: schematic `dnp` clear / `in_bom yes`, PCB
+footprint attr `smd`). A bare AHT20 has no internal pull-ups, so the on-board
+sensor needs these; 4.7 kΩ is the standard value for a short 3.3 V bus. (The
+old `esp32-mcu.md` line that called these "DNP for Qwiic" was a v1 leftover —
+there is no Qwiic connector in v2; the bus serves the on-board AHT20 plus the
+J4 breakout.)
 
 ## Placement
 
