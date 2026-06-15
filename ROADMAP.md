@@ -51,28 +51,30 @@ wrong — install works fine. Recorded the recipe (the `add-apt-repository` need
 `pcbnew` binds to python3.12). Only serial/USB + heavy GUI schematic re-layout
 stay Mac-bound.
 
-📋 **TOOLING OPPORTUNITIES surfaced (2026-06-15, researched — Nick asked).**
-Four-agent research on whether we're reinventing wheels. Headline actionable
-items (detail in chat; capture in `validation-tooling.md` before acting):
-- **Quick wins:** encode our "accepted" DRC/ERC warning classes as native
-  KiBot `filters` (retires the warning-count baseline); add KiBot
-  `check_zone_fills` preflight; generate **KiDiff** (INTI-CMNB, the maintained
-  one — not kdiff/kiri) visual PCB/sch diffs as a PR artifact.
-- **Correctness fix:** our rotation-table source of truth
-  (`matthewlai/JLCKicadTools`) is **deprecated**; the live DB is
-  `bennymeg/Fabrication-Toolkit` (`transformations.csv`), which KiBot's
-  `bennymeg_mode` already tracks. Re-cite + re-base values. NB: SOT-23 DBs
-  genuinely disagree (matthewlai −90 vs bennymeg 180) — JLC-preview every
-  SOT-23 + USB-C regardless of tool.
-- **Bigger (gate hard):** move CPL+BOM generation from `fab-outputs.py` to
-  KiBot `position`+`rot_footprint`+`bom`, **gated by a byte-diff vs today's
-  known-good CPL**. Keep the genuinely-special bits bespoke: the polarity truth
-  table, netlist partition-freshness/golden, page-extents guard, and the
-  hand-solder kit *narrative* + unclassified-footprint guard.
-- **Autorouter:** no magic ruleset to import; the real levers are KiCad net
-  classes (export to DSN) + a JLCPCB `.kicad_dru` + a FreeRouting `.rules` for
-  USB-on-F.Cu. Per-layer preferred-direction is the *wrong* tool for our
-  2-layer GND-pour board. (Folded into `layout.md` layer policy.)
+✅ **TOOLING IMPROVEMENTS DONE (2026-06-15, Nick picked all 4 threads).**
+Four-agent research → four shipped increments (each its own commit):
+- ✅ **Rotation-DB cite fix (safe):** `matthewlai/JLCKicadTools` is deprecated;
+  re-cited `bennymeg/Fabrication-Toolkit` (live, KiBot's `bennymeg_mode`
+  tracks it) in `fab-outputs.py` + `validation-tooling.md`; corrected the false
+  "KiBot has a built-in rotation DB" premise (it doesn't). Flagged the genuine
+  SOT-23 disagreement (−90 vs 180) — JLC-preview every SOT-23 + USB-C.
+- ✅ **KiBot quick wins:** `check_zone_fills` preflight (stale-pour guard) +
+  narrow DRC `filters` (board-only mounting-hole/logo + USB-C silk-edge) +
+  **KiDiff** PR visual diff (PCB+sch, base→head PDF artifact, non-gating).
+- ✅ **Net-class/DRU:** net classes already live in `.kicad_pro` (nothing to
+  migrate) + design_settings already enforce JLC floors; added a *focused*
+  `esp32-ir-remote.kicad_dru` (IR_Drive min-width 0.45 mm). Per-layer
+  preferred-direction confirmed the WRONG tool for a 2-layer GND-pour board.
+  Finding: `+3.3V` routing has 0.2 mm segments → Power min-width DRU deferred
+  to the next re-route; USB-on-F.Cu `.rules`/keepout is the real open lever.
+- ✅ **CPL/BOM → KiBot (gated):** `esp32-ir-remote-fab.kibot.yaml` (KiBot
+  `position`+`rot_footprint`+`bom`, our values) + `scripts/ci/cpl_crosscheck.py`
+  (gating) prove KiBot ≡ fab-outputs.py — **43/43 placements, 0 delta**,
+  negative test fails as intended. Cutover de-risked; fab-outputs.py stays the
+  producer pending the first-order JLC-preview sign-off.
+- Kept genuinely-special bespoke (pressure-tested): polarity truth table,
+  netlist partition-freshness/golden, page-extents guard, hand-solder kit
+  narrative + refuse-on-unclassified guard.
 
 🚀 **AUTOROUTER REPLACED + LDO THERMAL DONE (2026-06-15).** Two big wins:
 
