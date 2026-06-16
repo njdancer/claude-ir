@@ -132,6 +132,17 @@ def _apply_floorplan(gpio_path):
                 else PRISTINE, os.path.join(ROOT, PCB))
     b = pcbnew.LoadBoard(PCB)
     fp.apply_anchors(b, fp.ANCHORS, fp.HOLES, draw_outline=False)
+    # Drop the STALE board-level antenna keepout. It was drawn for the rot0
+    # merged layout (x136-164, y69-81) and does NOT track U3 when the floorplan
+    # moves the module -- in Layout B it strands on the N power chain (F1/U1/D1),
+    # blocking power routing. U3's *footprint* keepout rotates+moves with the
+    # module and already protects the antenna, so the board-level one is
+    # redundant. (b.Zones() excludes footprint zones in KiCad 10.)
+    removed = [z for z in b.Zones() if z.GetIsRuleArea()]
+    for z in removed:
+        b.Remove(z)
+    pcbnew.SaveBoard(PCB, b)            # commit the removal, then reload clean
+    b = pcbnew.LoadBoard(PCB)           # (b.Remove curses later .Pads() iteration)
     _legalize_flex(b)
     fp.set_outline(b)   # last: its b.Remove() curses .Pads()/.GetCourtyard()
     pcbnew.SaveBoard(PCB, b)

@@ -36,8 +36,11 @@ def main():
     assert gnd, "GND net missing"
 
     # antenna keepout rect from U3's footprint rule-area, extended to the
-    # NEAREST board edge (the module may be rotated to either long edge).
-    mid = (Y0 + Y1) / 2
+    # NEAREST board edge (the module may be rotated to ANY edge: N/S long edge
+    # OR W/E short edge for the rot90 west-end floorplan). Extend only toward
+    # the edge the antenna overhangs; keep the other three sides at the module's
+    # antenna span (extending the wrong way strands decoupling caps -- the
+    # Layout-B power-routing bug).
     kx0, ky0, kx1, ky1 = 136.0, Y0 - 1, 164.0, 81.5   # fallback (north)
     for fp in board.GetFootprints():
         if fp.GetReference() == "U3":
@@ -45,11 +48,18 @@ def main():
                 if z.GetIsRuleArea():
                     zb = z.GetBoundingBox()
                     kx0, kx1 = pcbnew.ToMM(zb.GetLeft()), pcbnew.ToMM(zb.GetRight())
-                    zt, zbm = pcbnew.ToMM(zb.GetTop()), pcbnew.ToMM(zb.GetBottom())
-                    if (zt + zbm) / 2 < mid:        # antenna on the N edge
-                        ky0, ky1 = Y0 - 1, zbm
-                    else:                            # antenna on the S edge
-                        ky0, ky1 = zt, Y1 + 1
+                    ky0, ky1 = pcbnew.ToMM(zb.GetTop()), pcbnew.ToMM(zb.GetBottom())
+                    dN, dS = ky0 - Y0, Y1 - ky1       # gap to each board edge
+                    dW, dE = kx0 - X0, X1 - kx1
+                    m = min(dN, dS, dW, dE)
+                    if m == dN:                       # antenna on the N edge
+                        ky0 = Y0 - 1
+                    elif m == dS:                     # antenna on the S edge
+                        ky1 = Y1 + 1
+                    elif m == dW:                     # antenna on the W edge
+                        kx0 = X0 - 1
+                    else:                             # antenna on the E edge
+                        kx1 = X1 + 1
 
     # drop pre-existing zones AND prior GND stitching vias (idempotent reruns —
     # GND is never routed, only poured + stitched, so every GND via is ours;
