@@ -45,40 +45,43 @@ RESULTS = "hardware/fab/search_results.json"
 
 # Anchors fixed by physics — never varied (values from the merged floorplan).
 FIXED = {
-    "J2": (109.7, 92.0, 270),                 # USB-C, W short edge
-    "U3": (150.0, 88.5, 0),                    # MCU, antenna flush N edge
-    "Q3": (178.0, 92.0, 0),                    # IR driver MOSFET, W of LED fan
-    "D2": (186.0, 79.0, 315), "D3": (186.0, 88.0, 285),
-    "D4": (186.0, 97.0, 255), "D5": (186.0, 106.0, 225),  # IR fan firing E
-    "U4": (153.0, 110.5, 180),                 # TSOP, S long edge
-    "J5": (168.0, 74.0, 0),                    # ext-IR header, NE
-    "F1": (119.0, 88.0, 0), "D1": (119.0, 93.0, 0),       # VBUS chain (W zone)
+    "J2": (110.0, 94.0, 270),                  # USB-C, W edge, meets U3's W USB pins
+    "U3": (150.0, 96.0, 180),                  # MCU rotated 180, antenna overhangs S
+    "Q3": (174.0, 98.0, 0),                    # IR driver MOSFET, W of LED fan
+    "D2": (188.0, 80.0, 315), "D3": (188.0, 90.0, 285),
+    "D4": (188.0, 100.0, 255), "D5": (188.0, 110.0, 225),  # IR fan firing E
+    "J5": (192.0, 96.0, 0),                    # ext-IR header, E edge
+    "F1": (127.0, 76.0, 0), "D1": (132.0, 76.0, 0),        # VBUS chain (NW)
 }
 
-# Discrete zones for the flexible groups. (x, y[, extra]) in mm.
-LED_ZONES = {                          # (start_x, start_y, orient)  5-LED row
-    "S_center": (141.0, 104.0, "h"),   # baseline
-    "SW":       (112.0, 107.0, "h"),   # Nick: bottom-left
-    "SW_vert":  (110.0, 96.0, "v"),
-    "S_mid":    (150.0, 106.0, "h"),
+# Discrete zones for the flexible groups (rotated-U3 layout: free space is the
+# N band y70-86 + the W column x106-134). (x, y[, extra]) in mm.
+LED_ZONES = {                          # 5-LED status row/col
+    "N_row":   (142.0, 73.0, "h"),     # N edge row, centre
+    "N_row_e": (150.0, 73.0, "h"),     # N edge, shifted E
+    "W_col":   (126.0, 84.0, "v"),     # W column vertical
 }
-BTN_ZONES = {                          # SW1 origin; SW2 sits +11mm along
-    "S_center": (120.0, 109.0, "h"),   # baseline
-    "SW":       (112.0, 111.0, "h"),   # Nick: bottom-left
-    "SW_stack": (110.0, 100.0, "v"),
+BTN_ZONES = {
+    "W_edge":  (112.0, 104.0, "h"),    # W edge, horizontal pair
+    "W_stack": (110.0, 103.0, "v"),    # W edge, vertical pair
 }
 J4_ZONES = {
-    "N_EofU1":   (130.0, 84.0, 180),   # baseline
-    "under_ESP": (150.0, 101.0, 180),  # Nick: south of the module
-    "NE":        (168.0, 81.0, 180),
+    "N_ctr": (150.0, 82.0, 0),         # N of U3 (heaviest link)
+    "N_e":   (162.0, 80.0, 0),
+    "N_w":   (140.0, 81.0, 0),
 }
 LDO_ZONES = {
-    "NW":        (120.0, 80.5, 90),    # baseline
-    "NW_corner": (113.5, 77.0, 90),    # tucked into the corner (clear USB lane)
+    "NW":       (118.0, 76.0, 90),
+    "NW_tight": (115.0, 75.0, 90),
 }
 U5_ZONES = {
-    "SE":  (165.0, 110.0, 0),          # baseline (far from NW heat)
-    "E":   (172.0, 100.0, 0),
+    "NE": (183.0, 75.0, 0),
+    "E":  (185.0, 88.0, 0),
+}
+U4_ZONES = {                           # TSOP IR-RX (lens N, clear of the E fan)
+    "N_ctr": (145.0, 74.0, 0),
+    "N_w":   (135.0, 74.0, 0),
+    "N_e":   (158.0, 74.0, 0),
 }
 LED_PITCH = 5.0
 LED_REFS = ["D6", "D7", "D10", "D11", "D12"]
@@ -111,10 +114,11 @@ def make_anchors(choices, rng=None, jit=0.0):
     bx, by, bo = BTN_ZONES[choices["btn"]]
     a.update({r: (J(px), J(py), rot)
               for r, (px, py, rot) in buttons(bx, by, bo).items()})
-    for grp, table in (("j4", J4_ZONES), ("ldo", LDO_ZONES), ("u5", U5_ZONES)):
+    for grp, table in (("j4", J4_ZONES), ("ldo", LDO_ZONES), ("u5", U5_ZONES),
+                       ("u4", U4_ZONES)):
         key = choices[grp]
         x, y, rot = table[key]
-        ref = {"j4": "J4", "ldo": "U1", "u5": "U5"}[grp]
+        ref = {"j4": "J4", "ldo": "U1", "u5": "U5", "u4": "U4"}[grp]
         a[ref] = (J(x), J(y), rot)
     return a
 
@@ -179,10 +183,8 @@ def fmt(m):
 def candidates(n, rng):
     """Named controls first, then random combos (dedup)."""
     named = [
-        ("baseline", dict(led="S_center", btn="S_center", j4="N_EofU1",
-                          ldo="NW", u5="SE")),
-        ("user_hyp", dict(led="SW", btn="SW", j4="under_ESP",
-                          ldo="NW_corner", u5="SE")),
+        ("v3_hand", dict(led="N_row", btn="W_edge", j4="N_ctr", ldo="NW",
+                         u5="NE", u4="N_w")),
     ]
     seen = {tuple(sorted(c.items())) for _, c in named}
     out = list(named)
@@ -191,7 +193,7 @@ def candidates(n, rng):
         tries += 1
         c = dict(led=rng.choice(list(LED_ZONES)), btn=rng.choice(list(BTN_ZONES)),
                  j4=rng.choice(list(J4_ZONES)), ldo=rng.choice(list(LDO_ZONES)),
-                 u5=rng.choice(list(U5_ZONES)))
+                 u5=rng.choice(list(U5_ZONES)), u4=rng.choice(list(U4_ZONES)))
         key = tuple(sorted(c.items()))
         if key in seen:
             continue
@@ -209,7 +211,7 @@ def main():
     rows = []
     best = None
     for tag, choices in candidates(n, rng):
-        jit = 0.0 if tag in ("baseline", "user_hyp") else 0.6
+        jit = 0.0 if tag == "v3_hand" else 0.6
         try:
             m, s, line = evaluate(choices, rng, jit=jit, tag=tag)
         except Exception as e:                # a bad candidate must not kill the run
@@ -230,7 +232,7 @@ def main():
 
 # flexible anchors the search moves (others — antenna/USB/IR-fan/TSOP — are
 # physics-fixed and never legalized, only treated as obstacles).
-FLEX = set(LED_REFS) | {"SW1", "SW2", "J4", "U1", "U5"}
+FLEX = set(LED_REFS) | {"SW1", "SW2", "J4", "U1", "U5", "U4"}
 
 
 def _legalize(b, anchors):
