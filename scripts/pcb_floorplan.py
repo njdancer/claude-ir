@@ -39,8 +39,8 @@ ANCHORS = {
     # --- WEST column: power + USB-C + buttons ---
     "J2":  (110.0, 94.0, 270),   # USB-C, mouth overhangs W edge; y aligns to U3's W USB pins
     "U1":  (118.0, 76.0, 90),    # AMS1117 LDO, NW corner, tab N into the edge thermal pour
-    "F1":  (127.0, 76.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
-    "D1":  (132.0, 76.0, 0),     # TVS
+    "F1":  (124.0, 74.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
+    "D1":  (132.0, 74.0, 0),     # TVS
     "SW1": (112.0, 104.0, 0),    # RESET button, W edge (reachable)
     "SW2": (123.0, 104.0, 0),    # BOOT button
     # --- CENTER-SOUTH: MCU rotated 180, antenna keepout overhangs the S edge ---
@@ -63,7 +63,7 @@ ANCHORS = {
     "D4":  (188.0, 100.0, 255), # -15
     "D5":  (188.0, 110.0, 225), # -45 SE
     "U5":  (182.0, 76.0, 0),     # AHT20 sensor, NE corner, far from LDO heat
-    "J5":  (192.0, 96.0, 0),     # ext-IR header, E edge
+    "J5":  (195.0, 74.0, 0),     # ext-IR header, E edge
 }
 
 

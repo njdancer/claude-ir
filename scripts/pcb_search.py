@@ -50,8 +50,8 @@ FIXED = {
     "Q3": (174.0, 98.0, 0),                    # IR driver MOSFET, W of LED fan
     "D2": (188.0, 80.0, 315), "D3": (188.0, 90.0, 285),
     "D4": (188.0, 100.0, 255), "D5": (188.0, 110.0, 225),  # IR fan firing E
-    "J5": (192.0, 96.0, 0),                    # ext-IR header, E edge
-    "F1": (127.0, 76.0, 0), "D1": (132.0, 76.0, 0),        # VBUS chain (NW)
+    "J5": (195.0, 74.0, 0),                    # ext-IR header, E edge
+    "F1": (124.0, 74.0, 0), "D1": (132.0, 74.0, 0),        # VBUS chain (NW)
 }
 
 # Discrete zones for the flexible groups (rotated-U3 layout: free space is the
