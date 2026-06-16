@@ -61,7 +61,13 @@ the board — design + 1:1 mapping in
   - Config lives in `pcb_floorplan.ANCHORS` (Layout B west-end). Reproduce:
     `pcb_experiment.py` pipeline. **`hardware/notes/autoresearch.md`** has the
     loop; `experiments.jsonl` (gitignored) the run log.
-- **➡️ NEXT:** (a) optional USB→F.Cu via B.Cu keepout under the J2→U3 lane;
+- **USB→F.Cu via B.Cu keepout — TRIED, backfires (2026-06-16).** A B.Cu
+  track/via keepout over the J2→U3 lane pushed the pair to route *around* it
+  (B.Cu 9→20 mm, 4 vias) instead of onto F.Cu — same geometric backfire as the
+  merged board. B.Cu (2–4 vias) is the natural optimum here and is fine for
+  full-speed; accepted. (F.Cu *did* land 0-via in one earlier placement, so it's
+  placement-marginal, not forced-able cheaply.)
+- **➡️ NEXT:** (a) ~~optional USB→F.Cu~~ (backfires, accepted B.Cu);
   (b) re-verify the USB-C **3D model seating** at rot180 (FAB/pads are correct;
   the `(model …)` offset was tuned for the old rotation); (c) CI baseline refresh
   for the new layout (silk/DRC counts drift) in `kicad/kicad:10.0.2`; (d) Nick
