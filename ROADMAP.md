@@ -10,6 +10,44 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔬 **AUTORESEARCH LOOP for layout/routing — BUILT + RUNNING; Layout-B power
+corner is the blocker (2026-06-16, Nick: "run the Layout-B search, but first
+replicate Karpathy's autoresearch for iteratively improving the board; we can
+totally remap GPIO — I don't care what pins").** Replicated Karpathy's ratchet
+loop (immutable evaluator + editable artifact + history log + keep-if-better) on
+the board — design + 1:1 mapping in
+[`hardware/notes/autoresearch.md`](hardware/notes/autoresearch.md). New tooling:
+- **`scripts/pcb_experiment.py`** — the immutable evaluator (the "prepare.py"):
+  one candidate → apply ANCHORS floorplan + legalize flex/holes + optional GPIO
+  remap → `pcb_place_v2` → rip → FreeRouting → pour → DRC → `pcb_score`; logs a
+  line to `hardware/fab/experiments.jsonl`, ratchets the best board aside.
+- **`scripts/pcb_gpio_remap.py`** — the new lever Nick unlocked: reassign nets
+  among U3's permutable pads (6 free + 4 spare; USB/strap/power locked) so each
+  signal exits the side facing its zone. The placement re-seat is net-driven so
+  remap + re-place is self-consistent. Reflection into the sources of truth
+  (firmware build_flags + schematic + netlist) is queued for a winning remap.
+- **Bug fixed (benefits all placement):** `pcb_place_v2.keepout_box` read only
+  U3's footprint antenna keepout, missing the **board-level** rule area that
+  extends past the module — it stranded the U3 decoupling caps just below the
+  footprint keepout (passed the placer, failed DRC `items_not_allowed`). Now
+  unions all rule areas.
+- **Finding (Layout B, ~12 experiments): USB + every peripheral net route
+  cleanly; the POWER chain is the blocker.** Root cause is the WROOM-02 pinout —
+  **its 3V3/EN/GND pins cluster at the *antenna end* of the module**, so with the
+  antenna on the W board edge (rot90) the 3V3 pad (pad1) is double-cornered by
+  the board edge + the antenna keepout: its decoupling caps have no legal home
+  and the +5V/+3.3V/VBUS chain won't close (14 unrouted, all in the N power/USB
+  zone — zero peripheral nets). **GPIO remap can't fix this** (power pins are
+  hardware-fixed). This is the *same class* of failure as Layout A's cram strip:
+  both edge-mount orientations that win USB break power on 2 layers.
+- **➡️ NEXT (this session continues):** run the generative search over the
+  Layout-B frame with **U1/F1/D1 (power) added to the flexible set** + GPIO remap
+  as a dimension — a fair test of whether *any* power placement closes it (the
+  open question). If even a deliberate/generous power placement fails, that's the
+  conclusive "rot90 doesn't route on 2L" result → fall back to the merged 0/0
+  board (USB-on-B.Cu, fine for full-speed) or escalate to 4-layer. Baseline
+  fallback unchanged: merged board = git HEAD, routes 0 DRC / 0 unrouted.
+
 🧭 **U3-ROTATION TO FIX USB — TWO LAYOUTS TRIED, NEITHER ROUTES ON 2 LAYERS
 (2026-06-16, Nick: rotate the module so its USB pins face J2; stay 2-layer, no
 4-layer).** This revisits item (2) below (USB-on-B.Cu). Confirmed the USB win is

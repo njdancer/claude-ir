@@ -78,15 +78,25 @@ def court_bbox(f):
 
 
 def keepout_box(b):
+    """Union bbox of ALL antenna rule areas. There are TWO: U3's footprint
+    keepout (rotates with the module, y stops at the module edge) AND a
+    board-level rule area that extends past the module to the S board edge.
+    Reading only the footprint one stranded decoupling caps just below it
+    (passed the placer, failed DRC items_not_allowed). Union both."""
+    boxes = []
     for f in b.GetFootprints():
-        if f.GetReference() != "U3":
-            continue
         for z in f.Zones():
             if z.GetIsRuleArea():
-                zb = z.GetBoundingBox()
-                return (pcbnew.ToMM(zb.GetLeft()), pcbnew.ToMM(zb.GetTop()),
-                        pcbnew.ToMM(zb.GetRight()), pcbnew.ToMM(zb.GetBottom()))
-    return None
+                boxes.append(z.GetBoundingBox())
+    for z in b.Zones():
+        if z.GetIsRuleArea():
+            boxes.append(z.GetBoundingBox())
+    if not boxes:
+        return None
+    return (min(pcbnew.ToMM(z.GetLeft()) for z in boxes),
+            min(pcbnew.ToMM(z.GetTop()) for z in boxes),
+            max(pcbnew.ToMM(z.GetRight()) for z in boxes),
+            max(pcbnew.ToMM(z.GetBottom()) for z in boxes))
 
 
 def main():

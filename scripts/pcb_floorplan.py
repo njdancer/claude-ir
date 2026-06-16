@@ -27,8 +27,8 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
-         "H3": (110.0, 105.0), "H4": (177.5, 109.5)}
+HOLES = {"H1": (135.0, 73.0), "H2": (185.0, 73.0),
+         "H3": (135.0, 112.0), "H4": (185.0, 112.0)}
 
 # Zone anchors: ref -> (x, y, rot_deg). v4 "U3-at-west-end" floorplan (Nick,
 # 2026-06-16): U3 rotated 90 at the WEST end so the antenna overhangs the W
@@ -39,7 +39,8 @@ HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
 ANCHORS = {
     # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
     "U3":  (126.0, 92.0, 90),
-    "J2":  (130.0, 73.0, 270),   # USB-C, N long edge, by U3's N USB pins
+    "J2":  (130.0, 72.0, 270),   # USB-C, N long edge, by U3's N USB pins (pads
+                                 # 13/14 land at y83 directly S of here)
     # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
     "U1":  (152.0, 74.0, 90),    # AMS1117 LDO
     "F1":  (140.0, 73.0, 0),     # fuse
@@ -50,18 +51,21 @@ ANCHORS = {
     "D3":  (188.0, 90.0, 285),
     "D4":  (188.0, 100.0, 255),
     "D5":  (188.0, 110.0, 225),
-    "J5":  (193.0, 76.0, 0),     # ext-IR header, NE
-    # --- open CENTRE/S: peripherals (flexible) ---
-    "U4":  (152.0, 108.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
+    "J5":  (195.0, 73.0, 0),     # ext-IR header, NE corner (clear of D2 fan)
+    # --- open CENTRE/S: peripherals (flexible; legalizer fine-tunes) ---
+    # Deliberate non-cramming arrangement: LED row along the upper-centre band,
+    # J4 below it, buttons + TSOP along the S edge, sensor E-centre away from the
+    # W LDO heat. (Targets chosen so courtyards don't fundamentally collide.)
+    "D6":  (140.0, 89.0, 90),    # status LED row, upper-centre
+    "D7":  (145.5, 89.0, 90),
+    "D10": (151.0, 89.0, 90),
+    "D11": (156.5, 89.0, 90),
+    "D12": (162.0, 89.0, 90),
     "U5":  (170.0, 90.0, 0),     # AHT20 sensor, centre-E, away from W LDO heat
-    "J4":  (140.0, 100.0, 0),    # GPIO header, centre
-    "SW1": (131.0, 108.0, 0),    # RESET button
-    "SW2": (143.0, 108.0, 0),    # BOOT button
-    "D6":  (158.0, 100.0, 90),   # status LEDs, centre row
-    "D7":  (163.0, 100.0, 90),
-    "D10": (168.0, 100.0, 90),
-    "D11": (173.0, 100.0, 90),
-    "D12": (178.0, 100.0, 90),
+    "J4":  (142.0, 101.0, 90),   # GPIO header, horizontal, centre
+    "SW1": (140.0, 110.0, 0),    # RESET button, S edge
+    "SW2": (149.0, 110.0, 0),    # BOOT button, S edge
+    "U4":  (160.0, 110.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
 }
 
 
