@@ -35,16 +35,21 @@ def main():
     gnd = board.FindNet("GND")
     assert gnd, "GND net missing"
 
-    # antenna keepout rect from U3's footprint rule-area (central-north strip),
-    # extended to the north board edge. Used for the pour keepout + via skip.
-    kx0, ky0, kx1, ky1 = 136.0, Y0, 164.0, 81.5   # fallback
+    # antenna keepout rect from U3's footprint rule-area, extended to the
+    # NEAREST board edge (the module may be rotated to either long edge).
+    mid = (Y0 + Y1) / 2
+    kx0, ky0, kx1, ky1 = 136.0, Y0 - 1, 164.0, 81.5   # fallback (north)
     for fp in board.GetFootprints():
         if fp.GetReference() == "U3":
             for z in fp.Zones():
                 if z.GetIsRuleArea():
                     zb = z.GetBoundingBox()
                     kx0, kx1 = pcbnew.ToMM(zb.GetLeft()), pcbnew.ToMM(zb.GetRight())
-                    ky0, ky1 = Y0, pcbnew.ToMM(zb.GetBottom())
+                    zt, zbm = pcbnew.ToMM(zb.GetTop()), pcbnew.ToMM(zb.GetBottom())
+                    if (zt + zbm) / 2 < mid:        # antenna on the N edge
+                        ky0, ky1 = Y0 - 1, zbm
+                    else:                            # antenna on the S edge
+                        ky0, ky1 = zt, Y1 + 1
 
     # drop pre-existing zones AND prior GND stitching vias (idempotent reruns —
     # GND is never routed, only poured + stitched, so every GND via is ours;
@@ -80,7 +85,7 @@ def main():
     ls.AddLayer(pcbnew.F_Cu)
     ls.AddLayer(pcbnew.B_Cu)
     ko.SetLayerSet(ls)
-    ko.AddPolygon(rect_chain(kx0, Y0 - 1, kx1, ky1))
+    ko.AddPolygon(rect_chain(kx0, ky0, kx1, ky1))
     ko.SetZoneName("antenna_keepout")
     board.Add(ko)
 
