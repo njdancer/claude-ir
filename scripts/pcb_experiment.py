@@ -76,15 +76,19 @@ _FLEX = {"U4", "U5", "J4", "SW1", "SW2", "D6", "D7", "D10", "D11", "D12",
          "H1", "H2", "H3", "H4"}
 
 
-def _legalize_flex(b):
+def _legalize_flex(b, anchors=None):
     """Spiral-nudge each FLEX part to the nearest collision-free slot near its
     ANCHOR target, treating fixed parts + already-placed flex as obstacles.
-    Reuses pcb_place_v2's courtyard/keepout helpers."""
+    Reuses pcb_place_v2's courtyard/keepout helpers. `anchors` lets the caller
+    pass overridden targets (else falls back to pcb_floorplan.ANCHORS) -- without
+    this, an --anchors override of a FLEX part was placed then legalized straight
+    back to its original target."""
     import math
     import pcbnew
     import pcb_floorplan as fp
     import pcb_place_v2 as pv
-    targets = {**fp.ANCHORS, **{h: (x, y, 0) for h, (x, y) in fp.HOLES.items()}}
+    base = anchors if anchors is not None else fp.ANCHORS
+    targets = {**base, **{h: (x, y, 0) for h, (x, y) in fp.HOLES.items()}}
     fps = {f.GetReference(): f for f in b.GetFootprints()}
     placed = [pv.court_bbox(fps[r]) for r in _FIXED_OBST if r in fps]
     ko = pv.keepout_box(b)
@@ -122,16 +126,22 @@ def _legalize_flex(b):
             placed.append(bb)
 
 
-def _apply_floorplan(gpio_path):
+def _apply_floorplan(gpio_path, anchors_path="-"):
     """Subprocess stage: fresh pristine -> ANCHORS floorplan + legalize +
-    outline (+ optional gpio remap)."""
+    outline (+ optional gpio remap). anchors_path overrides individual anchors
+    (json {ref:[x,y,rot]}) so the search can sweep positions without editing
+    pcb_floorplan."""
     import pcbnew
     sys.path.insert(0, HERE)
     import pcb_floorplan as fp
+    anchors = dict(fp.ANCHORS)
+    if anchors_path and anchors_path != "-":
+        for ref, v in json.load(open(anchors_path)).items():
+            anchors[ref] = tuple(v)
     shutil.copy(os.path.join(ROOT, PRISTINE) if not os.path.isabs(PRISTINE)
                 else PRISTINE, os.path.join(ROOT, PCB))
     b = pcbnew.LoadBoard(PCB)
-    fp.apply_anchors(b, fp.ANCHORS, fp.HOLES, draw_outline=False)
+    fp.apply_anchors(b, anchors, fp.HOLES, draw_outline=False)
     # Drop the STALE board-level antenna keepout. It was drawn for the rot0
     # merged layout (x136-164, y69-81) and does NOT track U3 when the floorplan
     # moves the module -- in Layout B it strands on the N power chain (F1/U1/D1),
@@ -143,7 +153,7 @@ def _apply_floorplan(gpio_path):
         b.Remove(z)
     pcbnew.SaveBoard(PCB, b)            # commit the removal, then reload clean
     b = pcbnew.LoadBoard(PCB)           # (b.Remove curses later .Pads() iteration)
-    _legalize_flex(b)
+    _legalize_flex(b, anchors)
     fp.set_outline(b)   # last: its b.Remove() curses .Pads()/.GetCourtyard()
     pcbnew.SaveBoard(PCB, b)
     # NB: GPIO remap runs as its OWN subprocess (see experiment()) -- doing it
@@ -181,10 +191,10 @@ def _score():
     print(json.dumps({"metrics": m, "score": pcb_score.score(m)}))
 
 
-def experiment(tag, gpio_path, note):
+def experiment(tag, gpio_path, note, anchors_path=None):
     ensure_pristine()
     # 1. placement -- own process
-    r = run([PY, __file__, "_apply", gpio_path or "-"])
+    r = run([PY, __file__, "_apply", gpio_path or "-", anchors_path or "-"])
     if r.returncode:
         return _log(tag, PENALTY, dict(stage="apply", err=r.stderr[-300:]), gpio_path, note)
     # 1b. GPIO remap -- its own clean process (SWIG state, see _apply_floorplan)
@@ -211,6 +221,7 @@ def experiment(tag, gpio_path, note):
     for st in ("export", "route", "import"):
         run([PY, os.path.join(HERE, "pcb_route_fr.py"), st])
     run([PY, os.path.join(HERE, "pcb_pour.py")])
+    run([PY, os.path.join(HERE, "pcb_ldo_pour.py")])   # U1 thermal pour (scored)
     # 5. DRC + score
     errs, unconn = drc()
     sc = run([PY, __file__, "_score"])
@@ -261,7 +272,7 @@ def _best_score():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "_apply":
-        _apply_floorplan(sys.argv[2])
+        _apply_floorplan(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "-")
     elif len(sys.argv) > 1 and sys.argv[1] == "_overlaps":
         _overlaps()
     elif len(sys.argv) > 1 and sys.argv[1] == "_score":
@@ -270,6 +281,7 @@ if __name__ == "__main__":
         ap = argparse.ArgumentParser()
         ap.add_argument("--tag", required=True)
         ap.add_argument("--gpio", default=None)
+        ap.add_argument("--anchors", default=None)
         ap.add_argument("--note", default="")
         a = ap.parse_args()
-        experiment(a.tag, a.gpio, a.note)
+        experiment(a.tag, a.gpio, a.note, a.anchors)

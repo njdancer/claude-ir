@@ -40,13 +40,32 @@ the board — design + 1:1 mapping in
   zone — zero peripheral nets). **GPIO remap can't fix this** (power pins are
   hardware-fixed). This is the *same class* of failure as Layout A's cram strip:
   both edge-mount orientations that win USB break power on 2 layers.
-- **➡️ NEXT (this session continues):** run the generative search over the
-  Layout-B frame with **U1/F1/D1 (power) added to the flexible set** + GPIO remap
-  as a dimension — a fair test of whether *any* power placement closes it (the
-  open question). If even a deliberate/generous power placement fails, that's the
-  conclusive "rot90 doesn't route on 2L" result → fall back to the merged 0/0
-  board (USB-on-B.Cu, fine for full-speed) or escalate to 4-layer. Baseline
-  fallback unchanged: merged board = git HEAD, routes 0 DRC / 0 unrouted.
+- **✅ RESULT — Layout B ROUTES 0 DRC / 0 unrouted on 2 layers.** The
+  autoresearch loop closed it. The "power doesn't route" conclusion was a
+  **stale-keepout bug** (`pcb_pour` rebuilt the antenna keepout N/S-only; antenna-W
+  fell through and extended it across the power chain) — fixed (edge-agnostic).
+  Then the loop drove placement to a clean solution:
+  - **U1 (LDO) → open NE** for a **433 mm² +3.3V tab thermal pour** (Nick's
+    "big fat thermal pour" ask); F1/D1 spread along the N edge so nothing crams.
+    `pcb_ldo_pour` is now U1-tracking (was hardcoded NW) + scored.
+  - **J2 USB-C → rot180** so the **mouth faces N off the board edge** (rot90/270
+    faced sideways — unusable; Nick caught it). rot180 is also shallower (4.7 mm)
+    so pads sit on-board with the mouth overhanging.
+  - **U5 (AHT20) → far from the LDO** (~38 mm to U1; sensor accuracy).
+  - **GPIO remap proven** (USER_LED2 off the far-W pad) — gets USB to 2 vias vs
+    4, but **not required**: the board routes 0/0 without it, so the committed
+    board stays schematic-parity-valid (no GPIO reflection needed yet).
+  - USB pair lands on **B.Cu (2–4 vias, ~9 mm)** — functional for full-speed
+    (same as the shipping merged board); F.Cu is marginal/flips with placement.
+    Forcing it (B.Cu keepout) is the remaining optional SI optimisation.
+  - Config lives in `pcb_floorplan.ANCHORS` (Layout B west-end). Reproduce:
+    `pcb_experiment.py` pipeline. **`hardware/notes/autoresearch.md`** has the
+    loop; `experiments.jsonl` (gitignored) the run log.
+- **➡️ NEXT:** (a) optional USB→F.Cu via B.Cu keepout under the J2→U3 lane;
+  (b) re-verify the USB-C **3D model seating** at rot180 (FAB/pads are correct;
+  the `(model …)` offset was tuned for the old rotation); (c) CI baseline refresh
+  for the new layout (silk/DRC counts drift) in `kicad/kicad:10.0.2`; (d) Nick
+  sign-off + finalise. Fallback unchanged: merged board on `main` routes 0/0.
 
 🧭 **U3-ROTATION TO FIX USB — TWO LAYOUTS TRIED, NEITHER ROUTES ON 2 LAYERS
 (2026-06-16, Nick: rotate the module so its USB pins face J2; stay 2-layer, no

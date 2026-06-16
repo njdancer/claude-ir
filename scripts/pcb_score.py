@@ -37,8 +37,11 @@ USB_NETS = {"/USB_D+", "/USB_D-"}
 WEIGHTS = {
     "usb_bcu_mm": 2.0, "usb_vias": 8.0, "bcu_sig_mm": 1.0,
     "track_mm": 0.05, "vias": 1.0, "decap_mm": 0.5, "sens_mm": -0.5,
+    "ldo_pour_mm2": -2.0,    # reward a big LDO thermal pour (Nick: "big fat
+                             # thermal pour"); negative = lower score = better
 }
 SENS_CAP = 40.0          # reward sensor->heat separation only up to here
+LDO_CAP = 600.0          # ~1in2-ish; enough for theta_JA, don't over-reward past
 PENALTY = 1e6            # for boards that fail the hard gates
 
 
@@ -98,6 +101,21 @@ def metrics(board_path):
         if ds:
             sens = min(min(ds), SENS_CAP)
     m["sens_mm"] = sens
+
+    # LDO thermal pour: F.Cu filled copper on +3.3V (the U1 SOT-223 tab pour),
+    # capped. Bigger = cooler LDO. (GND pour is a different net; +3.3V on F.Cu is
+    # essentially the LDO thermal/rail copper.)
+    ldo = 0.0
+    bf = b.GetLayerID("F.Cu")
+    for i in range(b.GetAreaCount()):
+        zz = b.GetArea(i)
+        if zz.GetIsRuleArea() or zz.GetNetname() != "+3.3V":
+            continue
+        try:
+            ldo += _mm(_mm(zz.GetFilledPolysList(bf).Area()))
+        except Exception:
+            pass
+    m["ldo_pour_mm2"] = min(ldo, LDO_CAP)
     return m
 
 
@@ -113,7 +131,7 @@ def main():
     print(f"score {s:8.1f}  " + "  ".join(
         f"{k}={m[k]:.1f}" if isinstance(m[k], float) else f"{k}={m[k]}"
         for k in ("usb_bcu_mm", "usb_vias", "bcu_sig_mm", "track_mm", "vias",
-                  "decap_mm", "sens_mm")))
+                  "decap_mm", "sens_mm", "ldo_pour_mm2")))
 
 
 if __name__ == "__main__":

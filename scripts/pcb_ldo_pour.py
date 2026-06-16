@@ -39,15 +39,39 @@ PCB = "hardware/esp32-ir-remote.kicad_pcb"
 # corner — a better heat path than the old isolated /LDO_OUT island.
 NET = "+3.3V"
 
-# NW-corner pour. x0/y0 run PAST the W (106) and N (70) board edges so KiCad
-# clips the fill flush to the outline (edge clearance only). East bound stops
-# just W of J4 (left edge ~125.7); south bound clears the F1/D1 pocket. The
-# whole rectangle is /LDO_OUT, displacing GND-F in the corner (no slivers).
-TOP_RECT = (104.0, 68.0, 125.5, 87.0)
+# Board outline (mm) — pour rects run PAST the relevant edge so KiCad clips the
+# fill flush to the outline (edge clearance only).
+BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 
 
 def mm(v):
     return pcbnew.ToMM(v)
+
+
+def ldo_rect(b):
+    """Generous +3.3V thermal-pour rectangle around U1's tab, biased to the
+    nearest board edge (heat sink) and reaching ~14mm inboard + ~11mm laterally
+    into open copper. KiCad clips to the outline and carves 0.3mm around foreign
+    parts, so the pour fills whatever open copper U1 actually has -- making
+    'U1 needs spare space for a big pour' (Nick, 2026-06-16) a property the
+    layout/score can optimise rather than a hardcoded corner. Tracks U1 wherever
+    the floorplan/search puts it."""
+    u1 = next((f for f in b.GetFootprints() if f.GetReference() == "U1"), None)
+    if u1 is None:
+        return (104.0, 68.0, 125.5, 87.0)        # legacy fallback
+    tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)  # VOUT tab
+    p = (tab or u1).GetPosition()
+    tx, ty = mm(p.x), mm(p.y)
+    L, DEPTH = 11.0, 14.0
+    dN, dS, dW, dE = ty - BY0, BY1 - ty, tx - BX0, BX1 - tx
+    m = min(dN, dS, dW, dE)
+    if m == dN:                                  # nearest the N edge
+        return (tx - L, BY0 - 2, tx + L, ty + DEPTH)
+    if m == dS:
+        return (tx - L, ty - DEPTH, tx + L, BY1 + 2)
+    if m == dW:
+        return (BX0 - 2, ty - L, tx + DEPTH, ty + L)
+    return (tx - DEPTH, ty - L, BX1 + 2, ty + L)  # nearest the E edge
 
 
 def main():
@@ -76,7 +100,7 @@ def main():
     z.SetIsFilled(True)
     z.SetZoneName("LDO_OUT_thermal")
     z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)  # solid tab connection
-    x0, y0, x1, y1 = TOP_RECT
+    x0, y0, x1, y1 = ldo_rect(b)
     poly = pcbnew.SHAPE_POLY_SET()
     poly.NewOutline()
     for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):

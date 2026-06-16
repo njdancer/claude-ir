@@ -39,13 +39,16 @@ HOLES = {"H1": (135.0, 73.0), "H2": (185.0, 73.0),
 ANCHORS = {
     # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
     "U3":  (126.0, 95.5, 90),    # nudged S so the USB-C posts clear the N edge
-    "J2":  (130.0, 75.3, 270),   # USB-C: center>=74.7 keeps the N mounting posts
-                                 # on-board (mouth still overhangs N); 75.3 gives
-                                 # the posts the 0.2mm edge clearance
-    # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
-    "U1":  (152.0, 76.5, 90),    # AMS1117 LDO (S of N edge: tab pad clears edge)
-    "F1":  (140.0, 73.5, 0),     # fuse
-    "D1":  (162.0, 73.5, 0),     # TVS
+    "J2":  (130.0, 72.5, 180),   # USB-C: rot180 -> mouth faces N off the board
+                                 # edge (rot90/270 face sideways - unusable); at
+                                 # rot180 it's only 4.7mm deep so pads sit
+                                 # on-board with the mouth overhanging N + posts
+                                 # clearing the edge
+    # --- power: U1 LDO in the OPEN NE for a big thermal pour (Nick 2026-06-16);
+    #     VBUS J2 -> F1 -> D1 -> U1 spread along the N edge so none crams ---
+    "U1":  (176.0, 81.0, 90),    # AMS1117 LDO, open NE -> ~433mm2 +3.3V tab pour
+    "F1":  (144.0, 73.5, 0),     # fuse
+    "D1":  (160.0, 73.5, 0),     # TVS
     # --- EAST end: IR-TX fan firing E ---
     "Q3":  (176.0, 92.0, 0),
     "D2":  (188.0, 80.0, 315),
@@ -62,7 +65,8 @@ ANCHORS = {
     "D10": (151.0, 89.0, 90),
     "D11": (156.5, 89.0, 90),
     "D12": (162.0, 89.0, 90),
-    "U5":  (170.0, 90.0, 0),     # AHT20 sensor, centre-E, away from W LDO heat
+    "U5":  (140.0, 84.0, 0),     # AHT20 sensor: kept FAR from the NE LDO heat
+                                 # (~38mm to U1); limited only by ~18mm to U3
     "J4":  (142.0, 101.0, 90),   # GPIO header, horizontal, centre
     "SW1": (140.0, 110.0, 0),    # RESET button, S edge
     "SW2": (149.0, 110.0, 0),    # BOOT button, S edge
