@@ -30,40 +30,38 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
          "H3": (110.0, 105.0), "H4": (177.5, 109.5)}
 
-# Zone anchors: ref -> (x, y, rot_deg). v3 "rotate-U3-180" floorplan (Nick,
-# 2026-06-16): U3 spun 180 and dropped onto the SOUTH edge so the antenna
-# overhangs S and its USB pins (were E) now face W toward the W USB-C, while the
-# IR_TX/IR_RX pins (were W) now face E toward the E IR fan — killing the old
-# USB cross-board run. The S peripherals move up into the freed N band.
+# Zone anchors: ref -> (x, y, rot_deg). v4 "U3-at-west-end" floorplan (Nick,
+# 2026-06-16): U3 rotated 90 at the WEST end so the antenna overhangs the W
+# short edge (clean corner, away from everything), its USB pins face NORTH (so
+# the USB-C sits on the N long edge right next to them) and its IR pins face
+# SOUTH/centre. The IR fan stays at the opposite (E) end and the whole open
+# CENTRE holds the now-distributed peripherals — no more thin-strip cram.
 ANCHORS = {
-    # --- WEST column: power + USB-C + buttons ---
-    "J2":  (110.0, 94.0, 270),   # USB-C, mouth overhangs W edge; y aligns to U3's W USB pins
-    "U1":  (118.0, 76.0, 90),    # AMS1117 LDO, NW corner, tab N into the edge thermal pour
-    "F1":  (124.0, 74.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1)
-    "D1":  (132.0, 74.0, 0),     # TVS
-    "SW1": (112.0, 104.0, 0),    # RESET button, W edge (reachable)
-    "SW2": (123.0, 104.0, 0),    # BOOT button
-    # --- CENTER-SOUTH: MCU rotated 180, antenna keepout overhangs the S edge ---
-    "U3":  (150.0, 96.0, 180),
-    # --- NORTH band (freed by U3 moving S): header hugs U3, status LEDs N edge.
-    #     NOTE: routing not yet closed (~14 nets) — the rotation re-sides every
-    #     non-USB/IR pin, so this peripheral set still needs re-optimisation
-    #     (pcb_search on the fixed rotated U3). USB/IR alignment is proven. ---
-    "J4":  (150.0, 82.0, 0),     # spare-GPIO header, just N of U3 (heaviest link)
-    "U4":  (135.0, 75.0, 0),     # TSOP IR-RX, N edge, lens N, far from the E IR fan
-    "D6":  (148.0, 73.0, 90),
-    "D7":  (153.0, 73.0, 90),
-    "D10": (158.0, 73.0, 90),
-    "D11": (163.0, 73.0, 90),
-    "D12": (168.0, 73.0, 90),
-    # --- EAST column: IR-TX fan firing E, sensor, ext-IR ---
-    "Q3":  (174.0, 98.0, 0),     # IR MOSFET driver, W of the LED row
-    "D2":  (188.0, 80.0, 315),  # +45 NE
-    "D3":  (188.0, 90.0, 285),  # +15
-    "D4":  (188.0, 100.0, 255), # -15
-    "D5":  (188.0, 110.0, 225), # -45 SE
-    "U5":  (182.0, 76.0, 0),     # AHT20 sensor, NE corner, far from LDO heat
-    "J5":  (195.0, 74.0, 0),     # ext-IR header, E edge
+    # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
+    "U3":  (126.0, 92.0, 90),
+    "J2":  (130.0, 73.0, 270),   # USB-C, N long edge, by U3's N USB pins
+    # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
+    "U1":  (152.0, 74.0, 90),    # AMS1117 LDO
+    "F1":  (140.0, 73.0, 0),     # fuse
+    "D1":  (162.0, 73.0, 0),     # TVS
+    # --- EAST end: IR-TX fan firing E ---
+    "Q3":  (176.0, 92.0, 0),
+    "D2":  (188.0, 80.0, 315),
+    "D3":  (188.0, 90.0, 285),
+    "D4":  (188.0, 100.0, 255),
+    "D5":  (188.0, 110.0, 225),
+    "J5":  (193.0, 76.0, 0),     # ext-IR header, NE
+    # --- open CENTRE/S: peripherals (flexible) ---
+    "U4":  (152.0, 108.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
+    "U5":  (170.0, 90.0, 0),     # AHT20 sensor, centre-E, away from W LDO heat
+    "J4":  (140.0, 100.0, 0),    # GPIO header, centre
+    "SW1": (131.0, 108.0, 0),    # RESET button
+    "SW2": (143.0, 108.0, 0),    # BOOT button
+    "D6":  (158.0, 100.0, 90),   # status LEDs, centre row
+    "D7":  (163.0, 100.0, 90),
+    "D10": (168.0, 100.0, 90),
+    "D11": (173.0, 100.0, 90),
+    "D12": (178.0, 100.0, 90),
 }
 
 
