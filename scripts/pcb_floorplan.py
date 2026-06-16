@@ -38,13 +38,14 @@ HOLES = {"H1": (135.0, 73.0), "H2": (185.0, 73.0),
 # CENTRE holds the now-distributed peripherals — no more thin-strip cram.
 ANCHORS = {
     # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
-    "U3":  (126.0, 92.0, 90),
-    "J2":  (130.0, 72.0, 270),   # USB-C, N long edge, by U3's N USB pins (pads
-                                 # 13/14 land at y83 directly S of here)
+    "U3":  (126.0, 95.5, 90),    # nudged S so the USB-C posts clear the N edge
+    "J2":  (130.0, 75.3, 270),   # USB-C: center>=74.7 keeps the N mounting posts
+                                 # on-board (mouth still overhangs N); 75.3 gives
+                                 # the posts the 0.2mm edge clearance
     # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
-    "U1":  (152.0, 74.0, 90),    # AMS1117 LDO
-    "F1":  (140.0, 73.0, 0),     # fuse
-    "D1":  (162.0, 73.0, 0),     # TVS
+    "U1":  (152.0, 76.5, 90),    # AMS1117 LDO (S of N edge: tab pad clears edge)
+    "F1":  (140.0, 73.5, 0),     # fuse
+    "D1":  (162.0, 73.5, 0),     # TVS
     # --- EAST end: IR-TX fan firing E ---
     "Q3":  (176.0, 92.0, 0),
     "D2":  (188.0, 80.0, 315),
