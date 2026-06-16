@@ -30,48 +30,38 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
          "H3": (110.0, 105.0), "H4": (177.5, 109.5)}
 
-# Zone anchors: ref -> (x, y, rot_deg). Firing/mouth directions verified by
-# render then tuned. IR LED fan fires EAST (+x); rot ~0 = east, splay around it.
+# Zone anchors: ref -> (x, y, rot_deg). v4 "U3-at-west-end" floorplan (Nick,
+# 2026-06-16): U3 rotated 90 at the WEST end so the antenna overhangs the W
+# short edge (clean corner, away from everything), its USB pins face NORTH (so
+# the USB-C sits on the N long edge right next to them) and its IR pins face
+# SOUTH/centre. The IR fan stays at the opposite (E) end and the whole open
+# CENTRE holds the now-distributed peripherals — no more thin-strip cram.
 ANCHORS = {
-    # --- WEST end: power + USB ---
-    "J2":  (109.7, 92.0, 270),   # USB-C, mouth overhangs west edge ~0.5mm, pads on-board
-    "U1":  (120.0, 80.5, 90),    # AMS1117 LDO in the open NW corner, rot90 so the
-                                 # SOT-223 tab faces NORTH into the to-the-edge
-                                 # thermal pour (max heat spread); pins face S to
-                                 # the VBUS chain. 2-sided pour+vias in pcb_ldo_pour
-    "F1":  (119.0, 88.0, 0),     # fuse  (VBUS: J2 -> F1 -> D1 -> U1), pocket S of U1
-    "D1":  (119.0, 93.0, 0),     # TVS, stacked below F1
-    # --- CENTER: MCU, antenna keepout flush at NORTH edge (rot0) ---
-    "U3":  (150.0, 88.5, 0),
-    # --- EAST end (front): IR-TX fan firing east. base east = rot270; fan is
-    #     ±15/±45° around it. (x,y) here is the desired pad-CENTROID; main()
-    #     shifts each LED so it pivots about its true centre and the row stays
-    #     aligned while the beams fan. ---
-    "Q3":  (178.0, 92.0, 0),     # IR MOSFET driver, W of the LED row
-    "D2":  (186.0, 79.0, 315),  # +45 NE
-    "D3":  (186.0, 88.0, 285),  # +15
-    "D4":  (186.0, 97.0, 255),  # -15
-    "D5":  (186.0, 106.0, 225), # -45 SE
-    # --- North edge (clear apart from the central antenna keepout x136-164) ---
-    "J4":  (130.0, 84.0, 180),   # spare-GPIO 2x5 header — rotated 90 deg CCW
-                                 # (vertical), sat E of U1 but NOT hugging the
-                                 # module: leaves the module-W channel open for
-                                 # the ESP boot/strap routing that jammed before
-    "J5":  (168.0, 74.0, 0),     # ext-IR header, E of the module
-    # --- TSOP receiver: SOUTH long edge (relocated off the TX corner, 1fc1f68);
-    #     lens fires south/room, isolated from the 38kHz drive loop ---
-    "U4":  (153.0, 110.5, 180),
-    # --- South / west: power jumper, buttons, sensor ---
-    "JP1": (110.0, 110.0, 0),    # LDO-disable jumper near U1
-    "SW1": (120.0, 109.0, 0),    # RESET
-    "SW2": (131.0, 109.0, 0),    # BOOT
-    "U5":  (165.0, 110.0, 0),    # AHT20 sensor, S edge, far from LDO heat (W)
-    # --- Status-LED cluster: tight labelled block, top face, S of the MCU ---
-    "D6":  (141.0, 104.0, 90),
-    "D7":  (146.0, 104.0, 90),
-    "D10": (151.0, 104.0, 90),
-    "D11": (156.0, 104.0, 90),
-    "D12": (161.0, 104.0, 90),
+    # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
+    "U3":  (126.0, 92.0, 90),
+    "J2":  (130.0, 73.0, 270),   # USB-C, N long edge, by U3's N USB pins
+    # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
+    "U1":  (152.0, 74.0, 90),    # AMS1117 LDO
+    "F1":  (140.0, 73.0, 0),     # fuse
+    "D1":  (162.0, 73.0, 0),     # TVS
+    # --- EAST end: IR-TX fan firing E ---
+    "Q3":  (176.0, 92.0, 0),
+    "D2":  (188.0, 80.0, 315),
+    "D3":  (188.0, 90.0, 285),
+    "D4":  (188.0, 100.0, 255),
+    "D5":  (188.0, 110.0, 225),
+    "J5":  (193.0, 76.0, 0),     # ext-IR header, NE
+    # --- open CENTRE/S: peripherals (flexible) ---
+    "U4":  (152.0, 108.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
+    "U5":  (170.0, 90.0, 0),     # AHT20 sensor, centre-E, away from W LDO heat
+    "J4":  (140.0, 100.0, 0),    # GPIO header, centre
+    "SW1": (131.0, 108.0, 0),    # RESET button
+    "SW2": (143.0, 108.0, 0),    # BOOT button
+    "D6":  (158.0, 100.0, 90),   # status LEDs, centre row
+    "D7":  (163.0, 100.0, 90),
+    "D10": (168.0, 100.0, 90),
+    "D11": (173.0, 100.0, 90),
+    "D12": (178.0, 100.0, 90),
 }
 
 
@@ -94,14 +84,26 @@ def set_outline(b):
 
 def main():
     b = pcbnew.LoadBoard(PCB)
+    apply_anchors(b, ANCHORS, HOLES)
+    pcbnew.SaveBoard(PCB, b)
+
+
+def apply_anchors(b, anchors, holes, draw_outline=True):
+    """Place every anchor + mounting hole, fan the IR LEDs about their true
+    centre, and (optionally) (re)draw the outline. Used by main() with the
+    module ANCHORS and by pcb_search.py with generated candidate dicts.
+
+    draw_outline=False skips set_outline() (whose b.Remove() curses later
+    .Pads()/.GetCourtyard() iteration) so the caller can legalize placement
+    first and draw the outline itself afterwards."""
     fps = {f.GetReference(): f for f in b.GetFootprints()}
     # NB: set_outline() does b.Remove() which curses later .Pads() iteration,
     # so it runs LAST (after the LED-centroid alignment below).
     moved = 0
-    for ref, (x, y, rot) in {**HOLES_AS_ANCHORS(), **ANCHORS}.items():
+    for ref, (x, y, rot) in {**{r: (hx, hy, 0) for r, (hx, hy) in holes.items()},
+                             **anchors}.items():
         f = fps.get(ref)
         if not f:
-            print(f"  ! {ref} not found")
             continue
         f.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
         if rot is not None:
@@ -110,12 +112,12 @@ def main():
 
     # IR LEDs fan but must stay ALIGNED: rotate about the true LED centre, not
     # the footprint anchor (pad 1). After rotation, shift each so its pad
-    # centroid lands on the ANCHORS target — equivalent to pivoting in place.
+    # centroid lands on the target — equivalent to pivoting in place.
     for ref in ("D2", "D3", "D4", "D5"):
         f = fps.get(ref)
-        if not f:
+        if not f or ref not in anchors:
             continue
-        tx, ty, _ = ANCHORS[ref]
+        tx, ty, _ = anchors[ref]
         xs, ys = [], []
         for p in f.Pads():
             pp = p.GetPosition()
@@ -126,13 +128,10 @@ def main():
         f.SetPosition(pcbnew.VECTOR2I(pos.x + pcbnew.FromMM(tx - cx),
                                       pos.y + pcbnew.FromMM(ty - cy)))
 
-    set_outline(b)   # last: its b.Remove() curses .Pads() iteration above
-    pcbnew.SaveBoard(PCB, b)
+    if draw_outline:
+        set_outline(b)   # last: its b.Remove() curses .Pads() iteration above
     print(f"outline {BX1-BX0:.0f}x{BY1-BY0:.0f}mm, moved {moved} parts")
-
-
-def HOLES_AS_ANCHORS():
-    return {ref: (x, y, 0) for ref, (x, y) in HOLES.items()}
+    return moved
 
 
 if __name__ == "__main__":
