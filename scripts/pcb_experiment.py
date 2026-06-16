@@ -146,9 +146,8 @@ def _apply_floorplan(gpio_path):
     _legalize_flex(b)
     fp.set_outline(b)   # last: its b.Remove() curses .Pads()/.GetCourtyard()
     pcbnew.SaveBoard(PCB, b)
-    if gpio_path and gpio_path != "-":
-        import pcb_gpio_remap as gr
-        gr.apply({str(k): v for k, v in json.load(open(gpio_path)).items()})
+    # NB: GPIO remap runs as its OWN subprocess (see experiment()) -- doing it
+    # in-process here corrupts the SWIG state after the repeated Load/Save above.
 
 
 def _overlaps():
@@ -184,10 +183,16 @@ def _score():
 
 def experiment(tag, gpio_path, note):
     ensure_pristine()
-    # 1. placement (+gpio) -- own process
+    # 1. placement -- own process
     r = run([PY, __file__, "_apply", gpio_path or "-"])
     if r.returncode:
         return _log(tag, PENALTY, dict(stage="apply", err=r.stderr[-300:]), gpio_path, note)
+    # 1b. GPIO remap -- its own clean process (SWIG state, see _apply_floorplan)
+    if gpio_path and gpio_path != "-":
+        r = run([PY, os.path.join(HERE, "pcb_gpio_remap.py"), "apply", gpio_path])
+        if r.returncode:
+            return _log(tag, PENALTY, dict(stage="gpio", err=r.stderr[-300:]),
+                        gpio_path, note)
     # 2. support re-seat
     r = run([PY, os.path.join(HERE, "pcb_place_v2.py")])
     if r.returncode:
