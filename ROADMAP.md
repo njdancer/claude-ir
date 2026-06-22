@@ -23,6 +23,14 @@ local via-stitched GND island (thin neck + copper moat), a solder-mask cut-out,
 and a real isolation slot/perforation on `Edge.Cuts` (the "vent slot" made
 geometry). All netlist-invariant (pour/Edge.Cuts only). Enclosure (custom print)
 gets a matching vent over the sensor. No bench/$$ gate.
+- **Demo built (2026-06-22, Nick: "show me what it could look like"):**
+  `scripts/pcb_sensor_isolate.py` applies the moat + east slot to the *current
+  merged board* — **DRC 0 new errors / 0 unconnected** (refilled). Confirmed the
+  congestion finding visually: the north moat must start **east of D12** (status
+  LED) and the **solder-mask cut-out is not viable** over the populated cluster
+  (bridges adjacent-net pads) — both need parts nudged in the floorplan pass.
+  Board left reverted (merged baseline); the script regenerates the demo on
+  demand. Render: before/after F.Cu GND, sensor corner.
 
 🧭 **U3-ROTATION TO FIX USB — TWO LAYOUTS TRIED, NEITHER ROUTES ON 2 LAYERS
 (2026-06-16, Nick: rotate the module so its USB pins face J2; stay 2-layer, no
