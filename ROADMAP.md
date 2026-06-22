@@ -10,6 +10,20 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🌡️ **TEMP-SENSOR THERMAL ISOLATION — eval done, layout change QUEUED
+(2026-06-22, Fabio shared TI SNOA967A).** Evaluated the app note "Temperature
+sensors: PCB guidelines for SMT devices" against U5 (AHT20). **Verdict: adopt.**
+It exposes a real gap — `pcb_pour.py` floods one solid GND plane up to U5, a
+copper thermal bridge from U1 (LDO ~0.83 W) + U3 (WiFi) to the sensor (the §2.1
+anti-pattern; it's literally the §3.1.2 recipe for the *opposite* goal). Full
+ranked recommendations + what doesn't apply in `temp-sensor.md` → "Thermal
+isolation"; constraint folded into `layout.md` #5. **Queued behind the U3
+floorplan decision** (don't pour twice): next pour/route pass must give U5 a
+local via-stitched GND island (thin neck + copper moat), a solder-mask cut-out,
+and a real isolation slot/perforation on `Edge.Cuts` (the "vent slot" made
+geometry). All netlist-invariant (pour/Edge.Cuts only). Enclosure (custom print)
+gets a matching vent over the sensor. No bench/$$ gate.
+
 🧭 **U3-ROTATION TO FIX USB — TWO LAYOUTS TRIED, NEITHER ROUTES ON 2 LAYERS
 (2026-06-16, Nick: rotate the module so its USB pins face J2; stay 2-layer, no
 4-layer).** This revisits item (2) below (USB-on-B.Cu). Confirmed the USB win is

@@ -57,6 +57,14 @@ constraints that rules can't express.
    with slots/perimeter routing between it and heat sources if space allows.
    Sensor must sample room air, not board air. Its 100 nF decoupling and the
    I²C pull-ups (R28/R29, 4.7 kΩ, populated) travel with it — see constraint 10.
+   **Thermal isolation (TI SNOA967A, queued for the next pour/route pass — see
+   `temp-sensor.md` "Thermal isolation"):** distance alone is defeated by the
+   solid GND pour bridging heat to U5. Break the main GND plane before the
+   sensor and give U5 a **local via-stitched GND island** joined to the plane by
+   a thin neck, ringed by a **copper-free moat**, with a **solder-mask cut-out**
+   over the local copper, and a real **isolation slot/perforation** (the "vent
+   slot" in the zone table, made geometry) on `Edge.Cuts`. This is a
+   `pcb_pour.py`/`Edge.Cuts` change → netlist-invariant.
 6. **TSOP receiver (U4) faces the user/room AND keeps its distance from the
    TX array (revised 2026-06-14):** board edge, lens unobstructed; its RC
    filter (R27/C9, net `IR_RX_VS`) directly at the Vs pin. **Hard separation:
