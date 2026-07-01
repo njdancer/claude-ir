@@ -10,6 +10,41 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+✅ **LAYOUT B FINALISED — verified, silk re-homed, ready for Nick's sign-off
+(2026-07-01, resumed after the June break).** Picked up PR #29's finished
+work (its CI was already fully green) on branch
+`claude/board-layout-autorouting-xktcuj`; PR #29 is superseded. Session log:
+- **Board state re-verified in a fresh container** (KiCad 10.0.4): DRC
+  **0 unrouted / 0 real errors**. The only error-severity items are 4×
+  `hole_clearance` **inside J2's own footprint** (USB-C NPTH posts vs its GND
+  pads, 0.185 mm vs the 0.25 mm board rule) — a **10.0.4-only checker
+  addition**; CI's pinned `kicad/kicad:10.0.2` reports 0. Don't chase them;
+  if CI ever bumps KiCad, add DRC exclusions for those 4 (vendored-footprint
+  geometry, not a layout defect).
+- **USB-C 3D seating at rot180 VERIFIED — no fix needed.** The `(model …)`
+  transform is footprint-local, so it rotated with the footprint: GLB mesh
+  datums identical to the previously verified seating (leg tips 0.66 mm into
+  the 1.51 mm board, terminal plane on board top, mouth overhanging N edge
+  1.19 mm) + profile render confirms. Closes PR #29's item (b).
+- **Silk re-homed for Layout B** (the last real defects, both stale anchors):
+  title was on F1/D1's new N-edge pads → moved to the scanned pad-free band
+  S of D1; `5V`/`3V3` captions were on R15/R16 → adaptive placement in
+  `pcb_silk.py` (uniform row → bounded sideways nudge → vertical fallback;
+  real stroke-font extents; footprint silk outlines as obstacles; status
+  LEDs carry captions instead of scattered wrong-reading refs). DRC silk:
+  overlap 0 / over_copper 0 (2× J2 edge-clearance accepted as ever).
+- **Scored vs the old merged (rot0) board** (`pcb_score.py`, lower=better):
+  **−196 vs +223**. USB-on-B.Cu **55.6 → 20.5 mm**, LDO pour **243 → 433
+  mm²**, track −70 mm, vias 122→116, decap 58→52.5, sensor 26→18 mm. Only
+  regression: B.Cu signal 358→397 mm (+11 %, accepted by the ratchet).
+- **➡️ REMAINING:** (1) CI on this branch is the gate (baseline already
+  matched 10.0.2 on PR #29's head; silk counts changed → watch the first
+  run, refresh in-container only if it flags); (2) **Nick sign-off** on the
+  Layout-B board (renders in the PR / Pages), then the order-package freeze
+  ritual (`order/v2.x` tag) when ready to spend; (3) optional, unreflected:
+  the proven GPIO-remap lever (USB 4→2 vias) — needs firmware+schematic
+  reflection, only worth it if we ever re-spin.
+
 🔬 **AUTORESEARCH LOOP for layout/routing — BUILT + RUNNING; Layout-B power
 corner is the blocker (2026-06-16, Nick: "run the Layout-B search, but first
 replicate Karpathy's autoresearch for iteratively improving the board; we can
