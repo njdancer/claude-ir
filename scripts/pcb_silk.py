@@ -22,10 +22,11 @@ BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 REF_SIZE = 0.8          # silk text min (smaller trips the text_height rule)
 EDGE = (106.3, 70.3, 197.7, 113.7)   # new long-thin board interior
 STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
-# Front labels: the title sits in the antenna-keepout strip (copper-free, no
-# parts), plus a caption over the status-LED cluster (S of the MCU).
+# Front labels: Layout B (antenna W) put the module over the old N-strip title
+# home, so the title now sits in the open band S of D1 / W of H2 (pad-free,
+# scanned 2026-07-01), plus captions over the status-LED cluster.
 LABELS = [
-    ("ESP32-C3 IR REMOTE", 150.0, 73.5, 1.0),
+    ("ESP32-C3 IR REMOTE", 156.75, 79.0, 1.0),
 ]
 # Per-LED function captions, abbreviated, placed just below each status LED so
 # the cluster is self-documenting (a single "STATUS" word told you nothing).
@@ -35,7 +36,22 @@ LABELS = [
 #   D10 IR-TX activity (GPIO5)  -> "TX": U4 (the IR *receiver*) now sits right
 #       below this row, so "IR" would read as if it labelled the receiver.
 STATUS_FN = {"D6": "5V", "D7": "3V3", "D10": "TX", "D11": "USR1", "D12": "USR2"}
-STATUS_FN_DY = 4.0       # mm below the LED centre (clear of the ref below it)
+# The captioned status LEDs get NO ref designator on silk: the cluster is too
+# dense for 5 more texts, so the placer scatters them into wrong-reading spots
+# (D10's ref lands nearer D11...). The function caption is the curated label;
+# refs live in the iBOM/fab docs. SMD machine-placed, not hand-solder parts.
+SUPPRESS_REF = set(STATUS_FN)
+# Caption row offset candidates (mm below the LED centre; negative = above).
+# The row is layout-dependent (Layout B seated R16 in the old fixed 4.0 row),
+# so pick the first offset where EVERY caption clears pads/courtyards — one
+# uniform row; falls back to per-LED offsets only if no uniform row exists.
+STATUS_FN_DYS = [4.0, 3.2, 4.6, 5.2, 5.8, 6.4, 7.0, -2.8, -3.4, -4.0]
+# Fallback per-LED sideways nudges (mm) when no uniform row clears: the
+# caption tucks beside whatever part the placer stacked under that LED.
+# Keep |dx| < half the LED pitch (2.5mm for the D6/D7 pair) wherever
+# possible so a caption stays nearest ITS OWN LED — a caption that drifts
+# under the neighbour actively mislabels it.
+STATUS_FN_DXS = [0.0, -1.4, 1.4, -1.8, 1.8, -2.4, 2.4]
 STATUS_FN_SIZE = 0.8     # min legible silk; <0.8 trips the text_height DRC rule
 # Claude spark logo footprint (extracted to a B.SilkS logo, mirror-correct).
 LOGO_LIB = "hardware/libraries/Branding.pretty"
@@ -65,6 +81,14 @@ def is_passive(ref):
 
 def overlaps(a, b):
     return not (a[2] <= b[0] or a[0] >= b[2] or a[3] <= b[1] or a[1] >= b[3])
+
+
+def text_wh(text, size):
+    """Real KiCad stroke-font extents (measured @0.8mm: 'R16' 2.46x1.29,
+    'C1' 1.70x1.29, 'SW1' 2.58x1.29 -> ~1.07*len*size wide, 1.61*size tall).
+    The old len*size*0.75 estimate under-read the true bbox by ~35% and let
+    refs land on silk lines that DRC then flagged."""
+    return len(text) * size * 1.1, size * 1.62
 
 
 def phase1():
@@ -118,20 +142,50 @@ def phase2():
             bb = c.BBox()
             obst.append((mm(bb.GetLeft()), mm(bb.GetTop()),
                          mm(bb.GetRight()), mm(bb.GetBottom())))
+        # kept footprint silk outlines (diodes/ICs/connectors) can poke past
+        # the courtyard (e.g. LED_0805 bar) — refs/captions must dodge them too
+        for g in fp.GraphicalItems():
+            if isinstance(g, pcbnew.PCB_SHAPE) and g.GetLayer() == pcbnew.F_SilkS:
+                gb = g.GetBoundingBox()
+                obst.append((mm(gb.GetLeft()), mm(gb.GetTop()),
+                             mm(gb.GetRight()), mm(gb.GetBottom())))
 
     # Reserve the per-LED caption boxes as obstacles so the designator placer
     # dodges them, then emit the captions after placement.
-    fn_labels = []
-    for fp in board.GetFootprints():
-        t = STATUS_FN.get(fp.GetReference())
-        if not t:
-            continue
+    def caption_box(fp, t, dy, dx=0.0, ang=0, margin=0.12):
         p = fp.GetPosition()
-        lx, ly = mm(p.x), mm(p.y) + STATUS_FN_DY
-        lw = max(0.6, len(t) * STATUS_FN_SIZE * 0.75)
-        obst.append((lx - lw / 2, ly - STATUS_FN_SIZE / 2,
-                     lx + lw / 2, ly + STATUS_FN_SIZE / 2))
-        fn_labels.append((t, lx, ly, STATUS_FN_SIZE))
+        lx, ly = mm(p.x) + dx, mm(p.y) + dy
+        lw, lh = text_wh(t, STATUS_FN_SIZE)
+        if ang:
+            lw, lh = lh, lw
+        return (lx, ly, ang, (lx - lw / 2 - margin, ly - lh / 2 - margin,
+                              lx + lw / 2 + margin, ly + lh / 2 + margin))
+
+    leds = [(fp, STATUS_FN[fp.GetReference()]) for fp in board.GetFootprints()
+            if fp.GetReference() in STATUS_FN]
+    fn_labels = []
+    for dy in STATUS_FN_DYS:            # prefer one uniform horizontal row
+        boxes = [caption_box(fp, t, dy) for fp, t in leds]
+        if all(not any(overlaps(rb, o) for o in obst) for _, _, _, rb in boxes):
+            break
+    else:                               # ragged fallback: nudge each caption
+        boxes = []                      # sideways/down (vertical as a last
+        for fp, t in leds:              # resort) until it clears
+            cands = [(dy, dx, ang) for ang in (0, 90)
+                     for dy in STATUS_FN_DYS for dx in STATUS_FN_DXS]
+            for dy, dx, ang in sorted(
+                    cands, key=lambda c: (c[2], abs(c[1]),
+                                          STATUS_FN_DYS.index(c[0]))):
+                lx, ly, a, rb = caption_box(fp, t, dy, dx, ang)
+                if not any(overlaps(rb, o)
+                           for o in obst + [b[3] for b in boxes]):
+                    boxes.append((lx, ly, a, rb))
+                    break
+            else:
+                boxes.append(caption_box(fp, t, STATUS_FN_DYS[0]))
+    for (fp, t), (lx, ly, ang, rb) in zip(leds, boxes):
+        obst.append(rb)
+        fn_labels.append((t, lx, ly, STATUS_FN_SIZE, ang))
 
     placed = []
     hidden = 0
@@ -139,6 +193,12 @@ def phase2():
                    key=lambda f: -f.GetCourtyard(pcbnew.F_CrtYd).BBox().GetWidth())
     for fp in order:
         ref = fp.Reference()
+        if fp.GetReference() in SUPPRESS_REF:
+            ref.SetVisible(False)
+            for f in fp.GetFields():
+                if f.GetName() != "Reference":
+                    f.SetVisible(False)
+            continue
         ref.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(REF_SIZE), pcbnew.FromMM(REF_SIZE)))
         ref.SetTextThickness(pcbnew.FromMM(0.1))
         ref.SetTextAngle(pcbnew.EDA_ANGLE(0))
@@ -150,14 +210,15 @@ def phase2():
             if f.GetName() != "Reference":
                 f.SetVisible(False)
         txt = ref.GetText()
-        w = max(0.6, len(txt) * REF_SIZE * 0.75)
-        h = REF_SIZE
+        w, h = text_wh(txt, REF_SIZE)
         c = fp.GetCourtyard(pcbnew.F_CrtYd)
         bb = c.BBox() if c.OutlineCount() else fp.GetBoundingBox()
         cx, cy = mm(bb.GetCenter().x), mm(bb.GetCenter().y)
         hw, hh = mm(bb.GetWidth()) / 2, mm(bb.GetHeight()) / 2
         best = None
-        for gap in [x * 0.25 for x in range(1, 16)]:
+        # gap sweep to 6mm: with real-size text boxes the dense zones need a
+        # longer leash before a ref gives up and hides
+        for gap in [x * 0.25 for x in range(1, 25)]:
             for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0),
                            (-1, -1), (1, -1), (-1, 1), (1, 1)):
                 px = cx + (dx * (hw + gap + w / 2) if dx else 0)
@@ -186,12 +247,16 @@ def phase2():
         ref.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(px), pcbnew.FromMM(py)))
         placed.append(rb)
 
-    for text, x, y, size in LABELS + fn_labels:
+    for entry in LABELS + fn_labels:
+        text, x, y, size = entry[:4]
+        ang = entry[4] if len(entry) > 4 else 0
         t = pcbnew.PCB_TEXT(board)
         t.SetText(text)
         t.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
         t.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(size), pcbnew.FromMM(size)))
         t.SetTextThickness(pcbnew.FromMM(max(0.1, size / 6)))
+        if ang:
+            t.SetTextAngle(pcbnew.EDA_ANGLE(float(ang)))
         t.SetLayer(pcbnew.F_SilkS)
         board.Add(t)
 
