@@ -16,9 +16,13 @@ Pin maps used:
                  11=IO20 12=IO21 13=IO18 14=IO19 15=IO3 16=IO2 17=IO1 18=IO0 19=GND
   AHT20 (U5):    2=VDD 3=SCL 4=SDA 5=GND  (1,6 NC)
 
-GPIO function map (C3): IO5=IR_TX IO6=IR_RX IO7=SDA IO10=SCL IO3=USER_LED1
-  IO4=USER_LED2 IO9=BOOT IO18=USB_D- IO19=USB_D+ IO0/IO1/IO20/IO21=spares(J4)
+GPIO function map (C3), r2 GPIO remap 2026-07-02 (each signal now exits the
+module on the side facing its zone — B.Cu plane slotting fell 390->167mm):
+  IO10=IR_TX IO6=IR_RX IO20=SDA IO21=SCL IO3=USER_LED1 IO1=USER_LED2
+  IO9=BOOT IO18=USB_D- IO19=USB_D+ IO0/IO4/IO5/IO7=spares(J4)
   IO2/IO8=strapping pull-ups EN=reset.
+  NB: UART0 (IO20/21) now carries I2C — ROM boot spew clocks SCL/SDA once
+  per boot; firmware does an I2C bus-clear at init (standard practice).
 
 Usage: python3 scripts/ci/golden_netlist_v2.py [path.kicad_sch]
        (exports the netlist via kicad-cli and diffs against GOLDEN)
@@ -56,15 +60,15 @@ GOLDEN = [
     {"J2.A5", "R1.1"},                                                 # CC1
     {"J2.B5", "R2.2"},                                                 # CC2
     # --- I2C bus (AHT20 + pullups + spare header) ----------------------------
-    {"U3.6", "U5.4", "R28.2", "J4.3"},                                 # I2C_SDA  (IO7)
-    {"U3.10", "U5.3", "R29.2", "J4.4"},                                # I2C_SCL  (IO10)
+    {"U3.11", "U5.4", "R28.2", "J4.3"},                                # I2C_SDA  (IO20)
+    {"U3.12", "U5.3", "R29.2", "J4.4"},                                # I2C_SCL  (IO21)
     # --- reset / boot / strapping --------------------------------------------
     {"U3.2", "C6.1", "R5.2", "SW1.1"},                                 # ESP_EN
     {"U3.8", "R6.2", "SW2.1"},                                         # ESP_BOOT (IO9)
     {"U3.7", "R7.1"},                                                  # IO8 strap pull-up
     {"U3.16", "R8.1"},                                                 # IO2 strap pull-up
     # --- IR transmit ---------------------------------------------------------
-    {"U3.4", "R13.2", "R19.1"},                                        # IR_TX (IO5)
+    {"U3.10", "R13.2", "R19.1"},                                       # IR_TX (IO10)
     {"Q3.1", "R13.1", "R14.2"},                                        # IR_GATE
     {"D2.1", "D3.1", "D4.1", "D5.1", "J5.2", "Q3.3"},                  # IR_DRAIN
     {"D2.2", "R9.1"}, {"D3.2", "R10.1"}, {"D4.2", "R11.1"}, {"D5.2", "R12.1"},
@@ -79,13 +83,13 @@ GOLDEN = [
     # --- user LEDs (direct GPIO drive) ---------------------------------------
     {"U3.15", "R25.1"},                                                # USER_LED1 (IO3)
     {"R25.2", "D11.2"},                                                # D11 anode
-    {"U3.3", "R20.2"},                                                 # USER_LED2 (IO4)
+    {"U3.17", "R20.2"},                                                # USER_LED2 (IO1)
     {"R20.1", "D12.2"},                                                # D12 anode
     # --- spare header GPIO ---------------------------------------------------
     {"U3.18", "J4.5"},                                                 # SPARE IO0
-    {"U3.17", "J4.6"},                                                 # SPARE IO1
-    {"U3.11", "J4.7"},                                                 # SPARE IO20 (U0RX)
-    {"U3.12", "J4.8"},                                                 # SPARE IO21 (U0TX)
+    {"U3.3", "J4.6"},                                                  # SPARE IO4
+    {"U3.4", "J4.7"},                                                  # SPARE IO5
+    {"U3.6", "J4.8"},                                                  # SPARE IO7
 ]
 
 

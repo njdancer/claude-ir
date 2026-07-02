@@ -10,6 +10,33 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔁 **RATCHET LOOP ROUND 3 — CONTINUOUS MODE (2026-07-02, Nick: "who told you
+to stop? keep analysing, experimenting, measuring").** Score −2404 → **−2840**
+(r2-29). The loop stays open; each wave = hypothesis → experiment → measure →
+ratchet. Landed this round:
+- **Two-sided LDO thermal stack:** B.Cu island (194 mm²) under the tab +
+  3×3 stitch-via grid (`pcb_ldo_pour.py --vias`, LDO_BCU=1 in the pipeline);
+  evicts pcb_pour GND stitch vias the island would strand; pad-EDGE (not
+  centre) clearance guards — r2-25/26 failures taught both. θ_JA ≈ 45–50.
+- **GPIO REMAP APPLIED + fully reflected** (the June lever, finally proven
+  worth its cost): IR_TX→IO10, SDA→IO20, SCL→IO21, USER_LED2→IO1; spares
+  now IO0/4/5/7 on J4. **B.Cu plane slotting 390→167 mm (−57 %)**, USB
+  back on F.Cu 0-via. Reflected end-to-end: schematic (7 stub-label swap,
+  ERC 0, GOLDEN OK 35/35), committed netlist regenerated, firmware
+  build_flags, `golden_netlist_v2.py`, `hardware/notes/README.md` (which
+  was still describing the v1 WROOM-32E board — rewritten). ⚠️ IO20/21 are
+  UART0: ROM boot spew clocks I2C once per boot → **firmware TODO: I2C
+  bus-clear at init** (standard 9-pulse; do it when writing the C3 AHT20
+  driver).
+- **Dead axes measured & closed:** FR `-us global_optimal`/`hybrid` ==
+  greedy exactly (identical routes); hole retargeting N-band pair (−265),
+  H3-to-SW (breaks routing) — H3 stays mid-board (also stiffens the button
+  zone).
+- **Next hypotheses queued:** U5 sensor separation probe (small, ~5 pts,
+  accuracy-motivated); IR_DRAIN/+5V B.Cu remainder (~103 mm of the 167 —
+  both are power/fan-local, likely intrinsic); silk hidden-ref recovery
+  (R28/C10, cosmetic). Diminishing returns expected — the ruler decides.
+
 🏆 **RATCHET LOOP ROUND 2 — pour 433→1047 mm², USB on F.Cu 0-via, board
 tidied (2026-07-02, Nick: "much larger thermal pour; it looks thrown
 together; run an autoresearch loop and juice it").** 19 experiments

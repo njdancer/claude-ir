@@ -40,43 +40,42 @@ what changed electrically, since `.kicad_sch` diffs are dominated by graphics.
 | [status-leds.md](./status-leds.md) | Serial activity and user LEDs |
 | [layout.md](./layout.md) | PCB layout constraints: placement, routing, stackup (H2) |
 
-## GPIO pin assignments
+## GPIO pin assignments (v2 board, ESP32-C3; r2 GPIO remap 2026-07-02)
 
-| GPIO | Function          | Direction | Notes                    |
-|------|-------------------|-----------|--------------------------|
-| 0    | Boot mode         | Input     | Strapping pin, pull-up   |
-| 1    | UART TXD          | Output    | Also drives TX LED       |
-| 2    | (Available)       | I/O       | Strapping pin, pull-down |
-| 3    | UART RXD          | Input     | Also drives RX LED       |
-| 4    | Temp sensor data  | I/O       | DHT22 single-wire        |
-| 15   | (Available)       | I/O       | Strapping pin, pull-down |
-| 16   | User LED 1        | Output    | Blue LED via MOSFET      |
-| 17   | User LED 2        | Output    | Blue LED via MOSFET      |
-| 18   | IR transmit       | Output    | 38kHz modulated signal   |
-| 19   | IR receive        | Input     | Demodulated signal       |
+The r2 autoresearch loop remapped the free GPIOs so each signal exits the
+module on the side facing its board zone (B.Cu ground-plane slotting fell
+390→167 mm). `scripts/ci/golden_netlist_v2.py` asserts this map; firmware
+pins live in `platformio.ini` `[env:esp32-c3]` build_flags.
 
-All other GPIOs are available on the breakout header for expansion.
+| GPIO | Function     | Direction | Notes                                     |
+|------|--------------|-----------|-------------------------------------------|
+| EN   | Reset (SW1)  | Input     | R5 pull-up + C6 POR RC                    |
+| 9    | Boot (SW2)   | Input     | strapping, R6 pull-up                     |
+| 10   | IR transmit  | Output    | 38 kHz → R13 → Q3 gate; D10 TX indicator  |
+| 6    | IR receive   | Input     | TSOP38238                                 |
+| 20   | I2C SDA      | I/O       | AHT20 + J4; R28 pull-up (UART0-RX pin)    |
+| 21   | I2C SCL      | Output    | AHT20 + J4; R29 pull-up (UART0-TX pin) — ROM boot spew clocks the bus once per boot; firmware must bus-clear at init |
+| 3    | User LED 1   | Output    | direct drive, yellow 0805                 |
+| 1    | User LED 2   | Output    | direct drive, yellow 0805                 |
+| 18/19| USB D−/D+    | I/O       | native USB-Serial-JTAG                    |
+| 2, 8 | (strapping)  | —         | pull-ups only, left NC                    |
+| 0,4,5,7 | spares    | I/O       | broken out on J4                          |
 
 ## Top-level design rationale
 
-**Power architecture.** A synchronous buck converter (AP63203) was chosen over
-an LDO for efficiency: an LDO would dissipate ~0.6W as heat at typical load
-where the buck dissipates ~0.09W, enabling a smaller package. The 2A rating
-provides headroom for simultaneous WiFi TX and IR emission peaks.
+**Power architecture.** v2 uses a single AMS1117-3.3 LDO from USB 5 V (the v1
+AP63203 buck was dropped in the cost-down: a 1S LiPo can't feed the buck's
+dropout anyway, and on USB power the LDO's ~0.85 W is handled by a ~1050 mm²
+top-side thermal pour + B.Cu island stitched under the tab — θ_JA ≈ 45–55 °C/W,
+T_J ≈ 72 °C worst case). See [power-supply.md](./power-supply.md).
 
 **IR LED drive.** A single MOSFET drives all four LEDs so they emit
-simultaneously for maximum coverage. 100mA per LED gives good range at
-reasonable power, and the 3.3V supply (rather than 5V) reduces resistor power
-dissipation.
+simultaneously for maximum coverage. ~86 mA per LED (22 Ω Basic-part series
+resistors) gives good range at reasonable power.
 
-**Serial LEDs.** Active-low drive (cathode to GPIO) gives activity indication
-without consuming extra GPIO pins — the UART signals themselves create the
-blinking pattern during serial communication.
-
-**Boot configuration.** The strapping pins (GPIO0, GPIO2, GPIO15) all have
-pull resistors to guarantee boot into flash execution mode, and the auto-reset
-circuit allows programming without manual button presses (buttons are still
-fitted for recovery).
+**Boot configuration.** The C3's strapping pins (IO2, IO8, IO9) carry
+pull-ups; flashing runs over native USB-Serial-JTAG (no auto-reset circuit
+needed — SW1/SW2 remain for manual recovery).
 
 **Development-board posture.** The board prioritizes ease of assembly and
 debugging over miniaturization: hand-solderable packages only, DevKitC-

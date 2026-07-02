@@ -57,6 +57,10 @@ SES = "hardware/fab/board.ses"
 FR_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/fr/freerouting-2.2.4.jar")
 JAVA = os.environ.get("JAVA25", "/tmp/fr/jdk-25.0.3+9-jre/bin/java")
 MAX_PASSES = int(os.environ.get("FR_MAX_PASSES", "100"))
+# board-update strategy: greedy (default) | global_optimal | hybrid.
+# Deterministic either way at -mt 1; exposed so the ratchet loop can measure
+# strategies as experiments (r2 loop, 2026-07-02).
+UPDATE_STRATEGY = os.environ.get("FR_US", "greedy")
 
 
 def export_dsn():
@@ -71,7 +75,8 @@ def export_dsn():
 def run_freerouting():
     cmd = [JAVA, "-jar", FR_JAR, "--gui.enabled=false",
            "-de", DSN, "-do", SES,
-           "-mp", str(MAX_PASSES), "-mt", "1", "-is", "sequential", "-us", "greedy", "-dl"]
+           "-mp", str(MAX_PASSES), "-mt", "1", "-is", "sequential",
+           "-us", UPDATE_STRATEGY, "-dl"]
     print("+ " + " ".join(cmd))
     subprocess.run(cmd, check=False)          # FR exit code is unreliable; gate on SES
     if not os.path.exists(SES) or os.path.getsize(SES) == 0:
