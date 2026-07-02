@@ -62,16 +62,24 @@ def ldo_rect(b):
     tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)  # VOUT tab
     p = (tab or u1).GetPosition()
     tx, ty = mm(p.x), mm(p.y)
-    L, DEPTH = 11.0, 14.0
+    L, DEPTH = 13.0, 17.0    # lifted 11/14 -> 13/17 (Nick 2026-07-02: "much
+                             # larger pour"); the filler carves foreign parts,
+                             # so the generous rect only claims what's open
     dN, dS, dW, dE = ty - BY0, BY1 - ty, tx - BX0, BX1 - tx
     m = min(dN, dS, dW, dE)
-    if m == dN:                                  # nearest the N edge
-        return (tx - L, BY0 - 2, tx + L, ty + DEPTH)
-    if m == dS:
-        return (tx - L, ty - DEPTH, tx + L, BY1 + 2)
+    # corner-aware: when the tab is also within L of a SECOND edge, run the
+    # rect past that edge too, so the pour owns the whole corner
+    if m in (dN, dS):
+        x0 = BX0 - 2 if dW < L else tx - L
+        x1 = BX1 + 2 if dE < L else tx + L
+        if m == dN:                              # nearest the N edge
+            return (x0, BY0 - 2, x1, ty + DEPTH)
+        return (x0, ty - DEPTH, x1, BY1 + 2)
+    y0 = BY0 - 2 if dN < L else ty - L
+    y1 = BY1 + 2 if dS < L else ty + L
     if m == dW:
-        return (BX0 - 2, ty - L, tx + DEPTH, ty + L)
-    return (tx - DEPTH, ty - L, BX1 + 2, ty + L)  # nearest the E edge
+        return (BX0 - 2, y0, tx + DEPTH, y1)
+    return (tx - DEPTH, y0, BX1 + 2, y1)         # nearest the E edge
 
 
 def main():

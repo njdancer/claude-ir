@@ -53,17 +53,33 @@ def ensure_pristine():
         open(PRISTINE, "w").write(r.stdout)
 
 
+def _real_violations(d):
+    """KiCad 10.0.4 added same-footprint NPTH hole checks that flag J2's
+    vendored USB-C footprint against ITSELF (4x hole_clearance, NPTH posts vs
+    its own GND pads). CI's pinned 10.0.2 reports 0 and the geometry is the
+    part's own — filter them so they don't poison every candidate's score."""
+    viol = []
+    for v in d.get("violations", []):
+        if (v.get("type") == "hole_clearance"
+                and all("of J2" in it.get("description", "")
+                        or it.get("description") == "NPTH pad of J2"
+                        for it in v.get("items", []))):
+            continue
+        viol.append(v)
+    return viol
+
+
 def drc():
     out = "/tmp/ar_drc.json"
     run(["kicad-cli", "pcb", "drc", "--severity-error", "--exit-code-violations",
          "-o", out, "--format", "json", PCB])
     try:
         d = json.load(open(os.path.join(ROOT, out) if not os.path.isabs(out) else out))
-        return len(d.get("violations", [])), len(d.get("unconnected_items", []))
+        return len(_real_violations(d)), len(d.get("unconnected_items", []))
     except Exception:
         try:
             d = json.load(open(out))
-            return len(d.get("violations", [])), len(d.get("unconnected_items", []))
+            return len(_real_violations(d)), len(d.get("unconnected_items", []))
         except Exception:
             return 999, 999
 

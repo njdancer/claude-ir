@@ -37,11 +37,12 @@ USB_NETS = {"/USB_D+", "/USB_D-"}
 WEIGHTS = {
     "usb_bcu_mm": 2.0, "usb_vias": 8.0, "bcu_sig_mm": 1.0,
     "track_mm": 0.05, "vias": 1.0, "decap_mm": 0.5, "sens_mm": -0.5,
-    "ldo_pour_mm2": -2.0,    # reward a big LDO thermal pour (Nick: "big fat
-                             # thermal pour"); negative = lower score = better
+    "ldo_pour_mm2": -3.0,    # reward a big LDO thermal pour (Nick 2026-07-02:
+                             # "much larger thermal pour" — raised from -2.0);
+                             # negative = lower score = better
 }
 SENS_CAP = 40.0          # reward sensor->heat separation only up to here
-LDO_CAP = 600.0          # ~1in2-ish; enough for theta_JA, don't over-reward past
+LDO_CAP = 1000.0         # raised from 600 (Nick: juice the pour; ~1.5in2 cap)
 PENALTY = 1e6            # for boards that fail the hard gates
 
 
