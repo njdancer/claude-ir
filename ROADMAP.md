@@ -10,6 +10,39 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🏆 **RATCHET LOOP ROUND 2 — pour 433→1047 mm², USB on F.Cu 0-via, board
+tidied (2026-07-02, Nick: "much larger thermal pour; it looks thrown
+together; run an autoresearch loop and juice it").** 19 experiments
+(`r2-*` in the gitignored `hardware/fab/experiments.jsonl`), every gate-
+passing candidate 0 DRC / 0 unrouted. Final board = `r2-19-repro`,
+score −2404 (ruler v2) vs −629 for the pre-loop board:
+- **LDO pour 1046.8 mm² F.Cu** (was 433) — rect lifted 11×14→19×21,
+  corner-aware; H2 hole moved out of the pour; θ_JA ≈ 50-55 °C/W ⇒
+  T_J ≈ 72 °C at the 0.85 W worst case. Score caps the reward at 1000 mm²
+  (LDO_CAP), deliberately: past ~1 in² it's score-gaming, not thermals.
+- **USB D± landed 100 % F.Cu, 0 vias** (the SI win from the U3-rotation
+  saga) — a route-permutation dividend the ratchet kept.
+- **Tidiness:** LED row re-anchored at uniform 5 mm pitch y90 (the
+  legalizer had crushed D6/D7 to 2.5 mm); placer got an axis-aligned
+  bias (supports now read as rows/columns); U4 aligned with the button
+  row; title auto-placed (three hardcoded homes went stale in a row).
+- **Real bugs the loop surfaced, all fixed:** (1) ratchet compared
+  best-score AFTER appending the current row → `new_best` could never
+  fire; (2) courtyard-less parts (M3 holes) fell back to a TEXT-INCLUSIVE
+  bbox, so every silk pass re-randomised the hole legalization — all four
+  holes wandered; text-free bboxes + pinned targets now; (3) KiCad
+  10.0.4's DSN export makes FreeRouting drop J2's stacked same-net VBUS
+  tie → the known-good detour is spared from the rip as a seed; (4)
+  10.0.4-only J2-internal NPTH hole_clearance noise filtered in the
+  evaluator (CI's 10.0.2 reports 0).
+- **Env recipe (container):** FreeRouting jar + JDK25 extracted from
+  `ghcr.io/freerouting/freerouting:2.2.4` (github.com release downloads
+  are proxy-blocked; ghcr is not); `FR_MAX_PASSES=250`.
+- **➡️ REMAINING:** CI gate on PR #30 (silk/DRC warning counts drifted —
+  informational), Nick sign-off, order freeze. Optional next lever: B.Cu
+  thermal island + via stitch under the tab (~+100 mm² effective, costs
+  B.Cu GND) — parked, F.Cu pour alone already clears thermals.
+
 ✅ **LAYOUT B FINALISED — verified, silk re-homed, ready for Nick's sign-off
 (2026-07-01, resumed after the June break).** Picked up PR #29's finished
 work (its CI was already fully green) on branch

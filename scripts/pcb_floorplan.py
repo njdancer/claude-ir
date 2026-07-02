@@ -27,8 +27,26 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (135.0, 73.0), "H2": (185.0, 73.0),
-         "H3": (135.0, 112.0), "H4": (185.0, 112.0)}
+# H2's old (185,73) target collided with the D2 fan + J5, so the legalizer
+# walked it to (167.6,80.7) — dead centre of U1's thermal pour, carving
+# ~50mm2 (found by the r2 ratchet loop, 2026-07-02). (151.5,72.5) sits in
+# the F1->D1 gap on the N edge: clear, and out of the pour rect.
+# H3's old (135,112) target was head-clearance-illegal against the S edge +
+# SW1, so the legalizer walked it to mid-board (~138,93). (132.5,110.5) is
+# legal and keeps the SW corner covered.
+# N-edge y73 is head-clearance-illegal for courtyard-less M3s and the old
+# corner spots collide with J2/fan/buttons, so the N pair sits in the open
+# band S of F1/D1 (found by the r2 legalizer itself); E/S spots tuned to the
+# open copper. Deterministic targets beat spiral surprises.
+# (M3 text-free bbox is 7.0mm; with the 1.0mm legalizer margin a hole centre
+# must stay >=4.5mm off edges/courtyards.) These are the spots the r2-14
+# winner's legalizer found — the empirically-open areas. Every attempt to
+# retarget them (r2-17: N-band pair + SW corner; r2-18: H3 alone) lost
+# 265+ score points or broke routing, so they're pinned as-is. H3's
+# mid-board spot doubles as central stiffening under the button zone; H2
+# grazes the pour rect rim (~20mm2 carve, included in the 1047mm2 figure).
+HOLES = {"H1": (146.9, 80.4), "H2": (156.0, 80.5),
+         "H3": (138.0, 93.1), "H4": (178.7, 109.0)}
 
 # Zone anchors: ref -> (x, y, rot_deg). v4 "U3-at-west-end" floorplan (Nick,
 # 2026-06-16): U3 rotated 90 at the WEST end so the antenna overhangs the W

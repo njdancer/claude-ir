@@ -64,7 +64,11 @@ def court_wh(f):
     sh = f.GetCourtyard(pcbnew.F_CrtYd)
     bb = sh.BBox()
     if bb.GetWidth() == 0:
-        bb = f.GetBoundingBox()
+        # text-free bbox: the default GetBoundingBox() includes the ref text,
+        # so a courtyard-less part (mounting holes) grows by wherever the last
+        # silk pass parked its ref — the legalizer then spiralled every hole
+        # off-target nondeterministically (r2 loop find, 2026-07-02)
+        bb = f.GetBoundingBox(False)
     return pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())
 
 
@@ -72,7 +76,7 @@ def court_bbox(f):
     sh = f.GetCourtyard(pcbnew.F_CrtYd)
     bb = sh.BBox()
     if bb.GetWidth() == 0:
-        bb = f.GetBoundingBox()
+        bb = f.GetBoundingBox(False)   # text-free: see court_wh
     return (pcbnew.ToMM(bb.GetLeft()) - MARGIN, pcbnew.ToMM(bb.GetTop()) - MARGIN,
             pcbnew.ToMM(bb.GetRight()) + MARGIN, pcbnew.ToMM(bb.GetBottom()) + MARGIN)
 
@@ -203,7 +207,14 @@ def main():
                         continue
                     if any(overlaps(bb, p) for p in placed):
                         continue
-                    cands.append((math.hypot(cx - tx, cy - ty), cx, cy, rot, bb))
+                    # tidiness bias (Nick 2026-07-02: board "looks thrown
+                    # together"): prefer spots straight N/S/E/W of the target
+                    # pad — clusters then read as rows/columns, not scatter.
+                    # 0.35mm equivalent-distance bonus keeps it gentle.
+                    aligned = abs(cx - tx) < 0.03 or abs(cy - ty) < 0.03
+                    cands.append((math.hypot(cx - tx, cy - ty)
+                                  + (0.0 if aligned else 0.35),
+                                  cx, cy, rot, bb))
             if cands:
                 cands.sort()
                 _, cx, cy, rot, bb = cands[0]

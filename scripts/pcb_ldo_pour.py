@@ -62,9 +62,10 @@ def ldo_rect(b):
     tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)  # VOUT tab
     p = (tab or u1).GetPosition()
     tx, ty = mm(p.x), mm(p.y)
-    L, DEPTH = 13.0, 17.0    # lifted 11/14 -> 13/17 (Nick 2026-07-02: "much
-                             # larger pour"); the filler carves foreign parts,
-                             # so the generous rect only claims what's open
+    L, DEPTH = 19.0, 21.0    # lifted stepwise 11/14 -> 19/21 by the r2 ratchet
+                             # loop (Nick 2026-07-02: "much larger pour"); the
+                             # filler carves foreign parts, so the generous
+                             # rect only claims whatever copper is open
     dN, dS, dW, dE = ty - BY0, BY1 - ty, tx - BX0, BX1 - tx
     m = min(dN, dS, dW, dE)
     # corner-aware: when the tab is also within L of a SECOND edge, run the

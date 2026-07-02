@@ -186,7 +186,7 @@ def _overlaps():
             continue
         bb = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
         if bb.GetWidth() == 0:
-            bb = f.GetBoundingBox()
+            bb = f.GetBoundingBox(False)   # text-free (see pcb_place_v2.court_wh)
         boxes.append((pcbnew.ToMM(bb.GetLeft()), pcbnew.ToMM(bb.GetTop()),
                       pcbnew.ToMM(bb.GetRight()), pcbnew.ToMM(bb.GetBottom())))
     n = 0
@@ -259,11 +259,12 @@ def _log(tag, score, metrics, gpio_path, note):
         gpio = json.load(open(gpio_path))
     row = dict(tag=tag, score=round(score, 1), metrics=metrics, gpio=gpio, note=note)
     os.makedirs(os.path.join(ROOT, "hardware/fab"), exist_ok=True)
-    with open(os.path.join(ROOT, LOG), "a") as f:
-        f.write(json.dumps(row) + "\n")
-    # ratchet: keep the best legal board aside
+    # ratchet: best-so-far must be read BEFORE appending this row — scanning
+    # after the append includes the current score, so new_best could never fire
     legal = metrics.get("drc_err") == 0 and metrics.get("unrouted") == 0
     best_score = _best_score()
+    with open(os.path.join(ROOT, LOG), "a") as f:
+        f.write(json.dumps(row) + "\n")
     if legal and score < best_score:
         shutil.copy(os.path.join(ROOT, PCB), BEST)
         row["new_best"] = True

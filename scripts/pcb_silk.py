@@ -22,12 +22,13 @@ BOARD_PATH = "hardware/esp32-ir-remote.kicad_pcb"
 REF_SIZE = 0.8          # silk text min (smaller trips the text_height rule)
 EDGE = (106.3, 70.3, 197.7, 113.7)   # new long-thin board interior
 STRIP_PREFIXES = ("R", "C")     # passives whose silk outline we remove
-# Front labels: Layout B (antenna W) put the module over the old N-strip title
-# home, so the title now sits in the open band S of D1 / W of H2 (pad-free,
-# scanned 2026-07-01), plus captions over the status-LED cluster.
-LABELS = [
-    ("ESP32-C3 IR REMOTE", 156.75, 79.0, 1.0),
-]
+# Front labels: the board title is AUTO-PLACED (three hardcoded homes in a
+# row went stale as the layout evolved — F1/D1's pads, then H2's new spot,
+# then R5/R6's band). place_title() scans the pad/courtyard obstacle field
+# for the widest clear band, preferring high on the board. Captions over the
+# status-LED row are anchored to the LEDs as before.
+TITLE = ("ESP32-C3 IR REMOTE", 1.0)
+LABELS = []
 # Per-LED function captions, abbreviated, placed just below each status LED so
 # the cluster is self-documenting (a single "STATUS" word told you nothing).
 # Anchored to the footprint position, not hardcoded x, so they track re-layout.
@@ -247,7 +248,34 @@ def phase2():
         ref.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(px), pcbnew.FromMM(py)))
         placed.append(rb)
 
-    for entry in LABELS + fn_labels:
+    # auto-place the board title: scan a 0.5mm grid for a clear box, top-first
+    title_entries = []
+    t_text, t_size = TITLE
+    tw, th = text_wh(t_text, t_size)
+    tw += 0.4
+    th += 0.4
+    ty = EDGE[1] + th / 2
+    found = None
+    while ty < EDGE[3] - th / 2 and not found:
+        tx = EDGE[0] + tw / 2
+        while tx < EDGE[2] - tw / 2:
+            rb = (tx - tw / 2, ty - th / 2, tx + tw / 2, ty + th / 2)
+            if (not any(overlaps(rb, o) for o in obst)
+                    and not any(overlaps(rb, p) for p in placed)):
+                found = (tx, ty, rb)
+                break
+            tx += 0.5
+        ty += 0.5
+    if found:
+        tx, ty, rb = found
+        obst.append(rb)
+        placed.append(rb)
+        title_entries.append((t_text, tx, ty, t_size))
+        print(f"  title auto-placed at ({tx:.2f},{ty:.2f})")
+    else:
+        print("  WARNING: no clear spot for the board title — omitted")
+
+    for entry in title_entries + LABELS + fn_labels:
         text, x, y, size = entry[:4]
         ang = entry[4] if len(entry) > 4 else 0
         t = pcbnew.PCB_TEXT(board)
