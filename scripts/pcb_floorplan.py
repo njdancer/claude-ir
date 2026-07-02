@@ -27,8 +27,26 @@ BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 # 4x M3 mounting holes — placed in the clearest well-spread spots the dense
 # layout leaves (3D-printed enclosure adapts to wherever they land). The east
 # end is packed by the IR fan, so the E holes sit inboard of the corners.
-HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
-         "H3": (110.0, 105.0), "H4": (177.5, 109.5)}
+# H2's old (185,73) target collided with the D2 fan + J5, so the legalizer
+# walked it to (167.6,80.7) — dead centre of U1's thermal pour, carving
+# ~50mm2 (found by the r2 ratchet loop, 2026-07-02). (151.5,72.5) sits in
+# the F1->D1 gap on the N edge: clear, and out of the pour rect.
+# H3's old (135,112) target was head-clearance-illegal against the S edge +
+# SW1, so the legalizer walked it to mid-board (~138,93). (132.5,110.5) is
+# legal and keeps the SW corner covered.
+# N-edge y73 is head-clearance-illegal for courtyard-less M3s and the old
+# corner spots collide with J2/fan/buttons, so the N pair sits in the open
+# band S of F1/D1 (found by the r2 legalizer itself); E/S spots tuned to the
+# open copper. Deterministic targets beat spiral surprises.
+# (M3 text-free bbox is 7.0mm; with the 1.0mm legalizer margin a hole centre
+# must stay >=4.5mm off edges/courtyards.) These are the spots the r2-14
+# winner's legalizer found — the empirically-open areas. Every attempt to
+# retarget them (r2-17: N-band pair + SW corner; r2-18: H3 alone) lost
+# 265+ score points or broke routing, so they're pinned as-is. H3's
+# mid-board spot doubles as central stiffening under the button zone; H2
+# grazes the pour rect rim (~20mm2 carve, included in the 1047mm2 figure).
+HOLES = {"H1": (146.9, 80.4), "H2": (156.0, 80.5),
+         "H3": (138.0, 93.1), "H4": (178.7, 109.0)}
 
 # Zone anchors: ref -> (x, y, rot_deg). v4 "U3-at-west-end" floorplan (Nick,
 # 2026-06-16): U3 rotated 90 at the WEST end so the antenna overhangs the W
@@ -38,30 +56,39 @@ HOLES = {"H1": (110.0, 74.0), "H2": (177.5, 80.5),
 # CENTRE holds the now-distributed peripherals — no more thin-strip cram.
 ANCHORS = {
     # --- WEST end: MCU rot90, antenna overhangs W edge; USB-C on N edge ---
-    "U3":  (126.0, 92.0, 90),
-    "J2":  (130.0, 73.0, 270),   # USB-C, N long edge, by U3's N USB pins
-    # --- N-centre: power (VBUS J2 -> F1 -> D1 -> U1 -> 3V3), open for LDO pour ---
-    "U1":  (152.0, 74.0, 90),    # AMS1117 LDO
-    "F1":  (140.0, 73.0, 0),     # fuse
-    "D1":  (162.0, 73.0, 0),     # TVS
+    "U3":  (126.0, 95.5, 90),    # nudged S so the USB-C posts clear the N edge
+    "J2":  (130.0, 72.5, 180),   # USB-C: rot180 -> mouth faces N off the board
+                                 # edge (rot90/270 face sideways - unusable); at
+                                 # rot180 it's only 4.7mm deep so pads sit
+                                 # on-board with the mouth overhanging N + posts
+                                 # clearing the edge
+    # --- power: U1 LDO in the OPEN NE for a big thermal pour (Nick 2026-06-16);
+    #     VBUS J2 -> F1 -> D1 -> U1 spread along the N edge so none crams ---
+    "U1":  (176.0, 81.0, 90),    # AMS1117 LDO, open NE -> ~433mm2 +3.3V tab pour
+    "F1":  (144.0, 73.5, 0),     # fuse
+    "D1":  (160.0, 73.5, 0),     # TVS
     # --- EAST end: IR-TX fan firing E ---
     "Q3":  (176.0, 92.0, 0),
     "D2":  (188.0, 80.0, 315),
     "D3":  (188.0, 90.0, 285),
     "D4":  (188.0, 100.0, 255),
     "D5":  (188.0, 110.0, 225),
-    "J5":  (193.0, 76.0, 0),     # ext-IR header, NE
-    # --- open CENTRE/S: peripherals (flexible) ---
-    "U4":  (152.0, 108.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
-    "U5":  (170.0, 90.0, 0),     # AHT20 sensor, centre-E, away from W LDO heat
-    "J4":  (140.0, 100.0, 0),    # GPIO header, centre
-    "SW1": (131.0, 108.0, 0),    # RESET button
-    "SW2": (143.0, 108.0, 0),    # BOOT button
-    "D6":  (158.0, 100.0, 90),   # status LEDs, centre row
-    "D7":  (163.0, 100.0, 90),
-    "D10": (168.0, 100.0, 90),
-    "D11": (173.0, 100.0, 90),
-    "D12": (178.0, 100.0, 90),
+    "J5":  (195.0, 73.0, 0),     # ext-IR header, NE corner (clear of D2 fan)
+    # --- open CENTRE/S: peripherals (flexible; legalizer fine-tunes) ---
+    # Deliberate non-cramming arrangement: LED row along the upper-centre band,
+    # J4 below it, buttons + TSOP along the S edge, sensor E-centre away from the
+    # W LDO heat. (Targets chosen so courtyards don't fundamentally collide.)
+    "D6":  (140.0, 89.0, 90),    # status LED row, upper-centre
+    "D7":  (145.5, 89.0, 90),
+    "D10": (151.0, 89.0, 90),
+    "D11": (156.5, 89.0, 90),
+    "D12": (162.0, 89.0, 90),
+    "U5":  (140.0, 84.0, 0),     # AHT20 sensor: kept FAR from the NE LDO heat
+                                 # (~38mm to U1); limited only by ~18mm to U3
+    "J4":  (142.0, 101.0, 90),   # GPIO header, horizontal, centre
+    "SW1": (140.0, 110.0, 0),    # RESET button, S edge
+    "SW2": (149.0, 110.0, 0),    # BOOT button, S edge
+    "U4":  (160.0, 110.0, 0),    # TSOP IR-RX, S edge, lens S, far from E fan
 }
 
 

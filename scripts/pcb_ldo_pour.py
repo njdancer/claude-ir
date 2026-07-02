@@ -28,6 +28,7 @@ memory -> segfault. Run, then validate:
   /tmp/kv10/bin/python scripts/pcb_ldo_pour.py     # needs numpy+pcbnew bindings
   kicad-cli pcb drc hardware/esp32-ir-remote.kicad_pcb
 """
+import os
 import sys
 import pcbnew
 
@@ -39,15 +40,48 @@ PCB = "hardware/esp32-ir-remote.kicad_pcb"
 # corner — a better heat path than the old isolated /LDO_OUT island.
 NET = "+3.3V"
 
-# NW-corner pour. x0/y0 run PAST the W (106) and N (70) board edges so KiCad
-# clips the fill flush to the outline (edge clearance only). East bound stops
-# just W of J4 (left edge ~125.7); south bound clears the F1/D1 pocket. The
-# whole rectangle is /LDO_OUT, displacing GND-F in the corner (no slivers).
-TOP_RECT = (104.0, 68.0, 125.5, 87.0)
+# Board outline (mm) — pour rects run PAST the relevant edge so KiCad clips the
+# fill flush to the outline (edge clearance only).
+BX0, BY0, BX1, BY1 = 106.0, 70.0, 198.0, 114.0
 
 
 def mm(v):
     return pcbnew.ToMM(v)
+
+
+def ldo_rect(b):
+    """Generous +3.3V thermal-pour rectangle around U1's tab, biased to the
+    nearest board edge (heat sink) and reaching ~14mm inboard + ~11mm laterally
+    into open copper. KiCad clips to the outline and carves 0.3mm around foreign
+    parts, so the pour fills whatever open copper U1 actually has -- making
+    'U1 needs spare space for a big pour' (Nick, 2026-06-16) a property the
+    layout/score can optimise rather than a hardcoded corner. Tracks U1 wherever
+    the floorplan/search puts it."""
+    u1 = next((f for f in b.GetFootprints() if f.GetReference() == "U1"), None)
+    if u1 is None:
+        return (104.0, 68.0, 125.5, 87.0)        # legacy fallback
+    tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)  # VOUT tab
+    p = (tab or u1).GetPosition()
+    tx, ty = mm(p.x), mm(p.y)
+    L, DEPTH = 19.0, 21.0    # lifted stepwise 11/14 -> 19/21 by the r2 ratchet
+                             # loop (Nick 2026-07-02: "much larger pour"); the
+                             # filler carves foreign parts, so the generous
+                             # rect only claims whatever copper is open
+    dN, dS, dW, dE = ty - BY0, BY1 - ty, tx - BX0, BX1 - tx
+    m = min(dN, dS, dW, dE)
+    # corner-aware: when the tab is also within L of a SECOND edge, run the
+    # rect past that edge too, so the pour owns the whole corner
+    if m in (dN, dS):
+        x0 = BX0 - 2 if dW < L else tx - L
+        x1 = BX1 + 2 if dE < L else tx + L
+        if m == dN:                              # nearest the N edge
+            return (x0, BY0 - 2, x1, ty + DEPTH)
+        return (x0, ty - DEPTH, x1, BY1 + 2)
+    y0 = BY0 - 2 if dN < L else ty - L
+    y1 = BY1 + 2 if dS < L else ty + L
+    if m == dW:
+        return (BX0 - 2, y0, tx + DEPTH, y1)
+    return (tx - DEPTH, y0, BX1 + 2, y1)         # nearest the E edge
 
 
 def main():
@@ -76,7 +110,7 @@ def main():
     z.SetIsFilled(True)
     z.SetZoneName("LDO_OUT_thermal")
     z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)  # solid tab connection
-    x0, y0, x1, y1 = TOP_RECT
+    x0, y0, x1, y1 = ldo_rect(b)
     poly = pcbnew.SHAPE_POLY_SET()
     poly.NewOutline()
     for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
@@ -84,12 +118,116 @@ def main():
     z.SetOutline(poly)
     b.Add(z)
 
+    # Optional B.Cu thermal island under the tab (LDO_BCU=1): a tab-local
+    # +3.3V pocket in the B.Cu GND plane, tied through by stitch vias (added
+    # by the separate --vias stage; SWIG constraints — see file header). The
+    # corner's B.Cu is under the F.Cu pour and carries little signal, so the
+    # GND-plane cost is small; effective thermal area grows ~theta_JA 55->45.
+    poly2 = None
+    if os.environ.get("LDO_BCU"):
+        u1 = next((f for f in b.GetFootprints() if f.GetReference() == "U1"), None)
+        tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)
+        tp = (tab or u1).GetPosition()
+        tx, ty = mm(tp.x), mm(tp.y)
+        z2 = pcbnew.ZONE(b)
+        z2.SetLayer(pcbnew.B_Cu)
+        z2.SetNetCode(nc)
+        z2.SetAssignedPriority(1)
+        z2.SetLocalClearance(pcbnew.FromMM(0.3))
+        z2.SetMinThickness(pcbnew.FromMM(0.2))
+        z2.SetIsFilled(True)
+        z2.SetZoneName("LDO_OUT_thermal_bcu")
+        z2.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
+        bx0, by0, bx1, by1 = tx - 7.0, ty - 5.0, tx + 7.0, ty + 9.0
+        poly2 = pcbnew.SHAPE_POLY_SET()
+        poly2.NewOutline()
+        for x, y in ((bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)):
+            poly2.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+        z2.SetOutline(poly2)
+        b.Add(z2)
+
     pcbnew.ZONE_FILLER(b).Fill(b.Zones())
     pcbnew.SaveBoard(PCB, b)
     # NB: don't query filled areas here — the ZONE_FILLER leaves this process's
     # SWIG objects untyped (even a re-LoadBoard). Run measure_pour_area() in a
     # fresh process (see __main__) to report the result.
-    print("LDO thermal pour filled & saved")
+    print("LDO thermal pour filled & saved"
+          + (" (+B.Cu island)" if poly2 is not None else ""))
+
+
+def add_thermal_vias():
+    """Separate-process stage (LDO_BCU=1): stitch the F.Cu tab pour to the
+    B.Cu island with a 3x3 grid of 0.6/0.3 vias around the tab.
+
+    Lessons from the first attempt (r2-25: 8 DRC + 2 unrouted):
+    - centre-distance guards are too weak — a via 0.6mm from a +5V track
+      landed close enough for connectivity to re-net it; use 1.0mm to any
+      foreign track segment/pad centre (via r=0.3 + track half-width + DRC
+      clearance + slack);
+    - pcb_pour's GND stitch grid pre-dates the island, so the island strands
+      any GND via inside it (B.Cu end floats) -> evict those (redundant
+      stitching, GND has hundreds);
+    - fills were computed before the vias existed -> refill all zones after."""
+    b = pcbnew.LoadBoard(PCB)
+    nc = b.GetNetcodeFromNetname(NET)
+    u1 = next((f for f in b.GetFootprints() if f.GetReference() == "U1"), None)
+    tab = next((p for p in u1.Pads() if p.GetNumber() == "2"), None)
+    tp = (tab or u1).GetPosition()
+    tx, ty = mm(tp.x), mm(tp.y)
+    ix0, iy0, ix1, iy1 = tx - 7.0, ty - 5.0, tx + 7.0, ty + 9.0  # island rect
+
+    foreign = []
+    evict = []
+    for t in b.GetTracks():
+        if t.GetNetCode() == nc:
+            continue
+        if (t.GetClass() == "PCB_VIA" and t.GetNetname() == "GND"):
+            p = t.GetPosition()
+            px, py = mm(p.x), mm(p.y)
+            if ix0 - 0.3 < px < ix1 + 0.3 and iy0 - 0.3 < py < iy1 + 0.3:
+                evict.append(t)          # stranded by the island: remove
+                continue
+        p0, p1 = t.GetStart(), t.GetEnd()
+        foreign.append((mm(p0.x), mm(p0.y), mm(p1.x), mm(p1.y)))
+    pad_boxes = []
+    for f in b.GetFootprints():
+        for pad in f.Pads():
+            if pad.GetNetCode() != nc:
+                pb = pad.GetBoundingBox()
+                pad_boxes.append((mm(pb.GetLeft()), mm(pb.GetTop()),
+                                  mm(pb.GetRight()), mm(pb.GetBottom())))
+    for t in evict:
+        b.Remove(t)
+
+    def seg_dist(ax, ay, bx, by, px, py):
+        dx, dy = bx - ax, by - ay
+        L2 = dx * dx + dy * dy
+        t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
+        cx, cy = ax + t * dx, ay + t * dy
+        return ((px - cx) ** 2 + (py - cy) ** 2) ** 0.5
+
+    added = 0
+    for gy in (-1.8, 0.0, 1.8):
+        for gx in (-1.8, 0.0, 1.8):
+            vx, vy = tx + gx, ty + 2.2 + gy   # grid biased S of the tab centre
+            if any(seg_dist(*fg, vx, vy) < 1.0 for fg in foreign):
+                continue
+            # pad EDGES, not centres (r2-25/26: a via passed the centre check
+            # but sat 0.035mm off C2's copper): rect distance >= 0.6mm
+            if any(max(px0 - vx, vx - px1, 0) ** 2 + max(py0 - vy, vy - py1, 0) ** 2
+                   < 0.6 ** 2 for px0, py0, px1, py1 in pad_boxes):
+                continue
+            v = pcbnew.PCB_VIA(b)
+            v.SetViaType(pcbnew.VIATYPE_THROUGH)
+            v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(vx), pcbnew.FromMM(vy)))
+            v.SetWidth(pcbnew.FromMM(0.6))
+            v.SetDrill(pcbnew.FromMM(0.3))
+            v.SetNetCode(nc)
+            b.Add(v)
+            added += 1
+    pcbnew.ZONE_FILLER(b).Fill(b.Zones())    # refill around the new/evicted vias
+    pcbnew.SaveBoard(PCB, b)
+    print(f"added {added} thermal stitch vias, evicted {len(evict)} stranded GND vias")
 
 
 def measure_pour_area():
@@ -111,5 +249,11 @@ def measure_pour_area():
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--measure":
         measure_pour_area()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--vias":
+        add_thermal_vias()
     else:
         main()
+        if os.environ.get("LDO_BCU"):
+            # vias in a fresh process: the ZONE_FILLER above cursed this one
+            import subprocess
+            subprocess.run([sys.executable, __file__, "--vias"], check=True)

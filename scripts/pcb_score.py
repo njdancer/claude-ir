@@ -37,8 +37,16 @@ USB_NETS = {"/USB_D+", "/USB_D-"}
 WEIGHTS = {
     "usb_bcu_mm": 2.0, "usb_vias": 8.0, "bcu_sig_mm": 1.0,
     "track_mm": 0.05, "vias": 1.0, "decap_mm": 0.5, "sens_mm": -0.5,
+    "ldo_pour_mm2": -3.0,    # reward a big LDO thermal pour (Nick 2026-07-02:
+                             # "much larger thermal pour" — raised from -2.0);
+                             # negative = lower score = better
+    "ldo_bcu_mm2": -1.5,     # ruler v2.1: B.Cu thermal island under the tab
+                             # (stitch-via tied); worth less than F.Cu copper
+                             # since it also displaces the GND plane
 }
 SENS_CAP = 40.0          # reward sensor->heat separation only up to here
+LDO_CAP = 1000.0         # raised from 600 (Nick: juice the pour; ~1.5in2 cap)
+LDO_BCU_CAP = 200.0      # island is tab-local by design; don't reward sprawl
 PENALTY = 1e6            # for boards that fail the hard gates
 
 
@@ -98,6 +106,31 @@ def metrics(board_path):
         if ds:
             sens = min(min(ds), SENS_CAP)
     m["sens_mm"] = sens
+
+    # LDO thermal pour: F.Cu filled copper on +3.3V (the U1 SOT-223 tab pour),
+    # capped. Bigger = cooler LDO. (GND pour is a different net; +3.3V on F.Cu is
+    # essentially the LDO thermal/rail copper.)
+    ldo = 0.0
+    ldo_b = 0.0
+    bf = b.GetLayerID("F.Cu")
+    for i in range(b.GetAreaCount()):
+        zz = b.GetArea(i)
+        if zz.GetIsRuleArea() or zz.GetNetname() != "+3.3V":
+            continue
+        # GetFilledPolysList asserts (C++ abort, not catchable) for a layer
+        # the zone is not on — gate with IsOnLayer first
+        if zz.IsOnLayer(bf):
+            try:
+                ldo += _mm(_mm(zz.GetFilledPolysList(bf).Area()))
+            except Exception:
+                pass
+        if zz.IsOnLayer(bcu):
+            try:
+                ldo_b += _mm(_mm(zz.GetFilledPolysList(bcu).Area()))
+            except Exception:
+                pass
+    m["ldo_pour_mm2"] = min(ldo, LDO_CAP)
+    m["ldo_bcu_mm2"] = min(ldo_b, LDO_BCU_CAP)
     return m
 
 
@@ -113,7 +146,7 @@ def main():
     print(f"score {s:8.1f}  " + "  ".join(
         f"{k}={m[k]:.1f}" if isinstance(m[k], float) else f"{k}={m[k]}"
         for k in ("usb_bcu_mm", "usb_vias", "bcu_sig_mm", "track_mm", "vias",
-                  "decap_mm", "sens_mm")))
+                  "decap_mm", "sens_mm", "ldo_pour_mm2", "ldo_bcu_mm2")))
 
 
 if __name__ == "__main__":

@@ -10,6 +10,170 @@ progress. Each phase lists its **gate** (what must be true to move on) and
 
 ## Now
 
+🔁 **RATCHET LOOP ROUND 3 — CONTINUOUS MODE (2026-07-02, Nick: "who told you
+to stop? keep analysing, experimenting, measuring").** Score −2404 → **−2840**
+(r2-29). The loop stays open; each wave = hypothesis → experiment → measure →
+ratchet. Landed this round:
+- **Two-sided LDO thermal stack:** B.Cu island (194 mm²) under the tab +
+  3×3 stitch-via grid (`pcb_ldo_pour.py --vias`, LDO_BCU=1 in the pipeline);
+  evicts pcb_pour GND stitch vias the island would strand; pad-EDGE (not
+  centre) clearance guards — r2-25/26 failures taught both. θ_JA ≈ 45–50.
+- **GPIO REMAP APPLIED + fully reflected** (the June lever, finally proven
+  worth its cost): IR_TX→IO10, SDA→IO20, SCL→IO21, USER_LED2→IO1; spares
+  now IO0/4/5/7 on J4. **B.Cu plane slotting 390→167 mm (−57 %)**, USB
+  back on F.Cu 0-via. Reflected end-to-end: schematic (7 stub-label swap,
+  ERC 0, GOLDEN OK 35/35), committed netlist regenerated, firmware
+  build_flags, `golden_netlist_v2.py`, `hardware/notes/README.md` (which
+  was still describing the v1 WROOM-32E board — rewritten). ⚠️ IO20/21 are
+  UART0: ROM boot spew clocks I2C once per boot → **firmware TODO: I2C
+  bus-clear at init** (standard 9-pulse; do it when writing the C3 AHT20
+  driver).
+- **Dead axes measured & closed:** FR `-us global_optimal`/`hybrid` ==
+  greedy exactly (identical routes); hole retargeting N-band pair (−265),
+  H3-to-SW (breaks routing) — H3 stays mid-board (also stiffens the button
+  zone).
+- **CONVERGED (2026-07-02, 24 experiments total):** the last five
+  hypotheses all measured worse — hole retargets (−265 / breaks routing),
+  SW1-west for a shorter EN run (bcu 167→316: lost the route lottery),
+  U5-toward-module (1 unrouted), ±0.5 mm jitter probe (2 unrouted). Small
+  placement deltas now mostly regress ⇒ r2-29 sits on a genuinely good
+  route permutation. Remaining B.Cu (167 mm) is dominated by the IR_DRAIN
+  fan bus + N-edge power dips — intrinsic to the topology. **The loop is
+  parked, not closed:** `experiments.jsonl` + `/tmp/ar_best` ratchet
+  machinery stays runnable; reopen by editing anchors/gpio json and
+  running `pcb_experiment.py` (env recipe above).
+
+🏆 **RATCHET LOOP ROUND 2 — pour 433→1047 mm², USB on F.Cu 0-via, board
+tidied (2026-07-02, Nick: "much larger thermal pour; it looks thrown
+together; run an autoresearch loop and juice it").** 19 experiments
+(`r2-*` in the gitignored `hardware/fab/experiments.jsonl`), every gate-
+passing candidate 0 DRC / 0 unrouted. Final board = `r2-19-repro`,
+score −2404 (ruler v2) vs −629 for the pre-loop board:
+- **LDO pour 1046.8 mm² F.Cu** (was 433) — rect lifted 11×14→19×21,
+  corner-aware; H2 hole moved out of the pour; θ_JA ≈ 50-55 °C/W ⇒
+  T_J ≈ 72 °C at the 0.85 W worst case. Score caps the reward at 1000 mm²
+  (LDO_CAP), deliberately: past ~1 in² it's score-gaming, not thermals.
+- **USB D± landed 100 % F.Cu, 0 vias** (the SI win from the U3-rotation
+  saga) — a route-permutation dividend the ratchet kept.
+- **Tidiness:** LED row re-anchored at uniform 5 mm pitch y90 (the
+  legalizer had crushed D6/D7 to 2.5 mm); placer got an axis-aligned
+  bias (supports now read as rows/columns); U4 aligned with the button
+  row; title auto-placed (three hardcoded homes went stale in a row).
+- **Real bugs the loop surfaced, all fixed:** (1) ratchet compared
+  best-score AFTER appending the current row → `new_best` could never
+  fire; (2) courtyard-less parts (M3 holes) fell back to a TEXT-INCLUSIVE
+  bbox, so every silk pass re-randomised the hole legalization — all four
+  holes wandered; text-free bboxes + pinned targets now; (3) KiCad
+  10.0.4's DSN export makes FreeRouting drop J2's stacked same-net VBUS
+  tie → the known-good detour is spared from the rip as a seed; (4)
+  10.0.4-only J2-internal NPTH hole_clearance noise filtered in the
+  evaluator (CI's 10.0.2 reports 0).
+- **Env recipe (container):** FreeRouting jar + JDK25 extracted from
+  `ghcr.io/freerouting/freerouting:2.2.4` (github.com release downloads
+  are proxy-blocked; ghcr is not); `FR_MAX_PASSES=250`.
+- **➡️ REMAINING:** CI gate on PR #30 (silk/DRC warning counts drifted —
+  informational), Nick sign-off, order freeze. Optional next lever: B.Cu
+  thermal island + via stitch under the tab (~+100 mm² effective, costs
+  B.Cu GND) — parked, F.Cu pour alone already clears thermals.
+
+✅ **LAYOUT B FINALISED — verified, silk re-homed, ready for Nick's sign-off
+(2026-07-01, resumed after the June break).** Picked up PR #29's finished
+work (its CI was already fully green) on branch
+`claude/board-layout-autorouting-xktcuj`; PR #29 is superseded. Session log:
+- **Board state re-verified in a fresh container** (KiCad 10.0.4): DRC
+  **0 unrouted / 0 real errors**. The only error-severity items are 4×
+  `hole_clearance` **inside J2's own footprint** (USB-C NPTH posts vs its GND
+  pads, 0.185 mm vs the 0.25 mm board rule) — a **10.0.4-only checker
+  addition**; CI's pinned `kicad/kicad:10.0.2` reports 0. Don't chase them;
+  if CI ever bumps KiCad, add DRC exclusions for those 4 (vendored-footprint
+  geometry, not a layout defect).
+- **USB-C 3D seating at rot180 VERIFIED — no fix needed.** The `(model …)`
+  transform is footprint-local, so it rotated with the footprint: GLB mesh
+  datums identical to the previously verified seating (leg tips 0.66 mm into
+  the 1.51 mm board, terminal plane on board top, mouth overhanging N edge
+  1.19 mm) + profile render confirms. Closes PR #29's item (b).
+- **Silk re-homed for Layout B** (the last real defects, both stale anchors):
+  title was on F1/D1's new N-edge pads → moved to the scanned pad-free band
+  S of D1; `5V`/`3V3` captions were on R15/R16 → adaptive placement in
+  `pcb_silk.py` (uniform row → bounded sideways nudge → vertical fallback;
+  real stroke-font extents; footprint silk outlines as obstacles; status
+  LEDs carry captions instead of scattered wrong-reading refs). DRC silk:
+  overlap 0 / over_copper 0 (2× J2 edge-clearance accepted as ever).
+- **Scored vs the old merged (rot0) board** (`pcb_score.py`, lower=better):
+  **−196 vs +223**. USB-on-B.Cu **55.6 → 20.5 mm**, LDO pour **243 → 433
+  mm²**, track −70 mm, vias 122→116, decap 58→52.5, sensor 26→18 mm. Only
+  regression: B.Cu signal 358→397 mm (+11 %, accepted by the ratchet).
+- **➡️ REMAINING:** (1) CI on this branch is the gate (baseline already
+  matched 10.0.2 on PR #29's head; silk counts changed → watch the first
+  run, refresh in-container only if it flags); (2) **Nick sign-off** on the
+  Layout-B board (renders in the PR / Pages), then the order-package freeze
+  ritual (`order/v2.x` tag) when ready to spend; (3) optional, unreflected:
+  the proven GPIO-remap lever (USB 4→2 vias) — needs firmware+schematic
+  reflection, only worth it if we ever re-spin.
+
+🔬 **AUTORESEARCH LOOP for layout/routing — BUILT + RUNNING; Layout-B power
+corner is the blocker (2026-06-16, Nick: "run the Layout-B search, but first
+replicate Karpathy's autoresearch for iteratively improving the board; we can
+totally remap GPIO — I don't care what pins").** Replicated Karpathy's ratchet
+loop (immutable evaluator + editable artifact + history log + keep-if-better) on
+the board — design + 1:1 mapping in
+[`hardware/notes/autoresearch.md`](hardware/notes/autoresearch.md). New tooling:
+- **`scripts/pcb_experiment.py`** — the immutable evaluator (the "prepare.py"):
+  one candidate → apply ANCHORS floorplan + legalize flex/holes + optional GPIO
+  remap → `pcb_place_v2` → rip → FreeRouting → pour → DRC → `pcb_score`; logs a
+  line to `hardware/fab/experiments.jsonl`, ratchets the best board aside.
+- **`scripts/pcb_gpio_remap.py`** — the new lever Nick unlocked: reassign nets
+  among U3's permutable pads (6 free + 4 spare; USB/strap/power locked) so each
+  signal exits the side facing its zone. The placement re-seat is net-driven so
+  remap + re-place is self-consistent. Reflection into the sources of truth
+  (firmware build_flags + schematic + netlist) is queued for a winning remap.
+- **Bug fixed (benefits all placement):** `pcb_place_v2.keepout_box` read only
+  U3's footprint antenna keepout, missing the **board-level** rule area that
+  extends past the module — it stranded the U3 decoupling caps just below the
+  footprint keepout (passed the placer, failed DRC `items_not_allowed`). Now
+  unions all rule areas.
+- **Finding (Layout B, ~12 experiments): USB + every peripheral net route
+  cleanly; the POWER chain is the blocker.** Root cause is the WROOM-02 pinout —
+  **its 3V3/EN/GND pins cluster at the *antenna end* of the module**, so with the
+  antenna on the W board edge (rot90) the 3V3 pad (pad1) is double-cornered by
+  the board edge + the antenna keepout: its decoupling caps have no legal home
+  and the +5V/+3.3V/VBUS chain won't close (14 unrouted, all in the N power/USB
+  zone — zero peripheral nets). **GPIO remap can't fix this** (power pins are
+  hardware-fixed). This is the *same class* of failure as Layout A's cram strip:
+  both edge-mount orientations that win USB break power on 2 layers.
+- **✅ RESULT — Layout B ROUTES 0 DRC / 0 unrouted on 2 layers.** The
+  autoresearch loop closed it. The "power doesn't route" conclusion was a
+  **stale-keepout bug** (`pcb_pour` rebuilt the antenna keepout N/S-only; antenna-W
+  fell through and extended it across the power chain) — fixed (edge-agnostic).
+  Then the loop drove placement to a clean solution:
+  - **U1 (LDO) → open NE** for a **433 mm² +3.3V tab thermal pour** (Nick's
+    "big fat thermal pour" ask); F1/D1 spread along the N edge so nothing crams.
+    `pcb_ldo_pour` is now U1-tracking (was hardcoded NW) + scored.
+  - **J2 USB-C → rot180** so the **mouth faces N off the board edge** (rot90/270
+    faced sideways — unusable; Nick caught it). rot180 is also shallower (4.7 mm)
+    so pads sit on-board with the mouth overhanging.
+  - **U5 (AHT20) → far from the LDO** (~38 mm to U1; sensor accuracy).
+  - **GPIO remap proven** (USER_LED2 off the far-W pad) — gets USB to 2 vias vs
+    4, but **not required**: the board routes 0/0 without it, so the committed
+    board stays schematic-parity-valid (no GPIO reflection needed yet).
+  - USB pair lands on **B.Cu (2–4 vias, ~9 mm)** — functional for full-speed
+    (same as the shipping merged board); F.Cu is marginal/flips with placement.
+    Forcing it (B.Cu keepout) is the remaining optional SI optimisation.
+  - Config lives in `pcb_floorplan.ANCHORS` (Layout B west-end). Reproduce:
+    `pcb_experiment.py` pipeline. **`hardware/notes/autoresearch.md`** has the
+    loop; `experiments.jsonl` (gitignored) the run log.
+- **USB→F.Cu via B.Cu keepout — TRIED, backfires (2026-06-16).** A B.Cu
+  track/via keepout over the J2→U3 lane pushed the pair to route *around* it
+  (B.Cu 9→20 mm, 4 vias) instead of onto F.Cu — same geometric backfire as the
+  merged board. B.Cu (2–4 vias) is the natural optimum here and is fine for
+  full-speed; accepted. (F.Cu *did* land 0-via in one earlier placement, so it's
+  placement-marginal, not forced-able cheaply.)
+- **➡️ NEXT:** (a) ~~optional USB→F.Cu~~ (backfires, accepted B.Cu);
+  (b) re-verify the USB-C **3D model seating** at rot180 (FAB/pads are correct;
+  the `(model …)` offset was tuned for the old rotation); (c) CI baseline refresh
+  for the new layout (silk/DRC counts drift) in `kicad/kicad:10.0.2`; (d) Nick
+  sign-off + finalise. Fallback unchanged: merged board on `main` routes 0/0.
+
 🧭 **U3-ROTATION TO FIX USB — TWO LAYOUTS TRIED, NEITHER ROUTES ON 2 LAYERS
 (2026-06-16, Nick: rotate the module so its USB pins face J2; stay 2-layer, no
 4-layer).** This revisits item (2) below (USB-on-B.Cu). Confirmed the USB win is

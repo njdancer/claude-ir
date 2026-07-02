@@ -64,7 +64,11 @@ def court_wh(f):
     sh = f.GetCourtyard(pcbnew.F_CrtYd)
     bb = sh.BBox()
     if bb.GetWidth() == 0:
-        bb = f.GetBoundingBox()
+        # text-free bbox: the default GetBoundingBox() includes the ref text,
+        # so a courtyard-less part (mounting holes) grows by wherever the last
+        # silk pass parked its ref — the legalizer then spiralled every hole
+        # off-target nondeterministically (r2 loop find, 2026-07-02)
+        bb = f.GetBoundingBox(False)
     return pcbnew.ToMM(bb.GetWidth()), pcbnew.ToMM(bb.GetHeight())
 
 
@@ -72,21 +76,31 @@ def court_bbox(f):
     sh = f.GetCourtyard(pcbnew.F_CrtYd)
     bb = sh.BBox()
     if bb.GetWidth() == 0:
-        bb = f.GetBoundingBox()
+        bb = f.GetBoundingBox(False)   # text-free: see court_wh
     return (pcbnew.ToMM(bb.GetLeft()) - MARGIN, pcbnew.ToMM(bb.GetTop()) - MARGIN,
             pcbnew.ToMM(bb.GetRight()) + MARGIN, pcbnew.ToMM(bb.GetBottom()) + MARGIN)
 
 
 def keepout_box(b):
+    """Union bbox of ALL antenna rule areas. There are TWO: U3's footprint
+    keepout (rotates with the module, y stops at the module edge) AND a
+    board-level rule area that extends past the module to the S board edge.
+    Reading only the footprint one stranded decoupling caps just below it
+    (passed the placer, failed DRC items_not_allowed). Union both."""
+    boxes = []
     for f in b.GetFootprints():
-        if f.GetReference() != "U3":
-            continue
         for z in f.Zones():
             if z.GetIsRuleArea():
-                zb = z.GetBoundingBox()
-                return (pcbnew.ToMM(zb.GetLeft()), pcbnew.ToMM(zb.GetTop()),
-                        pcbnew.ToMM(zb.GetRight()), pcbnew.ToMM(zb.GetBottom()))
-    return None
+                boxes.append(z.GetBoundingBox())
+    for z in b.Zones():
+        if z.GetIsRuleArea():
+            boxes.append(z.GetBoundingBox())
+    if not boxes:
+        return None
+    return (min(pcbnew.ToMM(z.GetLeft()) for z in boxes),
+            min(pcbnew.ToMM(z.GetTop()) for z in boxes),
+            max(pcbnew.ToMM(z.GetRight()) for z in boxes),
+            max(pcbnew.ToMM(z.GetBottom()) for z in boxes))
 
 
 def main():
@@ -193,7 +207,14 @@ def main():
                         continue
                     if any(overlaps(bb, p) for p in placed):
                         continue
-                    cands.append((math.hypot(cx - tx, cy - ty), cx, cy, rot, bb))
+                    # tidiness bias (Nick 2026-07-02: board "looks thrown
+                    # together"): prefer spots straight N/S/E/W of the target
+                    # pad — clusters then read as rows/columns, not scatter.
+                    # 0.35mm equivalent-distance bonus keeps it gentle.
+                    aligned = abs(cx - tx) < 0.03 or abs(cy - ty) < 0.03
+                    cands.append((math.hypot(cx - tx, cy - ty)
+                                  + (0.0 if aligned else 0.35),
+                                  cx, cy, rot, bb))
             if cands:
                 cands.sort()
                 _, cx, cy, rot, bb = cands[0]
