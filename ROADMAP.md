@@ -32,10 +32,16 @@ ratchet. Landed this round:
   greedy exactly (identical routes); hole retargeting N-band pair (−265),
   H3-to-SW (breaks routing) — H3 stays mid-board (also stiffens the button
   zone).
-- **Next hypotheses queued:** U5 sensor separation probe (small, ~5 pts,
-  accuracy-motivated); IR_DRAIN/+5V B.Cu remainder (~103 mm of the 167 —
-  both are power/fan-local, likely intrinsic); silk hidden-ref recovery
-  (R28/C10, cosmetic). Diminishing returns expected — the ruler decides.
+- **CONVERGED (2026-07-02, 24 experiments total):** the last five
+  hypotheses all measured worse — hole retargets (−265 / breaks routing),
+  SW1-west for a shorter EN run (bcu 167→316: lost the route lottery),
+  U5-toward-module (1 unrouted), ±0.5 mm jitter probe (2 unrouted). Small
+  placement deltas now mostly regress ⇒ r2-29 sits on a genuinely good
+  route permutation. Remaining B.Cu (167 mm) is dominated by the IR_DRAIN
+  fan bus + N-edge power dips — intrinsic to the topology. **The loop is
+  parked, not closed:** `experiments.jsonl` + `/tmp/ar_best` ratchet
+  machinery stays runnable; reopen by editing anchors/gpio json and
+  running `pcb_experiment.py` (env recipe above).
 
 🏆 **RATCHET LOOP ROUND 2 — pour 433→1047 mm², USB on F.Cu 0-via, board
 tidied (2026-07-02, Nick: "much larger thermal pour; it looks thrown
